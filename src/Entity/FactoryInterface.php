@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm;
+namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\Entity\Tracker;
 

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
-use InvalidArgumentException;
 use Sirius\Orm\Action\Delete;
+use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviours\BehaviourInterface;
 use Sirius\Orm\Collection\Collection;
@@ -15,9 +15,7 @@ use Sirius\Orm\Entity\GenericEntityFactory;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
-use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
-use Sirius\Orm\Relation\RelationOption;
 
 /**
  * @method array where($column, $value, $condition)
@@ -84,7 +82,15 @@ class Mapper
      */
     protected $relations = [];
 
+    /**
+     * @var array
+     */
     protected $scopes = [];
+
+    /**
+     * @var array
+     */
+    protected $guards = [];
 
     /**
      * @var QueryBuilder
@@ -96,6 +102,11 @@ class Mapper
      */
     protected $orm;
 
+    /**
+     * @var Query
+     */
+    private $queryPrototype;
+
     public static function make(Orm $orm, MapperConfig $mapperConfig)
     {
         $mapper                          = new static($orm, $mapperConfig->entityFactory);
@@ -106,16 +117,13 @@ class Mapper
         $mapper->entityDefaultAttributes = $mapperConfig->entityDefaultAttributes;
         $mapper->columnAttributeMap      = $mapperConfig->columnAttributeMap;
         $mapper->scopes                  = $mapperConfig->scopes;
+        $mapper->guards                  = $mapperConfig->guards;
+        $mapper->relations               = $mapperConfig->relations;
 
         if ($mapperConfig->entityClass) {
             $mapper->entityClass = $mapperConfig->entityClass;
         }
 
-        if ($mapperConfig->entityFactory && $mapperConfig instanceof FactoryInterface) {
-            $mapper->entityFactory = $mapperConfig->entityFactory;
-        }
-
-        $mapper->relations = $mapperConfig->relations;
         if ($mapperConfig->behaviours && ! empty($mapperConfig->behaviours)) {
             $mapper->use(...$mapperConfig->behaviours);
         }
@@ -190,9 +198,9 @@ class Mapper
     /**
      * @return string
      */
-    public function getTableAlias()
+    public function getTableAlias($returnTableIfNull = false)
     {
-        return $this->tableAlias;
+        return (! $this->tableAlias && $returnTableIfNull) ? $this->table : $this->tableAlias;
     }
 
     /**
@@ -217,6 +225,14 @@ class Mapper
     public function getEntityClass(): string
     {
         return $this->entityClass;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGuards(): array
+    {
+        return $this->guards;
     }
 
     /**
@@ -289,9 +305,9 @@ class Mapper
 
             $tracker->setRelation($name, $relation, $queryCallback);
 
-            if (array_key_exists($name, $eagerLoad)) {
-                $relation->attachesMatchesToEntity($entity, $tracker->getRelationResults($name));
-            } else {
+            if (array_key_exists($name, $eagerLoad) || $relation->isEagerLoad()) {
+                $relation->attachMatchesToEntity($entity, $tracker->getRelationResults($name));
+            } elseif ($relation->isLazyLoad()) {
                 $relation->attachLazyValueToEntity($entity, $tracker);
             }
         }
@@ -312,7 +328,7 @@ class Mapper
         return $entity->get($attribute);
     }
 
-    public function hasRelation($name)
+    public function hasRelation($name): bool
     {
         return isset($this->relations[$name]);
     }
@@ -324,7 +340,7 @@ class Mapper
         }
 
         if (is_array($this->relations[$name])) {
-            $this->relations[$name] = $this->createRelation($name, $this->relations[$name]);
+            $this->relations[$name] = $this->orm->createRelation($this, $name, $this->relations[$name]);
         }
         $relation = $this->relations[$name];
         if (! $relation instanceof Relation) {
@@ -334,71 +350,65 @@ class Mapper
         return $relation;
     }
 
-    protected function createRelation($name, $options)
+    public function getRelations(): array
     {
-        $nativeMapper  = $this;
-        $foreignMapper = $options[RelationOption::FOREIGN_MAPPER];
-        if (! $foreignMapper instanceof Mapper) {
-            $foreignMapper = $this->orm->get($foreignMapper);
-        }
-        $type          = $options[RelationOption::TYPE];
-        $relationClass = __NAMESPACE__ . '\\Relation\\' . Str::className($type);
-
-        if (! class_exists($relationClass)) {
-            throw new InvalidArgumentException("{$relationClass} does not exist");
-        }
-
-        return new $relationClass($name, $nativeMapper, $foreignMapper, $options);
+        return array_keys($this->relations);
     }
 
     public function newQuery(): Query
     {
         $query = $this->queryBuilder->newQuery();
 
-        return $this->applyBehaviours('query', $query);
+        return $this->applyBehaviours(__FUNCTION__, $query);
     }
 
-    /**
-     * @param $pk
-     *
-     * @return EntityInterface|null
-     */
-    public function find($pk)
+    public function find($pk, array $load = [])
     {
         return $this->newQuery()
                     ->where($this->getPrimaryKey(), $pk)
+                    ->load(...$load)
                     ->first();
     }
 
     /**
      * @param EntityInterface $entity
      *
-     * @return
+     * @return bool
      * @throws \Exception
      */
-    public function save(EntityInterface $entity)
+    public function save(EntityInterface $entity, $withRelations = true)
     {
         $this->assertCanPersistEntity($entity);
-
-        if (! $entity->pk()) {
-            $action = new Insert($this->orm, $this, $entity);
-        } else {
-            $action = new Update($this->orm, $this, $entity);
-        }
-
-        $action = $this->applyBehaviours(__FUNCTION__, $action);
+        $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
 
         return $action->run();
     }
 
-    public function delete(EntityInterface $entity)
+    public function newSaveAction(EntityInterface $entity, $options)
+    {
+        if (! $entity->getPk()) {
+            $action = new Insert($this, $entity, $options);
+        } else {
+            $action = new Update($this, $entity, $options);
+        }
+
+        return $this->applyBehaviours('save', $action);
+    }
+
+    public function delete(EntityInterface $entity, $withRelations = true)
     {
         $this->assertCanPersistEntity($entity);
 
-        $action = new Delete($this->orm, $this, $entity);
-        $action = $this->applyBehaviours(__FUNCTION__, $action);
+        $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
 
         return $action->run();
+    }
+
+    public function newDeleteAction(EntityInterface $entity, $options)
+    {
+        $action = new Delete($this, $entity, $options);
+
+        return $this->applyBehaviours('delete', $action);
     }
 
     protected function assertCanPersistEntity($entity)
@@ -423,5 +433,15 @@ class Mapper
         }
 
         return $result;
+    }
+
+    public function getReadConnection()
+    {
+        return $this->orm->getConnectionLocator()->getRead();
+    }
+
+    public function getWriteConnection()
+    {
+        return $this->orm->getConnectionLocator()->getWrite();
     }
 }

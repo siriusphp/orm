@@ -15,13 +15,10 @@ class Delete extends BaseAction
         $this->entityId    = $this->entity->getPk();
         $this->entityState = $this->entity->getPersistanceState();
 
-        $delete = new \Sirius\Sql\Delete($this->orm->getConnectionLocator()->getWrite());
+        $delete = new \Sirius\Sql\Delete($this->mapper->getWriteConnection());
         $delete->from($this->mapper->getTable())
                ->where('id', $this->entityId);
         $delete->perform();
-
-        $this->entity->setPk(null);
-        $this->entity->setPersistanceState(StateEnum::DELETED);
     }
 
     public function revert()
@@ -31,5 +28,13 @@ class Delete extends BaseAction
         }
         $this->entity->setPK($this->entityId);
         $this->entity->setPersistanceState($this->entityState);
+    }
+
+    public function onSuccess()
+    {
+        if ($this->entity->getPersistanceState() !== StateEnum::DELETED) {
+            $this->entity->setPk(null);
+            $this->entity->setPersistanceState(StateEnum::DELETED);
+        }
     }
 }

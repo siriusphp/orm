@@ -26,7 +26,15 @@ class Query extends Select
      */
     protected $load = [];
 
-    public $guards = [];
+    /**
+     * @var array
+     */
+    protected $guards = [];
+
+    /**
+     * @var array
+     */
+    protected $scopes = [];
 
     public function __construct(Orm $orm, Mapper $mapper, Connection $connection)
     {
@@ -34,6 +42,8 @@ class Query extends Select
         $this->orm    = $orm;
         $this->mapper = $mapper;
         $this->from($this->reference($this->mapper->getTable(), $this->mapper->getTableAlias()));
+        $this->resetColumns();
+        $this->columns($this->mapper->getTableAlias(true) . '.*');
     }
 
     public function load(...$relations): self
@@ -67,10 +77,7 @@ class Query extends Select
     {
         /** @var Query $countQuery */
         $countQuery = clone $this;
-        $countQuery->resetOrderBy();
-        $countQuery->resetColumns();
-        $countQuery->columns('COUNT(*)');
-        $total = (int)$countQuery->fetchValue();
+        $total      = $countQuery->count();
 
         if ($total == 0) {
             $this->mapper->newPaginatedCollectionFromRows([], $total, $perPage, $page, $this->load);
@@ -86,6 +93,15 @@ class Query extends Select
     {
     }
 
+    public function count()
+    {
+        $this->resetOrderBy();
+        $this->resetColumns();
+        $this->columns('COUNT(*)');
+
+        return (int)$this->fetchValue();
+    }
+
     public function setGuards(array $guards)
     {
         foreach ($guards as $column => $value) {
@@ -94,6 +110,15 @@ class Query extends Select
             } else {
                 $this->guards[$column] = $value;
             }
+        }
+
+        return $this;
+    }
+
+    public function setScopes(array $scopes)
+    {
+        foreach ($scopes as $name => $callback) {
+            $this->scopes[$name] = $callback;
         }
 
         return $this;
@@ -122,7 +147,7 @@ class Query extends Select
         }
     }
 
-    protected function reference($table, $tableAlias)
+    public function reference($table, $tableAlias)
     {
         if (! $tableAlias || $table == $tableAlias) {
             return $table;

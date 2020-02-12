@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Relation;
 
-use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
-use Sirius\Orm\Relation\ManyToOne;
+use Sirius\Orm\Relation\ManyToMany;
 use Sirius\Orm\Relation\RelationOption;
 use Sirius\Orm\Tests\BaseTestCase;
 
-class ManyToOneTest extends BaseTestCase
+class ManyToManyTest extends BaseTestCase
 {
 
     /**
@@ -28,31 +27,32 @@ class ManyToOneTest extends BaseTestCase
         parent::setUp();
         $this->loadMappers();
 
-        $this->nativeMapper = $this->orm->get('products');
-        $this->foreignMapper = $this->orm->get('categories');
+        $this->nativeMapper  = $this->orm->get('products');
+        $this->foreignMapper = $this->orm->get('tags');
     }
 
     public function test_query_callback()
     {
-        $relation = new ManyToOne('category', $this->nativeMapper, $this->foreignMapper, [
+        $relation = new ManyToMany('tags', $this->nativeMapper, $this->foreignMapper, [
             RelationOption::QUERY_CALLBACK => function (Query $query) {
                 return $query->where('status', 'active');
             }
         ]);
 
         $tracker = new Tracker($this->nativeMapper, [
-            ['category_id' => 10],
-            ['category_id' => 11],
+            ['id' => 10],
+            ['id' => 11],
         ]);
         $query   = $relation->getQuery($tracker);
 
         $expectedSql = <<<SQL
 SELECT
-    categories.*
+    tags.*, products_tags.product_id
 FROM
-    categories
+    tags
+    INNER JOIN products_tags ON tags.id = products_tags.tag_id
 WHERE
-    id IN (:__1__, :__2__) AND status = :__3__
+    product_id IN (:__1__, :__2__) AND status = :__3__
 SQL;
 
         $this->assertSameStatement($expectedSql, $query->getStatement());
@@ -65,23 +65,24 @@ SQL;
 
     public function test_query_guards()
     {
-        $relation = new ManyToOne('category', $this->nativeMapper, $this->foreignMapper, [
+        $relation = new ManyToMany('category', $this->nativeMapper, $this->foreignMapper, [
             RelationOption::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
         $tracker = new Tracker($this->nativeMapper, [
-            ['category_id' => 10],
-            ['category_id' => 11],
+            ['id' => 10],
+            ['id' => 11],
         ]);
         $query   = $relation->getQuery($tracker);
 
         $expectedSql = <<<SQL
 SELECT
-    categories.*
+    tags.*, products_tags.product_id
 FROM
-    categories
+    tags
+    INNER JOIN products_tags ON tags.id = products_tags.tag_id
 WHERE
-    (id IN (:__1__, :__2__)) AND status = :__3__ AND deleted_at IS NULL
+    (product_id IN (:__1__, :__2__)) AND status = :__3__ AND deleted_at IS NULL
 SQL;
 
         $this->assertSameStatement($expectedSql, $query->getStatement());
@@ -98,15 +99,14 @@ SQL;
 
         $products = $this->nativeMapper
             ->newQuery()
-            ->load('category')
+            ->load('tags')
             ->get();
 
-        $category1 = $products[0]->get('category');
-        $category2 = $products[1]->get('category');
-        $this->assertNotNull($category1);
-        $this->assertEquals(10, $category1->getPk());
-        $this->assertNotNull($category2);
-        $this->assertSame($category1, $category2); // to ensure only one query was executed
+        $tag1 = $products[0]->get('tags')[0];
+        $tag2 = $products[1]->get('tags')[0];
+        $this->assertNotNull($tag1);
+        $this->assertNotNull($tag2);
+        $this->assertEquals($tag1->getPk(), $tag2->getPk());
     }
 
     public function test_lazy_load()
@@ -117,18 +117,29 @@ SQL;
             ->newQuery()
             ->get();
 
-        $category1 = $products[0]->get('category');
-        $category2 = $products[1]->get('category');
-        $this->assertNotNull($category1);
-        $this->assertEquals(10, $category1->getPk());
-        $this->assertNotNull($category2);
-        $this->assertSame($category1, $category2); // to ensure only one query was executed
+        $tag1 = $products[0]->get('tags')[0];
+        $tag2 = $products[1]->get('tags')[0];
+        $this->assertNotNull($tag1);
+        $this->assertNotNull($tag2);
+        $this->assertEquals(1, $tag1->get('pivot_position'));
+        $this->assertEquals(1, $tag2->get('pivot_position'));
+        $this->assertEquals($tag1->getPk(), $tag2->getPk()); // the tags are not the same object (due to the pivot) but they have the same ID
     }
 
     protected function populateDb(): void
     {
-        $this->insertRow('categories', ['id' => 10, 'name' => 'Category']);
-        $this->insertRow('products', ['category_id' => 10, 'sku' => 'abc', 'price' => 10.5]);
-        $this->insertRow('products', ['category_id' => 10, 'sku' => 'xyz', 'price' => 20.5]);
+        $this->insertRows('tags', ['id', 'name'], [
+            [1, 'tag_1'],
+            [2, 'tag_2'],
+        ]);
+        $this->insertRows('products', ['id', 'category_id', 'sku', 'price'], [
+            [1, 10, 'abc', 10],
+            [2, 10, 'xyz', 20],
+        ]);
+        $this->insertRows('products_tags', ['product_id', 'tag_id', 'position'], [
+            [1, 1, 1],
+            [1, 2, 2],
+            [2, 1, 1],
+        ]);
     }
 }

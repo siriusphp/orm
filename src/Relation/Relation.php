@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Relation;
 
+use Sirius\Orm\Action\BaseAction;
+use Sirius\Orm\Action\Delete;
+use Sirius\Orm\Action\Update;
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Entity\LazyValueLoader;
 use Sirius\Orm\Entity\Tracker;
+use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\LazyLoader;
 use Sirius\Orm\Mapper;
 
@@ -31,22 +36,32 @@ abstract class Relation
      */
     protected $options = [];
 
+    /**
+     * @var array
+     */
+    protected $keyPairs;
+
     public function __construct($name, Mapper $nativeMapper, Mapper $foreignMapper, array $options = [])
     {
         $this->name          = $name;
         $this->nativeMapper  = $nativeMapper;
         $this->foreignMapper = $foreignMapper;
-        $this->options       = array_merge($this->getDefaultOptions(), $options);
+        $this->options       = $options;
+        $this->applyDefaults();
+        $this->keyPairs = $this->computeKeyPairs();
     }
 
-    protected function getDefaultOptions()
+    protected function applyDefaults(): void
     {
-        $defaults = [
-            RelationOption::LOAD_STRATEGY => RelationOption::LOAD_LAZY,
-            RelationOption::CASCADE       => true,
-        ];
+        $this->setOptionIfMissing(RelationOption::LOAD_STRATEGY, RelationOption::LOAD_LAZY);
+        $this->setOptionIfMissing(RelationOption::CASCADE, false);
+    }
 
-        return $defaults;
+    protected function setOptionIfMissing($name, $value)
+    {
+        if (! isset($this->options[$name])) {
+            $this->options[$name] = $value;
+        }
     }
 
     public function getOption($name)
@@ -69,25 +84,30 @@ abstract class Relation
      */
     public function entitiesBelongTogether(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $nativeKey  = $this->options[RelationOption::NATIVE_KEY];
-        $foreignKey = $this->options[RelationOption::FOREIGN_KEY];
-
-        if (is_array($nativeKey)) {
-            foreach ($nativeKey as $k => $column) {
-                $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeKey[$k]);
-                $foreignKeyValue = $this->foreignMapper->getEntityAttribute($foreignEntity, $foreignKey[$k]);
-                if ($nativeKeyValue != $foreignKeyValue) {
-                    return false;
-                }
+        foreach ($this->keyPairs as $nativeCol => $foreignCol) {
+            $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
+            $foreignKeyValue = $this->foreignMapper->getEntityAttribute($foreignEntity, $foreignCol);
+            if ($nativeKeyValue != $foreignKeyValue) {
+                return false;
             }
-
-            return true;
         }
 
-        $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeKey);
-        $foreignKeyValue = $this->foreignMapper->getEntityAttribute($foreignEntity, $foreignKey);
+        return true;
+    }
 
-        return $nativeKeyValue == $foreignKeyValue;
+    public function isEagerLoad()
+    {
+        return $this->options[RelationOption::LOAD_STRATEGY] == RelationOption::LOAD_EAGER;
+    }
+
+    public function isLazyLoad()
+    {
+        return $this->options[RelationOption::LOAD_STRATEGY] == RelationOption::LOAD_LAZY;
+    }
+
+    public function isCascade()
+    {
+        return $this->options[RelationOption::CASCADE] === true;
     }
 
     protected function getKeyColumn($name, $column)
@@ -104,9 +124,26 @@ abstract class Relation
         return $name . '_' . $column;
     }
 
-    abstract public function attachesMatchesToEntity(EntityInterface $nativeEntity, array $queryResult);
+    public function attachActions(BaseAction $action)
+    {
+        if (! $this->cascadeIsAllowedForAction($action)) {
+            return;
+        }
 
-    abstract public function attachLazyValueToEntity(EntityInterface $entity, Tracker $tracker);
+        if ($action instanceof Delete) {
+            $this->attachToDelete($action);
+        } elseif ($action instanceof Insert || $action instanceof Update) {
+            $this->attachToSave($action);
+        }
+    }
+
+    abstract public function attachMatchesToEntity(EntityInterface $nativeEntity, array $queryResult);
+
+    public function attachLazyValueToEntity(EntityInterface $entity, Tracker $tracker)
+    {
+        $valueLoader = new LazyValueLoader($entity, $tracker, $this);
+        $this->nativeMapper->setEntityAttribute($entity, $this->name, $valueLoader);
+    }
 
     public function getQuery(Tracker $tracker)
     {
@@ -115,11 +152,7 @@ abstract class Relation
 
         $query = $this->foreignMapper
             ->newQuery()
-            ->where($this->options[RelationOption::FOREIGN_KEY], $nativePks);
-
-        if ($this->getOption(RelationOption::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationOption::FOREIGN_GUARDS]);
-        }
+            ->where($this->foreignMapper->getPrimaryKey(), $nativePks);
 
         if ($this->getOption(RelationOption::QUERY_CALLBACK) &&
             is_callable($this->getOption(RelationOption::QUERY_CALLBACK))) {
@@ -127,11 +160,63 @@ abstract class Relation
             $query    = $callback($query);
         }
 
+        if ($this->getOption(RelationOption::FOREIGN_GUARDS)) {
+            $query->setGuards($this->options[RelationOption::FOREIGN_GUARDS]);
+        }
+
         return $query;
     }
 
-    public function getLazyLoader(Tracker $tracker, callable $callback = null)
+    /**
+     * Method used by `entitiesBelongTogether` to check
+     * if a foreign entity belongs to the native entity
+     * @return array
+     */
+    protected function computeKeyPairs()
     {
-        return new LazyLoader($tracker, $this->nativeMapper, $this, $callback);
+        $pairs      = [];
+        $nativeKey  = (array)$this->options[RelationOption::NATIVE_KEY];
+        $foreignKey = (array)$this->options[RelationOption::FOREIGN_KEY];
+        foreach ($nativeKey as $k => $v) {
+            $pairs[$v] = $foreignKey[$k];
+        }
+
+        return $pairs;
+    }
+
+    /**
+     * @see BaseAction::$options
+     * @param BaseAction $action
+     *
+     * @return bool|mixed|null
+     */
+    protected function cascadeIsAllowedForAction(BaseAction $action)
+    {
+        $relations = $action->getOption('relations');
+        if (is_array($relations) && ! in_array($this->name, $relations)) {
+            return false;
+        }
+
+        return $relations;
+    }
+
+    /**
+     * Computes the $withRelations value to be passed on to the next related entities
+     * If an entity receives on delete/save $withRelations = ['category', 'category.images']
+     * the related 'category' is saved with $withRelations = ['images']
+     *
+     * @param $relations
+     *
+     * @return array
+     */
+    protected function getRemainingRelations($relations)
+    {
+        if (! is_array($relations)) {
+            return $relations;
+        }
+
+        $children = Arr::getChildren(array_combine($relations, $relations), $this->name);
+
+        return array_keys($children);
     }
 }

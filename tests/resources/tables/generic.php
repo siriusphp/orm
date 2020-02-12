@@ -23,5 +23,15 @@ return [
         `content_id` INTEGER NULL DEFAULT NULL,
         `content_type` VARCHAR(50) NOT NULL,
         `priority` INTEGER NOT NULL DEFAULT '0'
+    )",
+    "CREATE TABLE `products_tags` (
+        `product_id` INTEGER NOT NULL,
+        `tag_id` INTEGER NOT NULL,
+        `position` SMALLINT(6) NOT NULL,
+        PRIMARY KEY (`product_id`, `tag_id`)
+    )",
+    "CREATE TABLE `tags` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `name` VARCHAR(50) NOT NULL
     )"
 ];

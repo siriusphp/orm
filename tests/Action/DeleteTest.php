@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Action;
 
+use Sirius\Orm\Action\FailedActionException;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -44,7 +45,7 @@ class DeleteTest extends BaseTestCase
         $product = $this->mapper->find(1);
         $this->assertNotNull($product);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(FailedActionException::class);
         $this->mapper->delete($product);
         $this->assertEquals(1, $product->getPk());
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistanceState());

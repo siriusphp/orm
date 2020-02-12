@@ -26,5 +26,16 @@ return [
         `content_id` INT(10) UNSIGNED NULL DEFAULT NULL,
         `content_type` VARCHAR(50) NOT NULL,
         `priority` INT(10) UNSIGNED NOT NULL DEFAULT '0'
+    )",
+    "CREATE TABLE `products_tags` (
+        `product_id` INT(10) UNSIGNED NOT NULL,
+        `tag_id` INT(10) UNSIGNED NOT NULL,
+        `created_at` TIMESTAMP NOT NULL,
+        PRIMARY KEY (`product_id`, `tag_id`)
+    )",
+    "CREATE TABLE `tags` (
+        `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+        `name` VARCHAR(50) NOT NULL,
+        PRIMARY KEY (`id`)
     )"
 ];

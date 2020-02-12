@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Orm;
 use Sirius\Sql\Insert;
+use Sirius\Sql\Select;
 
 class BaseTestCase extends TestCase
 {
@@ -43,6 +44,15 @@ class BaseTestCase extends TestCase
         }
     }
 
+    public function loadMappers()
+    {
+        $this->orm->register('images', $this->getMapperConfig('images'));
+        $this->orm->register('tags', $this->getMapperConfig('tags'));
+        $this->orm->register('categories', $this->getMapperConfig('categories'));
+        $this->orm->register('products', $this->getMapperConfig('products'));
+
+    }
+
     public function getMapperConfig($name)
     {
         return include(__DIR__ . '/resources/mappers/' . $name . '.php');
@@ -53,6 +63,25 @@ class BaseTestCase extends TestCase
         $insert = new Insert($this->connection);
         $insert->into($table)->columns($values);
         $this->connection->perform($insert->getStatement(), $insert->getBindValues());
+    }
+
+    public function assertRowDeleted($table, ...$conditions)
+    {
+        $select = new Select($this->connection);
+        $row    = $select->from($table)
+                         ->where(...$conditions)
+                         ->fetchOne();
+        $this->assertNull($row);
+    }
+
+    public function assertRowPresent($table, ...$conditions)
+    {
+        $select = new Select($this->connection);
+        $row    = $select->from($table)
+                         ->where(...$conditions)
+                         ->fetchOne();
+        print_r($select->__toString());
+        $this->assertNotNull($row);
     }
 
     protected function insertRows($table, $columns, $rows)

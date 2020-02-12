@@ -48,4 +48,18 @@ class Arr
 
         return $parents;
     }
+
+    public static function only(array $arr, array $keys)
+    {
+        return array_intersect_key($arr, array_flip((array)$keys));
+    }
+
+    public static function except(array $arr, $keys)
+    {
+        foreach ((array)$keys as $key) {
+            unset($arr[$key]);
+        }
+
+        return $arr;
+    }
 }

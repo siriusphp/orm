@@ -1,6 +1,7 @@
 <?php
 
 use Sirius\Orm\MapperConfig;
+use Sirius\Orm\Query;
 use Sirius\Orm\Relation\RelationOption;
 
 return MapperConfig::make([
@@ -13,9 +14,21 @@ return MapperConfig::make([
         ],
         'featured_image' => [
             RelationOption::FOREIGN_MAPPER => 'images',
-            RelationOption::TYPE           => RelationOption::TYPE_ONE_TO_ONE,
-            RelationOption::FOREIGN_GUARDS => ['type' => 'product'],
-            RelationOption::CASCADE        => true
+            RelationOption::TYPE           => RelationOption::TYPE_ONE_TO_ONE
+        ],
+//        'images'         => [
+//            RelationOption::FOREIGN_MAPPER => 'images',
+//            RelationOption::TYPE           => RelationOption::TYPE_ONE_TO_MANY,
+//            RelationOption::FOREIGN_GUARDS => ['type' => 'product'],
+//        ],
+        'tags'           => [
+            RelationOption::FOREIGN_MAPPER  => 'tags',
+            RelationOption::TYPE            => RelationOption::TYPE_MANY_TO_MANY,
+            RelationOption::THROUGH_COLUMNS => ['position'],
+            RelationOption::QUERY_CALLBACK  => function (Query $query) {
+                $query->orderBy('position ASC');
+                return $query;
+            }
         ]
     ]
 ]);

@@ -5,16 +5,10 @@ namespace Sirius\Orm\Action;
 
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Mapper;
-use Sirius\Orm\Orm;
 use Sirius\Orm\Relation\Relation;
 
 abstract class BaseAction implements ActionInterface
 {
-    /**
-     * @var Orm
-     */
-    protected $orm;
-
     /**
      * @var Mapper
      */
@@ -35,7 +29,6 @@ abstract class BaseAction implements ActionInterface
      * Actions to be executed after the `execute()` method (save child entities)
      * @var array
      */
-
     protected $after = [];
 
     protected $hasRun = false;
@@ -50,23 +43,51 @@ abstract class BaseAction implements ActionInterface
      */
     protected $relation;
 
+    /**
+     * Contains additional options for the action:
+     * - relations (relations that will be saved)
+     *      - true: all related entities will be saved, without limit
+     *      - false: do not save any related entity
+     *      - array: list of the related entities to be saved
+     *              (ex: ['category', 'category.parent', 'images'])
+     * @var array
+     */
+    protected $options;
+
     public function __construct(
-        Orm $orm,
         Mapper $mapper,
         EntityInterface $entity,
-        EntityInterface $parentEntity = null,
-        Relation $relation = null
+        array $options = []
     ) {
-        $this->orm          = $orm;
-        $this->mapper       = $mapper;
-        $this->entity       = $entity;
-        $this->parentEntity = $parentEntity;
-        $this->relation     = $relation;
+        $this->mapper  = $mapper;
+        $this->entity  = $entity;
+        $this->options = $options;
     }
 
     public function prepend(ActionInterface $action)
     {
         $this->before[] = $action;
+    }
+
+    /**
+     * @return Mapper
+     */
+    public function getMapper(): Mapper
+    {
+        return $this->mapper;
+    }
+
+    /**
+     * @return EntityInterface
+     */
+    public function getEntity(): EntityInterface
+    {
+        return $this->entity;
+    }
+
+    public function getOption($name)
+    {
+        return $this->options[$name] ?? null;
     }
 
     public function append(ActionInterface $action)
@@ -76,30 +97,51 @@ abstract class BaseAction implements ActionInterface
 
     protected function attachActionsForRelatedEntities()
     {
-        /**
-         * @todo
-         */
+        if ($this->getOption('relations') === false || ! $this->mapper) {
+            return;
+        }
+
+        foreach ($this->getMapper()->getRelations() as $name) {
+            if (! $this->mapper->hasRelation($name)) {
+                continue;
+            }
+            $this->mapper->getRelation($name)->attachActions($this);
+        }
     }
 
-    public function run()
+    public function run($calledByAnotherAction = false)
     {
-        $this->attachActionsForRelatedEntities();
         $executed = [];
+
         try {
+            $this->attachActionsForRelatedEntities();
+
             foreach ($this->before as $action) {
-                $action->run();
+                $action->run(true);
                 $executed[] = $action;
             }
             $this->execute();
             $executed[]   = $this;
             $this->hasRun = true;
             foreach ($this->after as $action) {
-                $action->run();
+                $action->run(true);
                 $executed[] = $action;
             }
         } catch (\Exception $e) {
             $this->undo($executed);
-            throw $e;
+            throw new FailedActionException(
+                sprintf("%s failed for mapper %s", get_class($this), $this->mapper->getTableAlias(true)),
+                (int) $e->getCode(),
+                $e
+            );
+        }
+
+        /** @var ActionInterface $action */
+        foreach ($executed as $action) {
+            // if called by another action, that action will call `onSuccess`
+            if (!$calledByAnotherAction || $action !== $this) {
+                $action->onSuccess();
+            }
         }
 
         return true;
@@ -115,6 +157,11 @@ abstract class BaseAction implements ActionInterface
         foreach ($executed as $action) {
             $action->revert();
         }
+    }
+
+    public function onSuccess()
+    {
+        return;
     }
 
 

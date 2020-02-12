@@ -24,6 +24,7 @@ class MapperConfig
     const BEHAVIOURS = 'behaviours';
     const RELATIONS = 'relations';
     const SCOPES = 'scopes';
+    const GUARDS = 'guards';
 
     public $entityClass = GenericEntity::class;
 
@@ -81,6 +82,12 @@ class MapperConfig
      * @var array
      */
     public $scopes = [];
+
+    /**
+     * List of column-value pairs that act as global filters
+     * @var array
+     */
+    public $guards = [];
 
     public static function make(array $array)
     {

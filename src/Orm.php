@@ -3,6 +3,12 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
+use Sirius\Orm\Collection\Collection;
+use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Helpers\Str;
+use Sirius\Orm\Relation\Relation;
+use Sirius\Orm\Relation\RelationOption;
+
 class Orm implements MapperLocator
 {
     protected $mappers = [];
@@ -50,6 +56,44 @@ class Orm implements MapperLocator
         }
 
         return $this->mappers[$mapperName];
+    }
+
+    public function save($mapperName, EntityInterface $entity, ...$params)
+    {
+        return $this->get($mapperName)->save($entity, ...$params);
+    }
+
+    public function delete($mapperName, EntityInterface $entity, ...$params)
+    {
+        return $this->get($mapperName)->delete($entity, ...$params);
+    }
+
+    public function find($mapperName, EntityInterface $entity, ...$params)
+    {
+        return $this->get($mapperName)->find($entity, ...$params);
+    }
+
+    public function select($mapperName): Collection
+    {
+        return $this->get($mapperName)->newQuery();
+    }
+
+    public function createRelation(Mapper $nativeMapper, $name, $options): Relation
+    {
+        $foreignMapper = $options[RelationOption::FOREIGN_MAPPER];
+        if ($this->has($foreignMapper)) {
+            if (! $foreignMapper instanceof Mapper) {
+                $foreignMapper = $this->get($foreignMapper);
+            }
+        }
+        $type          = $options[RelationOption::TYPE];
+        $relationClass = __NAMESPACE__ . '\\Relation\\' . Str::className($type);
+
+        if (! class_exists($relationClass)) {
+            throw new InvalidArgumentException("{$relationClass} does not exist");
+        }
+
+        return new $relationClass($name, $nativeMapper, $foreignMapper, $options);
     }
 
     private function buildMapper($mapperConfigOrFactory): Mapper

@@ -46,7 +46,7 @@ class RelationTest extends BaseTestCase
 
         $expectedStatement = <<<SQL
 SELECT
-    *
+    categories.*
 FROM
     categories
 WHERE

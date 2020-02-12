@@ -3,15 +3,9 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
-use Sirius\Orm\Loaders\LazyLoader;
-
 class GenericEntity implements EntityInterface
 {
-    const STATE_SAVED = 'saved';
-    const STATE_CHANGED = 'changed';
-    const STATE_DELETED = 'deleted';
-
-    protected $state = self::STATE_CHANGED;
+    protected $state = StateEnum::CHANGED;
 
     protected $primaryKey = 'id';
 
@@ -63,6 +57,7 @@ class GenericEntity implements EntityInterface
 
         if (isset($this->attributes[$attributeOrAttributes]) && $value != $this->attributes[$attributeOrAttributes]) {
             $this->changed[$attributeOrAttributes] = true;
+            $this->state                           = StateEnum::CHANGED;
         }
         $this->attributes[$attributeOrAttributes] = $value;
 
@@ -82,6 +77,9 @@ class GenericEntity implements EntityInterface
 
     public function getPersistanceState()
     {
+        if (! empty($this->changed)) {
+        }
+
         return $this->state;
     }
 
@@ -125,8 +123,10 @@ class GenericEntity implements EntityInterface
     protected function maybeLazyLoad($attribute): void
     {
         if (isset($this->lazyLoaders[$attribute])) {
+            /** @var LazyValueLoader $lazyLoader */
             $lazyLoader = $this->lazyLoaders[$attribute];
             $lazyLoader->load();
+            unset($this->changed[$attribute]);
             unset($this->lazyLoaders[$attribute]);
         }
     }

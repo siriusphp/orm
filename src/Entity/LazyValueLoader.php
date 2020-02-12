@@ -30,6 +30,6 @@ class LazyValueLoader
     public function load()
     {
         $results = $this->tracker->getRelationResults($this->relation->getOption('name'));
-        $this->relation->attachesMatchesToEntity($this->entity, $results);
+        $this->relation->attachMatchesToEntity($this->entity, $results);
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Behaviour;
@@ -17,6 +16,12 @@ class FakeThrowsException implements BehaviourInterface
     public function onDelete(Mapper $mapper, ActionInterface $delete)
     {
         $delete->prepend(new \Sirius\Orm\Tests\Action\FakeThrowsException());
+        return $delete;
+    }
+
+    public function onSave(Mapper $mapper, ActionInterface $delete)
+    {
+        $delete->append(new \Sirius\Orm\Tests\Action\FakeThrowsException());
         return $delete;
     }
 

@@ -25,7 +25,7 @@ class QueryBuilder
         $this->mapper = $mapper;
     }
 
-    public function newQuery($view = 'default')
+    public function newQuery($view = 'default'): Query
     {
         $queryClass = $this->getQueryClass($this->mapper);
 

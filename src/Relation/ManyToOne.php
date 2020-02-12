@@ -2,28 +2,28 @@
 
 namespace Sirius\Orm\Relation;
 
+use Sirius\Orm\Action\BaseAction;
+use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
-use Sirius\Orm\Entity\LazyValueLoader;
-use Sirius\Orm\Entity\Tracker;
 
 class ManyToOne extends Relation
 {
-    protected function getDefaultOptions()
+    protected function applyDefaults(): void
     {
-        $defaults = parent::getDefaultOptions();
+        parent::applyDefaults();
 
-        $defaults[RelationOption::CASCADE] = false;
+        $foreignKey = $this->foreignMapper->getPrimaryKey();
+        if (! isset($this->options[RelationOption::FOREIGN_KEY])) {
+            $this->options[RelationOption::FOREIGN_KEY] = $foreignKey;
+        }
 
-        $foreignKey                            = $this->foreignMapper->getPrimaryKey();
-        $defaults[RelationOption::FOREIGN_KEY] = $foreignKey;
-
-        $nativeKey                            = $this->getKeyColumn($this->name, $this->foreignMapper->getPrimaryKey());
-        $defaults[RelationOption::NATIVE_KEY] = $nativeKey;
-
-        return $defaults;
+        if (! isset($this->options[RelationOption::NATIVE_KEY])) {
+            $nativeKey                                 = $this->getKeyColumn($this->name, $foreignKey);
+            $this->options[RelationOption::NATIVE_KEY] = $nativeKey;
+        }
     }
 
-    public function attachesMatchesToEntity(EntityInterface $nativeEntity, array $result)
+    public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
         $found = null;
         foreach ($result as $foreignEntity) {
@@ -47,9 +47,13 @@ class ManyToOne extends Relation
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
     }
 
-    public function attachLazyValueToEntity(EntityInterface $entity, Tracker $tracker)
+    protected function attachToDelete(BaseAction $action)
     {
-        $valueLoader = new LazyValueLoader($entity, $tracker, $this);
-        $this->nativeMapper->setEntityAttribute($entity, $this->name, $valueLoader);
+        return;
+    }
+
+    protected function attachToSave(BaseAction $action)
+    {
+        return;
     }
 }
