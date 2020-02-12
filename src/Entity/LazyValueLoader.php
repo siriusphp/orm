@@ -1,0 +1,35 @@
+<?php
+declare(strict_types=1);
+
+namespace Sirius\Orm\Entity;
+
+use Sirius\Orm\Relation\Relation;
+
+class LazyValueLoader
+{
+    /**
+     * @var EntityInterface
+     */
+    protected $entity;
+    /**
+     * @var Tracker
+     */
+    protected $tracker;
+    /**
+     * @var Relation
+     */
+    protected $relation;
+
+    public function __construct(EntityInterface $entity, Tracker $tracker, Relation $relation)
+    {
+        $this->entity   = $entity;
+        $this->tracker  = $tracker;
+        $this->relation = $relation;
+    }
+
+    public function load()
+    {
+        $results = $this->tracker->getRelationResults($this->relation->getOption('name'));
+        $this->relation->attachesMatchesToEntity($this->entity, $results);
+    }
+}
