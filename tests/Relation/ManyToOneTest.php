@@ -157,6 +157,24 @@ SQL;
         $this->assertNotNull($category);
     }
 
+    public function test_insert()
+    {
+        $this->populateDb();
+
+        $product = $this->foreignMapper->newEntity([
+            'sku' => 'New sku'
+        ]);
+
+        $category = $this->nativeMapper->newEntity([
+            'name' => 'New Category'
+        ]);
+
+        $product->set('category', $category);
+
+        $this->nativeMapper->save($product);
+        $this->assertEquals($category->getPk(), $product->get('category_id'));
+    }
+
     public function test_save_with_relations()
     {
         $this->populateDb();
