@@ -118,7 +118,10 @@ class Mapper
         $mapper->columnAttributeMap      = $mapperConfig->columnAttributeMap;
         $mapper->scopes                  = $mapperConfig->scopes;
         $mapper->guards                  = $mapperConfig->guards;
-        $mapper->relations               = $mapperConfig->relations;
+
+        if ($mapperConfig->relations) {
+            $mapper->relations = array_merge($mapper->relations, $mapperConfig->relations);
+        }
 
         if ($mapperConfig->entityClass) {
             $mapper->entityClass = $mapperConfig->entityClass;
