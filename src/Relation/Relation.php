@@ -59,7 +59,7 @@ abstract class Relation
 
     protected function setOptionIfMissing($name, $value)
     {
-        if (! isset($this->options[$name])) {
+        if ( ! isset($this->options[$name])) {
             $this->options[$name] = $value;
         }
     }
@@ -126,7 +126,7 @@ abstract class Relation
 
     public function attachActions(BaseAction $action)
     {
-        if (! $this->cascadeIsAllowedForAction($action)) {
+        if ( ! $this->cascadeIsAllowedForAction($action)) {
             return;
         }
 
@@ -185,10 +185,10 @@ abstract class Relation
     }
 
     /**
-     * @see BaseAction::$options
      * @param BaseAction $action
      *
      * @return bool|mixed|null
+     * @see BaseAction::$options
      */
     protected function cascadeIsAllowedForAction(BaseAction $action)
     {
@@ -211,12 +211,28 @@ abstract class Relation
      */
     protected function getRemainingRelations($relations)
     {
-        if (! is_array($relations)) {
+        if ( ! is_array($relations)) {
             return $relations;
         }
 
         $children = Arr::getChildren(array_combine($relations, $relations), $this->name);
 
         return array_keys($children);
+    }
+
+    protected function getExtraColumnsForAction()
+    {
+        $cols   = [];
+        $guards = $this->getOption(RelationOption::FOREIGN_GUARDS);
+        if (is_array($guards)) {
+            foreach ($guards as $col => $val) {
+                // guards that are strings (eg: 'deleted_at is null') can't be used as extra columns
+                if ( ! is_int($col)) {
+                    $cols[$col] = $val;
+                }
+            }
+        }
+
+        return $cols;
     }
 }

@@ -9,7 +9,7 @@ class OneToOne extends ManyToOne
     protected function attachToDelete(BaseAction $action)
     {
         // no cascade delete? treat it as a save
-        if (! $this->isCascade()) {
+        if ( ! $this->isCascade()) {
             $this->attachToSave($action);
         } else {
             $nativeEntity  = $action->getEntity();
@@ -31,6 +31,7 @@ class OneToOne extends ManyToOne
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
             $saveAction         = $this->foreignMapper
                 ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
+            $saveAction->addColumns($this->getExtraColumnsForAction());
             $action->append($saveAction);
         }
     }

@@ -143,11 +143,47 @@ SQL;
             ->first();
         /** @var Collection $products */
         $products = $category->get('products');
-        $products[0]->set('sku', 'def');
+        $products[0]->set('sku', 'sku_1');
         $products->removeElement($products[1]);
         $products->delete($products[2]);
 
         $this->assertTrue($this->nativeMapper->delete($category, true));
+        // check if the first product was updated
+        $product = $this->foreignMapper->find($products[0]->getPk());
+        $this->assertNotNull($product);
+        $this->assertEquals('sku_1', $product->get('sku'));
+    }
+
+    public function test_save_with_relations()
+    {
+        $this->populateDb();
+
+        $category = $this->nativeMapper
+            ->newQuery()
+            ->first();
+        /** @var Collection $products */
+        $products = $category->get('products');
+        $products[0]->set('sku', 'sku_1');
+
+        $this->nativeMapper->save($category);
+        $product = $this->foreignMapper->find($products[0]->getPk());
+        $this->assertEquals('sku_1', $product->get('sku'));
+    }
+
+    public function test_save_without_relations()
+    {
+        $this->populateDb();
+
+        $category = $this->nativeMapper
+            ->newQuery()
+            ->first();
+        /** @var Collection $products */
+        $products = $category->get('products');
+        $products[0]->set('sku', 'sku_1');
+
+        $this->nativeMapper->save($category, false);
+        $product = $this->foreignMapper->find($products[0]->getPk());
+        $this->assertEquals('abc', $product->get('sku'));
     }
 
     protected function populateDb(): void

@@ -59,7 +59,7 @@ class OneToOneTest extends BaseTestCase
         $this->assertEquals('image.png', $image->get('name'));
     }
 
-    public function test_save()
+    public function test_save_with_relations()
     {
         $this->insertRow('products', ['id' => 3, 'featured_image_id' => 3]);
         $this->insertRow('images', ['id' => 3, 'name' => 'img.jpg']);
@@ -74,5 +74,22 @@ class OneToOneTest extends BaseTestCase
         $this->assertEquals('abc', $product->get('sku'));
         $image = $this->foreignMapper->find(3);
         $this->assertEquals('image.png', $image->get('name'));
+    }
+
+    public function test_save_without_relations()
+    {
+        $this->insertRow('products', ['id' => 3, 'featured_image_id' => 3]);
+        $this->insertRow('images', ['id' => 3, 'name' => 'img.jpg']);
+
+        $product = $this->nativeMapper->find(3);
+        $product->set('sku', 'abc');
+        $product->get('featured_image')->set('name', 'image.png');
+
+        $this->assertTrue($this->nativeMapper->save($product, false));
+
+        $product = $this->nativeMapper->find(3);
+        $this->assertEquals('abc', $product->get('sku'));
+        $image = $this->foreignMapper->find(3);
+        $this->assertEquals('img.jpg', $image->get('name'));
     }
 }

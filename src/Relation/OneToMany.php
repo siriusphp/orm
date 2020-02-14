@@ -95,6 +95,7 @@ class OneToMany extends Relation
             if (! empty($foreignEntity->getChanges())) {
                 $saveAction = $this->foreignMapper
                     ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
+                $saveAction->addColumns($this->getExtraColumnsForAction());
                 $action->append($saveAction);
             }
         }
@@ -103,6 +104,7 @@ class OneToMany extends Relation
         foreach ($changes['removed'] as $foreignEntity) {
             $saveAction = $this->foreignMapper
                 ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
+            $saveAction->addColumns($this->getExtraColumnsForAction());
             $action->append($saveAction);
         }
 
