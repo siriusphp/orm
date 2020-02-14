@@ -125,6 +125,38 @@ SQL;
         $this->assertSame($category1, $category2); // to ensure only one query was executed
     }
 
+    public function test_save_with_relations()
+    {
+        $this->populateDb();
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $category = $product->get('category');
+        $category->set('name', 'New category');
+
+        $this->nativeMapper->save($product);
+        $category = $this->foreignMapper->find($category->getPk());
+        $this->assertEquals('New category', $category->get('name'));
+    }
+
+    public function test_save_without_relations()
+    {
+        $this->populateDb();
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $category = $product->get('category');
+        $category->set('name', 'New category');
+
+        $this->nativeMapper->save($product, false);
+        $category = $this->foreignMapper->find($category->getPk());
+        $this->assertEquals('Category', $category->get('name'));
+    }
+
     protected function populateDb(): void
     {
         $this->insertRow('categories', ['id' => 10, 'name' => 'Category']);
