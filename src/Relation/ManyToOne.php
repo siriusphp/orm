@@ -64,6 +64,10 @@ class ManyToOne extends Relation
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
+        if ($nativeEntity->getPersistanceState() == StateEnum::DELETED) {
+            return;
+        }
+
         // required for DELETED entities that throw errors if they are changed
         $state = $foreignEntity->getPersistanceState();
         $foreignEntity->setPersistanceState(StateEnum::SYNCHRONIZED);
