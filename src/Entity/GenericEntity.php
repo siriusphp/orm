@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
+use Sirius\Orm\CastingManager;
+use Sirius\Orm\Helpers\Str;
+
 class GenericEntity implements EntityInterface
 {
     protected $state = StateEnum::CHANGED;
@@ -15,11 +18,33 @@ class GenericEntity implements EntityInterface
 
     protected $changed = [];
 
-    public function __construct(array $attributes)
+    protected $casts = [];
+
+    public function __construct(array $attributes, CastingManager $castingManager = null)
     {
+        $this->castingManager = $castingManager;
         foreach ($attributes as $attr => $value) {
             $this->set($attr, $value);
         }
+    }
+
+    protected function castAttribute($name, $value)
+    {
+        $method = Str::methodName($name . ' attribute', 'cast');
+        if (method_exists($this, $method)) {
+            return $this->$method($value);
+        }
+
+        if (!$this->castingManager) {
+            return $value;
+        }
+
+        /**
+         * @todo implement additional attributes
+         */
+        $type = $this->casts[$name] ?? $name;
+
+        return $this->castingManager->cast($type, $value);
     }
 
     public function getPk()
@@ -48,7 +73,8 @@ class GenericEntity implements EntityInterface
             return $this;
         }
 
-        if (!isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
+        $value = $this->castAttribute($attribute, $value);
+        if (! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->changed[$attribute] = true;
             $this->state               = StateEnum::CHANGED;
         }

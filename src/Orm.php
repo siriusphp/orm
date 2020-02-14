@@ -20,9 +20,18 @@ class Orm implements MapperLocator
      */
     protected $connectionLocator;
 
-    public function __construct(ConnectionLocator $connectionLocator)
+    /**
+     * @var CastingManager
+     */
+    protected $castingManager;
+
+    public function __construct(ConnectionLocator $connectionLocator, CastingManager $castingManager = null)
     {
         $this->connectionLocator = $connectionLocator;
+        if (! $castingManager) {
+            $castingManager = new CastingManager();
+        }
+        $this->castingManager = $castingManager;
     }
 
     public function register($mapperName, $mapperOrConfigOrFactory): self
@@ -31,6 +40,7 @@ class Orm implements MapperLocator
             $this->lazyMappers[$mapperName] = $mapperOrConfigOrFactory;
         } elseif ($mapperOrConfigOrFactory instanceof Mapper) {
             $this->mappers[$mapperName] = $mapperOrConfigOrFactory;
+            $mapperOrConfigOrFactory->registerCasts($this->castingManager);
         } else {
             throw new \InvalidArgumentException('$mapperOrConfigOrFactory must be a Mapper instance, 
             a MapperConfig instance or a callable that returns a Mapper instance');
@@ -48,6 +58,7 @@ class Orm implements MapperLocator
     {
         if (isset($this->lazyMappers[$mapperName])) {
             $this->mappers[$mapperName] = $this->buildMapper($this->lazyMappers[$mapperName]);
+            $this->mappers[$mapperName]->registerCasts($this->castingManager);
             unset($this->lazyMappers[$mapperName]);
         }
 
@@ -115,5 +126,13 @@ class Orm implements MapperLocator
     public function getConnectionLocator(): ConnectionLocator
     {
         return $this->connectionLocator;
+    }
+
+    /**
+     * @return CastingManager
+     */
+    public function getCastingManager(): CastingManager
+    {
+        return $this->castingManager;
     }
 }

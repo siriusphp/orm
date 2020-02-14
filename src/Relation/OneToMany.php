@@ -7,7 +7,7 @@ use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
-use Symfony\Component\Inflector\Inflector;
+use Sirius\Orm\Helpers\Inflector;
 
 class OneToMany extends Relation
 {

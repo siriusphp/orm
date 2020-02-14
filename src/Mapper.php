@@ -17,6 +17,7 @@ use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Relation\Relation;
+use Sirius\Orm\Helpers\Inflector;
 
 /**
  * @method array where($column, $value, $condition)
@@ -181,6 +182,26 @@ class Mapper
             }
             $this->behaviours[$behaviour->getName()] = $behaviour;
         }
+    }
+
+    public function registerCasts(CastingManager $castingManager)
+    {
+        $mapper   = $this;
+
+        $singular = Inflector::singularize($this->getTableAlias(true));
+        $castingManager->register($singular, function ($value) use ($mapper, $castingManager) {
+            return $value !== null ? $mapper->newEntity($value, $castingManager) : null;
+        });
+
+        $plural   = $this->getTableAlias(true);
+        $castingManager->register($plural, function ($values) use ($mapper, $castingManager) {
+            $collection = new Collection();
+            foreach ($values as $value) {
+                $collection->add($mapper->newEntity($value, $castingManager));
+            }
+
+            return $collection;
+        });
     }
 
     /**
