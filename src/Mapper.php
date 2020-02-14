@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
+use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
@@ -387,7 +388,7 @@ class Mapper
         return $action->run();
     }
 
-    public function newSaveAction(EntityInterface $entity, $options)
+    public function newSaveAction(EntityInterface $entity, $options): BaseAction
     {
         if (! $entity->getPk()) {
             $action = new Insert($this, $entity, $options);

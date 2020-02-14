@@ -43,13 +43,13 @@
         }
     },
     "scripts": {
-        "php-cs": [
+        "cs": [
             "php phpcs.phar --standard=PSR2 ./src"
         ],
-        "php-cbf": [
+        "cbf": [
             "php phpcbf.phar ./src --standard=PSR2 -w"
         ],
-        "php-csfix": [
+        "csfix": [
             "php php-cs-fixer.phar fix ./src --rules=@PSR2"
         ]
     }

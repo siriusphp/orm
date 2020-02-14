@@ -9,7 +9,6 @@ class Collection extends ArrayCollection
 {
     protected $changes = [
         'removed' => [],
-        'deleted' => [],
         'added'   => []
     ];
 
@@ -17,7 +16,6 @@ class Collection extends ArrayCollection
     {
         parent::__construct($elements);
         $this->changes['removed'] = new ArrayCollection();
-        $this->changes['deleted'] = new ArrayCollection();
         $this->changes['added']   = new ArrayCollection();
     }
 
@@ -43,16 +41,6 @@ class Collection extends ArrayCollection
         $removed = parent::removeElement($element);
         if ($removed) {
             $this->change('removed', $element);
-        }
-
-        return $removed;
-    }
-
-    public function delete($element)
-    {
-        $removed = parent::removeElement($element);
-        if ($removed) {
-            $this->change('deleted', $element);
         }
 
         return $removed;

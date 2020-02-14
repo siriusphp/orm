@@ -18,10 +18,14 @@ class Update extends BaseAction
      * To be used by behaviours (eg: Timestamps)
      *
      * @param array $columns
+     *
+     * @return self
      */
     public function addColumns(array $columns)
     {
         $this->extraColumns = array_merge($this->extraColumns, $columns);
+
+        return $this;
     }
 
     protected function execute()
@@ -54,7 +58,6 @@ class Update extends BaseAction
         if (! $this->hasRun) {
             return;
         }
-        $this->entity->setPK($this->entityId);
         $this->entity->setPersistanceState($this->entityState);
     }
 

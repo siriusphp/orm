@@ -47,11 +47,16 @@ class ManyToOne extends Relation
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
     }
 
-    protected function attachToDelete(BaseAction $action)
+    public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
+    {
+        // TODO: Implement detachEntities() method.
+    }
+
+    protected function addActionOnDelete(BaseAction $action)
     {
         // no cascade delete? treat it as a save
-        if ( ! $this->isCascade()) {
-            $this->attachToSave($action);
+        if (! $this->isCascade()) {
+            $this->addActionOnSave($action);
         } else {
             $nativeEntity  = $action->getEntity();
             $foreignEntity = $nativeEntity->get($this->name);
@@ -60,12 +65,12 @@ class ManyToOne extends Relation
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
                 $deleteAction       = $this->foreignMapper
                     ->newDeleteAction($foreignEntity, ['relations' => $remainingRelations]);
-                $action->append($deleteAction);
+                $action->prepend($deleteAction);
             }
         }
     }
 
-    protected function attachToSave(BaseAction $action)
+    protected function addActionOnSave(BaseAction $action)
     {
         $foreignEntity = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
         if ($foreignEntity) {
@@ -73,7 +78,7 @@ class ManyToOne extends Relation
             $saveAction         = $this->foreignMapper
                 ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
             $saveAction->addColumns($this->getExtraColumnsForAction());
-            $action->append($saveAction);
+            $action->prepend($saveAction);
         }
     }
 }

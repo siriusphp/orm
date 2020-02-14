@@ -3,16 +3,22 @@
 namespace Sirius\Orm\Relation;
 
 use Sirius\Orm\Action\BaseAction;
+use Sirius\Orm\Entity\EntityInterface;
 
 class OneToOne extends ManyToOne
 {
-    protected function attachToDelete(BaseAction $action)
+    public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        parent::attachToDelete($action);
+        // TODO: Implement detachEntities() method.
     }
 
-    protected function attachToSave(BaseAction $action)
+    protected function addActionOnDelete(BaseAction $action)
     {
-        parent::attachToSave($action);
+        parent::addActionOnDelete($action);
+    }
+
+    protected function addActionOnSave(BaseAction $action)
+    {
+        parent::addActionOnSave($action);
     }
 }

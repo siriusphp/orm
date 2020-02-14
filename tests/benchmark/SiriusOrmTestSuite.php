@@ -7,6 +7,7 @@ use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
 use Sirius\Orm\Relation\RelationOption;
+use Sirius\Sql\Insert;
 
 require_once __DIR__ . '/AbstractTestSuite.php';
 
@@ -62,6 +63,15 @@ class SiriusOrmTestSuite extends AbstractTestSuite
 
     function runAuthorInsertion($i)
     {
+//        $insert = new Insert($this->con);
+//        $insert->into('author')->columns([
+//            'first_name' => 'John' . $i,
+//            'last_name'  => 'Doe' . $i,
+//        ]);
+//        $insert->perform();
+//        $this->authors[] = $this->con->lastInsertId();
+//        return;
+
         $authorsMapper = $this->orm->get('authors');
         $author = $authorsMapper->newEntity([
             'first_name' => 'John' . $i,
@@ -73,6 +83,17 @@ class SiriusOrmTestSuite extends AbstractTestSuite
 
     function runBookInsertion($i)
     {
+//        $insert = new Insert($this->con);
+//        $insert->into('book')->columns([
+//            'title'     => 'Hello' . $i,
+//            'isbn'      => '1234' . $i,
+//            'price'     => $i,
+//            'author_id' => $this->authors[array_rand($this->authors)],
+//        ]);
+//        $insert->perform();
+//        $this->books[] = $this->con->lastInsertId();
+//        return;
+
         $booksMapper = $this->orm->get('books');
         $book = $booksMapper->newEntity([
             'title'     => 'Hello' . $i,

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Action;
+namespace Sirius\Orm\Exception;
 
 class FailedActionException extends \RuntimeException
 {

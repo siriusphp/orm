@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Relation;
 
+use Sirius\Orm\Action\AttachEntities;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\Delete;
+use Sirius\Orm\Action\DetachEntities;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\LazyValueLoader;
@@ -59,7 +61,7 @@ abstract class Relation
 
     protected function setOptionIfMissing($name, $value)
     {
-        if ( ! isset($this->options[$name])) {
+        if (! isset($this->options[$name])) {
             $this->options[$name] = $value;
         }
     }
@@ -87,7 +89,9 @@ abstract class Relation
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
             $foreignKeyValue = $this->foreignMapper->getEntityAttribute($foreignEntity, $foreignCol);
-            if ($nativeKeyValue != $foreignKeyValue) {
+            // if both native and foreign key values are present (not unlinked entities) they must be the same
+            // otherwise we assume that the entities can be linked together
+            if ($nativeKeyValue && $foreignKeyValue && $nativeKeyValue != $foreignKeyValue) {
                 return false;
             }
         }
@@ -124,20 +128,22 @@ abstract class Relation
         return $name . '_' . $column;
     }
 
-    public function attachActions(BaseAction $action)
+    public function addActions(BaseAction $action)
     {
-        if ( ! $this->cascadeIsAllowedForAction($action)) {
+        if (! $this->cascadeIsAllowedForAction($action)) {
             return;
         }
 
         if ($action instanceof Delete) {
-            $this->attachToDelete($action);
+            $this->addActionOnDelete($action);
         } elseif ($action instanceof Insert || $action instanceof Update) {
-            $this->attachToSave($action);
+            $this->addActionOnSave($action);
         }
     }
 
     abstract public function attachMatchesToEntity(EntityInterface $nativeEntity, array $queryResult);
+
+    abstract public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity);
 
     public function attachLazyValueToEntity(EntityInterface $entity, Tracker $tracker)
     {
@@ -211,7 +217,7 @@ abstract class Relation
      */
     protected function getRemainingRelations($relations)
     {
-        if ( ! is_array($relations)) {
+        if (! is_array($relations)) {
             return $relations;
         }
 
@@ -227,12 +233,31 @@ abstract class Relation
         if (is_array($guards)) {
             foreach ($guards as $col => $val) {
                 // guards that are strings (eg: 'deleted_at is null') can't be used as extra columns
-                if ( ! is_int($col)) {
+                if (! is_int($col)) {
                     $cols[$col] = $val;
                 }
             }
         }
 
         return $cols;
+    }
+
+    protected function newSyncAction(EntityInterface $nativeEntity, EntityInterface $foreignEntity, string $actionType)
+    {
+        if ($actionType == 'delete') {
+            return new DetachEntities(
+                $nativeEntity,
+                $foreignEntity,
+                $this,
+                'save'
+            );
+        }
+
+        return new AttachEntities(
+            $nativeEntity,
+            $foreignEntity,
+            $this,
+            'save'
+        );
     }
 }

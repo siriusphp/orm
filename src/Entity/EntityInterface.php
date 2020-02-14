@@ -9,7 +9,7 @@ interface EntityInterface
 
     public function setPk($val);
 
-    public function set($attributeOrAttributes, $value);
+    public function set($attribute, $value);
 
     public function get($attribute);
 

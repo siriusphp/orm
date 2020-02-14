@@ -133,27 +133,80 @@ class ManyToMany extends Relation
             }
         }
 
-        $nativeKey  = (array)$this->getOption(RelationOption::NATIVE_KEY);
-        $foreignKey = (array)$this->getOption(RelationOption::FOREIGN_KEY);
-
-        foreach ($nativeKey as $k => $col) {
-            $this->nativeMapper->setEntityAttribute(
-                $nativeEntity,
-                $col,
-                new Collection($found)
-            );
-        }
-
+        $found = new Collection($found);
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
     }
 
-    protected function attachToDelete(BaseAction $action)
+    public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        return;
+        // TODO: Implement detachEntities() method.
     }
 
-    protected function attachToSave(BaseAction $action)
+    protected function addActionOnDelete(BaseAction $action)
     {
-        return;
+        $nativeEntity       = $action->getEntity();
+        $nativeEntityKey    = $nativeEntity->getPk();
+        $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
+
+        // no cascade delete? treat as save so we can process the changes
+        if (! $this->isCascade()) {
+            $this->addActionOnSave($action);
+        } else {
+            // retrieve them again from the DB since the related collection might not have everything
+            // for example due to a relation query callback
+            $foreignEntities = $this->getQuery(new Tracker($this->nativeMapper, [$nativeEntity->getArrayCopy()]))
+                                    ->get();
+
+            foreach ($foreignEntities as $entity) {
+                $deleteAction = $this->foreignMapper
+                    ->newDeleteAction($entity, ['relations' => $remainingRelations]);
+                $action->append($deleteAction);
+            }
+        }
+    }
+
+    protected function addActionOnSave(BaseAction $action)
+    {
+        $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
+
+        /** @var Collection $foreignEntities */
+        $foreignEntities = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
+        if (!$foreignEntities) {
+            return;
+        }
+
+        $changes         = $foreignEntities->getChanges();
+
+        // save the entities still in the collection
+        foreach ($foreignEntities as $foreignEntity) {
+            if (! empty($foreignEntity->getChanges())) {
+                $saveAction = $this->foreignMapper
+                    ->newSaveAction($foreignEntity, [
+                        'relations' => $remainingRelations
+                    ]);
+                $saveAction->addColumns($this->getExtraColumnsForAction());
+                $action->prepend($saveAction);
+                $action->append($this->newSyncAction(
+                    $action->getEntity(),
+                    $foreignEntity,
+                    'save'
+                ));
+            }
+        }
+
+        // save entities that were removed but NOT deleted
+        foreach ($changes['removed'] as $foreignEntity) {
+            $saveAction = $this->foreignMapper
+                ->newSaveAction($foreignEntity, [
+                    'relations' => $remainingRelations
+                ])
+                ->addColumns($this->getExtraColumnsForAction());
+            $action->prepend($saveAction);
+            $action->append($this->newSyncAction(
+                $action->getEntity(),
+                $foreignEntity,
+                'delete'
+            ));
+        }
     }
 }

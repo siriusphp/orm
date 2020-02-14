@@ -38,21 +38,21 @@ class GenericEntity implements EntityInterface
         $this->set($this->primaryKey, $val);
     }
 
-    public function set($attributeOrAttributes, $value = null)
+    public function set($attribute, $value = null)
     {
         $this->preventChangesIfDeleted();
 
         if ($value instanceof LazyValueLoader) {
-            $this->lazyLoaders[$attributeOrAttributes] = $value;
+            $this->lazyLoaders[$attribute] = $value;
 
             return $this;
         }
 
-        if (isset($this->attributes[$attributeOrAttributes]) && $value != $this->attributes[$attributeOrAttributes]) {
-            $this->changed[$attributeOrAttributes] = true;
-            $this->state                           = StateEnum::CHANGED;
+        if (!isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
+            $this->changed[$attribute] = true;
+            $this->state               = StateEnum::CHANGED;
         }
-        $this->attributes[$attributeOrAttributes] = $value;
+        $this->attributes[$attribute] = $value;
 
         return $this;
     }

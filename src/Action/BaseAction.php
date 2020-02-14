@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Action;
 
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Relation\Relation;
 
@@ -95,7 +96,7 @@ abstract class BaseAction implements ActionInterface
         $this->after[] = $action;
     }
 
-    protected function attachActionsForRelatedEntities()
+    protected function addActionsForRelatedEntities()
     {
         if ($this->getOption('relations') === false || ! $this->mapper) {
             return;
@@ -105,7 +106,7 @@ abstract class BaseAction implements ActionInterface
             if (! $this->mapper->hasRelation($name)) {
                 continue;
             }
-            $this->mapper->getRelation($name)->attachActions($this);
+            $this->mapper->getRelation($name)->addActions($this);
         }
     }
 
@@ -114,7 +115,7 @@ abstract class BaseAction implements ActionInterface
         $executed = [];
 
         try {
-            $this->attachActionsForRelatedEntities();
+            $this->addActionsForRelatedEntities();
 
             foreach ($this->before as $action) {
                 $action->run(true);
@@ -131,7 +132,7 @@ abstract class BaseAction implements ActionInterface
             $this->undo($executed);
             throw new FailedActionException(
                 sprintf("%s failed for mapper %s", get_class($this), $this->mapper->getTableAlias(true)),
-                (int) $e->getCode(),
+                (int)$e->getCode(),
                 $e
             );
         }
@@ -139,7 +140,7 @@ abstract class BaseAction implements ActionInterface
         /** @var ActionInterface $action */
         foreach ($executed as $action) {
             // if called by another action, that action will call `onSuccess`
-            if (!$calledByAnotherAction || $action !== $this) {
+            if (! $calledByAnotherAction || $action !== $this) {
                 $action->onSuccess();
             }
         }

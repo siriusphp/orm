@@ -126,6 +126,83 @@ SQL;
         $this->assertEquals($tag1->getPk(), $tag2->getPk()); // the tags are not the same object (due to the pivot) but they have the same ID
     }
 
+    public function test_delete_with_cascade_true()
+    {
+        $this->populateDb();
+
+        // don't know why would anybody do this but...
+        $config                                                 = $this->getMapperConfig('products');
+        $config->relations['tags'][RelationOption::CASCADE] = true;
+        $this->nativeMapper                                     = $this->orm->register('products', $config)->get('products');
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $this->assertTrue($this->nativeMapper->delete($product));
+
+        $tag = $this->foreignMapper->find(1);
+        $this->assertNull($tag);
+    }
+
+    public function test_delete_with_cascade_false()
+    {
+        $this->populateDb();
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $this->assertTrue($this->nativeMapper->delete($product));
+
+        $tag = $this->foreignMapper->find(1);
+        $this->assertNotNull($tag);
+    }
+
+
+
+    public function test_save_with_relations()
+    {
+        $this->populateDb();
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $tag = $product->get('tags')[0];
+        $tag->set('name', 'New tag');
+        $tag->set('pivot_position', 3);
+
+        $this->nativeMapper->save($product);
+
+        $product = $this->nativeMapper->find($product->getPk());
+        $tag = $product->get('tags')[0];
+
+        $this->assertEquals('New tag', $tag->get('name'));
+        $this->assertEquals(3, $tag->get('pivot_position'));
+    }
+
+    public function test_save_without_relations()
+    {
+        $this->populateDb();
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $tag = $product->get('tags')[0];
+        $tag->set('name', 'New tag');
+        $tag->set('pivot_position', 3);
+
+        $this->nativeMapper->save($product, false);
+
+        $product = $this->nativeMapper->find($product->getPk());
+        $tag = $product->get('tags')[0];
+
+        $this->assertEquals('tag_1', $tag->get('name'));
+        $this->assertEquals(1, $tag->get('pivot_position'));
+    }
+
     protected function populateDb(): void
     {
         $this->insertRows('tags', ['id', 'name'], [
