@@ -145,13 +145,31 @@ SQL;
         $products = $category->get('products');
         $products[0]->set('sku', 'sku_1');
         $products->removeElement($products[1]);
-        $products->delete($products[2]);
 
         $this->assertTrue($this->nativeMapper->delete($category, true));
         // check if the first product was updated
         $product = $this->foreignMapper->find($products[0]->getPk());
         $this->assertNotNull($product);
         $this->assertEquals('sku_1', $product->get('sku'));
+    }
+
+    public function test_insert()
+    {
+        $this->populateDb();
+
+        $category = $this->nativeMapper->newEntity([
+            'name' => 'New category',
+            'products' => new Collection()
+        ]);
+        $product = $this->foreignMapper->newEntity([
+            'sku' => 'New sku'
+        ]);
+        /** @var Collection $products */
+        $products = $category->get('products');
+        $products->add($product);
+
+        $this->nativeMapper->save($category);
+        $this->assertEquals($category->getPk(), $product->get('category_id'));
     }
 
     public function test_save_with_relations()
