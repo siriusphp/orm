@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Relation;
 
-use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
@@ -28,7 +27,7 @@ class ManyToOneTest extends BaseTestCase
         parent::setUp();
         $this->loadMappers();
 
-        $this->nativeMapper = $this->orm->get('products');
+        $this->nativeMapper  = $this->orm->get('products');
         $this->foreignMapper = $this->orm->get('categories');
     }
 
@@ -123,6 +122,39 @@ SQL;
         $this->assertEquals(10, $category1->getPk());
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
+    }
+
+    public function test_delete_with_cascade_true()
+    {
+        $this->populateDb();
+
+        // don't know why would anybody do this but...
+        $config                                                 = $this->getMapperConfig('products');
+        $config->relations['category'][RelationOption::CASCADE] = true;
+        $this->nativeMapper                                     = $this->orm->register('products', $config)->get('products');
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $this->assertTrue($this->nativeMapper->delete($product));
+
+        $category = $this->foreignMapper->find($product->get('category_id'));
+        $this->assertNull($category);
+    }
+
+    public function test_delete_with_cascade_false()
+    {
+        $this->populateDb();
+
+        $product = $this->nativeMapper
+            ->newQuery()
+            ->first();
+
+        $this->assertTrue($this->nativeMapper->delete($product));
+
+        $category = $this->foreignMapper->find($product->get('category_id'));
+        $this->assertNotNull($category);
     }
 
     public function test_save_with_relations()
