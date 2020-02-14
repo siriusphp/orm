@@ -260,4 +260,27 @@ abstract class Relation
             'save'
         );
     }
+
+    protected function relationWasChanged(EntityInterface $entity) {
+        $changes = $entity->getChanges();
+        return isset($changes[$this->name]) && $changes[$this->name];
+    }
+
+    /**
+     * @return Mapper
+     */
+    public function getNativeMapper(): Mapper
+    {
+        return $this->nativeMapper;
+    }
+
+    /**
+     * @return Mapper
+     */
+    public function getForeignMapper(): Mapper
+    {
+        return $this->foreignMapper;
+    }
+
+
 }

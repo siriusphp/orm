@@ -176,10 +176,16 @@ SQL;
         $this->nativeMapper->save($product);
 
         $product = $this->nativeMapper->find($product->getPk());
-        $tag = $product->get('tags')[0];
+        $updatedTag = null;
+        foreach ($product->get('tags') as $tag) {
+            if (!$updatedTag && $tag->get('name') == 'New tag') {
+                $updatedTag = $tag;
+            }
+        }
 
-        $this->assertEquals('New tag', $tag->get('name'));
-        $this->assertEquals(3, $tag->get('pivot_position'));
+        $this->assertNotNull($updatedTag);
+        $this->assertEquals('New tag', $updatedTag->get('name'));
+        $this->assertEquals(3, $updatedTag->get('pivot_position'));
     }
 
     public function test_save_without_relations()

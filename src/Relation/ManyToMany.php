@@ -5,6 +5,7 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
 
@@ -130,6 +131,7 @@ class ManyToMany extends Relation
         foreach ($result as $foreignEntity) {
             if ($this->entitiesBelongTogether($nativeEntity, $foreignEntity)) {
                 $found[] = $foreignEntity;
+                $this->attachEntities($nativeEntity, $foreignEntity);
             }
         }
 
@@ -137,9 +139,23 @@ class ManyToMany extends Relation
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
     }
 
+    public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
+    {
+        foreach ($this->keyPairs as $nativeCol => $foreignCol) {
+            $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
+            $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, $nativeKeyValue);
+        }
+    }
+
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        // TODO: Implement detachEntities() method.
+        $state = $foreignEntity->getPersistanceState();
+        $foreignEntity->setPersistanceState(StateEnum::SYNCHRONIZED);
+        foreach ($this->keyPairs as $nativeCol => $foreignCol) {
+            $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
+        }
+        $this->foreignMapper->setEntityAttribute($foreignEntity, $this->name, null);
+        $foreignEntity->setPersistanceState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)

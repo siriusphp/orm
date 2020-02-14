@@ -111,9 +111,7 @@ class OneToMany extends Relation
 
     protected function addActionOnSave(BaseAction $action)
     {
-        // related entities haven't changed, no point in moving forward
-        $changes = $action->getEntity()->getChanges();
-        if (!isset($changes[$this->name]) || !$changes[$this->name]) {
+        if (!$this->relationWasChanged($action->getEntity())) {
             return;
         }
 

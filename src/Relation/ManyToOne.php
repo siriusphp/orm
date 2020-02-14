@@ -108,6 +108,9 @@ class ManyToOne extends Relation
 
     protected function addActionOnSave(BaseAction $action)
     {
+        if (!$this->relationWasChanged($action->getEntity())) {
+            return;
+        }
         $foreignEntity = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
         if ($foreignEntity) {
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
