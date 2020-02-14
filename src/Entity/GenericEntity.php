@@ -41,13 +41,6 @@ class GenericEntity implements EntityInterface
     public function set($attributeOrAttributes, $value = null)
     {
         $this->preventChangesIfDeleted();
-        if (is_array($attributeOrAttributes) && $value == null) {
-            foreach ($attributeOrAttributes as $k => $v) {
-                $this->set($k, $v);
-            }
-
-            return $this;
-        }
 
         if ($value instanceof LazyValueLoader) {
             $this->lazyLoaders[$attributeOrAttributes] = $value;
