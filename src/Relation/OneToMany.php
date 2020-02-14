@@ -5,6 +5,7 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Symfony\Component\Inflector\Inflector;
 
@@ -49,6 +50,11 @@ class OneToMany extends Relation
 
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
+        // no point in linking entities if the native one is deleted
+        if ($nativeEntity->getPersistanceState() == StateEnum::DELETED) {
+            return;
+        }
+
         $found = [];
         foreach ($result as $foreignEntity) {
             if ($this->entitiesBelongTogether($nativeEntity, $foreignEntity)) {
@@ -70,10 +76,13 @@ class OneToMany extends Relation
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
+        $state = $foreignEntity->getPersistanceState();
+        $foreignEntity->setPersistanceState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
         }
         $this->foreignMapper->setEntityAttribute($foreignEntity, $this->name, null);
+        $foreignEntity->setPersistanceState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -102,6 +111,12 @@ class OneToMany extends Relation
 
     protected function addActionOnSave(BaseAction $action)
     {
+        // related entities haven't changed, no point in moving forward
+        $changes = $action->getEntity()->getChanges();
+        if (!isset($changes[$this->name]) || !$changes[$this->name]) {
+            return;
+        }
+
         $nativeEntity       = $action->getEntity();
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
