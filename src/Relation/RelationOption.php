@@ -21,7 +21,6 @@ final class RelationOption
     const THROUGH_TABLE_ALIAS = 'through_table_alias';
     const THROUGH_GUARDS = 'through_guards';
     const THROUGH_COLUMNS = 'through_columns';
-    const THROUGH_MAPPER = 'through_mapper';
     const THROUGH_NATIVE_COLUMN = 'through_native_column';
     const THROUGH_FOREIGN_COLUMN = 'through_foreign_column';
     // prefix of the attributes in the relations, defaults to 'pivot_'

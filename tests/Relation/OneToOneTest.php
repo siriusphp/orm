@@ -33,10 +33,11 @@ class OneToOneTest extends BaseTestCase
         // reconfigure products-featured_image to use CASCADE
         $config                                                       = $this->getMapperConfig('products');
         $config->relations['featured_image'][RelationOption::CASCADE] = true;
+        $config->relations['featured_image'][RelationOption::FOREIGN_KEY] = 'id';
         $this->nativeMapper                                           = $this->orm->register('products', $config)->get('products');
 
         $this->insertRow('products', ['id' => 1, 'featured_image_id' => 2]);
-        $this->insertRow('images', ['id' => 2, 'name' => 'img.jpg']);
+        $this->insertRow('images', ['id' => 1, 'name' => 'img.jpg']);
 
         $product = $this->nativeMapper->find(1);
         $this->assertNotNull($product->get('featured_image'));
@@ -48,14 +49,14 @@ class OneToOneTest extends BaseTestCase
     public function test_delete_with_cascade_false()
     {
         $this->insertRow('products', ['id' => 1, 'featured_image_id' => 2]);
-        $this->insertRow('images', ['id' => 2, 'name' => 'img.jpg']);
+        $this->insertRow('images', ['id' => 1, 'name' => 'img.jpg']);
 
         $product = $this->nativeMapper->find(1);
         $product->get('featured_image')->set('name', 'image.png');
 
         $this->assertTrue($this->nativeMapper->delete($product, true));
         $this->assertRowDeleted('products', 'id', 1);
-        $image = $this->foreignMapper->find(2);
+        $image = $this->foreignMapper->find(1);
         $this->assertEquals('image.png', $image->get('name'));
     }
 

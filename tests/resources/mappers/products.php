@@ -12,9 +12,11 @@ return MapperConfig::make([
             RelationOption::FOREIGN_MAPPER => 'categories',
             RelationOption::TYPE           => RelationOption::TYPE_MANY_TO_ONE
         ],
+        // not a REAL one-to-one relation this is just for testing
         'featured_image' => [
             RelationOption::FOREIGN_MAPPER => 'images',
-            RelationOption::TYPE           => RelationOption::TYPE_ONE_TO_ONE
+            RelationOption::TYPE           => RelationOption::TYPE_ONE_TO_ONE,
+            RelationOption::FOREIGN_KEY    => 'id'
         ],
 //        'images'         => [
 //            RelationOption::FOREIGN_MAPPER => 'images',
