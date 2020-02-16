@@ -60,7 +60,15 @@ class Collection extends ArrayCollection
 
     public function getArrayCopy()
     {
-        return $this->getValues();
+        $result = [];
+        foreach ($this as $element) {
+            if (is_object($element) && method_exists($element, 'getArrayCopy')) {
+                $result[] = $element->getArrayCopy();
+            } else {
+                $result[] = $element;
+            }
+        }
+        return $result;
     }
 
     protected function change($type, $element)
