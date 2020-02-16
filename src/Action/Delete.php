@@ -12,22 +12,20 @@ class Delete extends BaseAction
 
     protected function execute()
     {
-        $this->entityId    = $this->entity->getPk();
-        $this->entityState = $this->entity->getPersistanceState();
+        $entityId = $this->entity->getPk();
+        if (!$entityId) {
+            return;
+        }
 
         $delete = new \Sirius\Sql\Delete($this->mapper->getWriteConnection());
         $delete->from($this->mapper->getTable())
-               ->where('id', $this->entityId);
+               ->where('id', $entityId);
         $delete->perform();
     }
 
     public function revert()
     {
-        if (! $this->hasRun) {
-            return;
-        }
-        $this->entity->setPK($this->entityId);
-        $this->entity->setPersistanceState($this->entityState);
+        return; // no change to the entity has actually been performed
     }
 
     public function onSuccess()
