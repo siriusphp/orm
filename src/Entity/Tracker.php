@@ -32,6 +32,11 @@ class Tracker
      */
     protected $relationResults = [];
 
+    /**
+     * @var bool
+     */
+    protected $disposable = false;
+
     public function __construct(Mapper $mapper, array $rows = [])
     {
         $this->mapper = $mapper;
@@ -46,9 +51,19 @@ class Tracker
         }
     }
 
+    public function setDisposable(bool $disposable = false)
+    {
+        $this->disposable = $disposable;
+    }
+
+    public function hasRelation($name)
+    {
+        return isset($this->relations[$name]);
+    }
+
     public function getRelationResults($name)
     {
-        if (! isset($this->relations[$name])) {
+        if ( ! isset($this->relations[$name])) {
             return null;
         }
 
@@ -84,7 +99,11 @@ class Tracker
         if (is_array($columns) && count($columns) > 1) {
             $result = [];
             foreach ($columns as $column) {
-                $result[] = $row[$column] ?? null;
+                if ($row instanceof GenericEntity) {
+                    $result[] = $row->get($column);
+                } else {
+                    $result[] = $row[$column] ?? null;
+                }
             }
 
             return $result;
@@ -92,6 +111,22 @@ class Tracker
 
         $column = is_array($columns) ? $columns[0] : $columns;
 
-        return $row[$column] ?? null;
+        return $row instanceof GenericEntity ? $row->get($column) : ($row[$column] ?? null);
+    }
+
+    /**
+     * After the entities are created we use this method to swap the rows
+     * with the actual entities to save some memory since rows can be quite big
+     *
+     * @param array $entities
+     */
+    public function replaceRows(array $entities)
+    {
+        $this->rows = $entities;
+    }
+
+    public function isDisposable()
+    {
+        return $this->disposable;
     }
 }

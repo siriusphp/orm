@@ -16,8 +16,8 @@ use Sirius\Orm\Entity\GenericEntityFactory;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
-use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Helpers\Inflector;
+use Sirius\Orm\Relation\Relation;
 
 /**
  * @method array where($column, $value, $condition)
@@ -139,10 +139,10 @@ class Mapper
     public function __construct(Orm $orm, QueryBuilder $queryBuilder = null, FactoryInterface $entityFactory = null)
     {
         $this->orm = $orm;
-        if (! $entityFactory) {
+        if ( ! $entityFactory) {
             $entityFactory = new GenericEntityFactory($orm, $this);
         }
-        if (! $queryBuilder) {
+        if ( ! $queryBuilder) {
             $this->queryBuilder = new QueryBuilder($orm, $this);
         }
         $this->entityFactory = $entityFactory;
@@ -186,14 +186,14 @@ class Mapper
 
     public function registerCasts(CastingManager $castingManager)
     {
-        $mapper   = $this;
+        $mapper = $this;
 
         $singular = Inflector::singularize($this->getTableAlias(true));
         $castingManager->register($singular, function ($value) use ($mapper, $castingManager) {
             return $value !== null ? $mapper->newEntity($value, $castingManager) : null;
         });
 
-        $plural   = $this->getTableAlias(true);
+        $plural = $this->getTableAlias(true);
         $castingManager->register($plural, function ($values) use ($mapper, $castingManager) {
             $collection = new Collection();
             foreach ($values as $value) {
@@ -225,7 +225,7 @@ class Mapper
      */
     public function getTableAlias($returnTableIfNull = false)
     {
-        return (! $this->tableAlias && $returnTableIfNull) ? $this->table : $this->tableAlias;
+        return ( ! $this->tableAlias && $returnTableIfNull) ? $this->table : $this->tableAlias;
     }
 
     /**
@@ -278,13 +278,22 @@ class Mapper
             return null;
         }
 
-        if (! $tracker) {
-            $tracker = new Tracker($this, [$data]);
+        $receivedTracker = ! ! $tracker;
+        if ( ! $tracker) {
+            $receivedTracker = false;
+            $tracker         = new Tracker($this, [$data]);
         }
 
         $entity = $this->newEntity($data);
         $this->injectRelations($entity, $tracker, $load);
         $entity->setPersistanceState(StateEnum::SYNCHRONIZED);
+
+        if ( ! $receivedTracker) {
+            $tracker->replaceRows([$entity]);
+            if ($tracker->isDisposable()) {
+                unset($tracker);
+            }
+        }
 
         return $entity;
     }
@@ -299,6 +308,10 @@ class Mapper
             }
             $entity     = $this->newEntityFromRow($row, $load, $tracker);
             $entities[] = $entity;
+        }
+        $tracker->replaceRows($entities);
+        if ($tracker->isDisposable()) {
+            unset($tracker);
         }
 
         return new Collection($entities);
@@ -317,25 +330,35 @@ class Mapper
             $entity     = $this->newEntityFromRow($row, $load, $tracker);
             $entities[] = $entity;
         }
+        $tracker->replaceRows($entities);
+        if ($tracker->isDisposable()) {
+            unset($tracker);
+        }
 
         return new PaginatedCollection($entities, $totalCount, $perPage, $currentPage);
     }
 
     protected function injectRelations(EntityInterface $entity, Tracker $tracker, array $eagerLoad = [])
     {
+        $trackerIdDisposable = true;
         foreach (array_keys($this->relations) as $name) {
             $relation      = $this->getRelation($name);
             $queryCallback = $eagerLoad[$name] ?? null;
             $nextLoad      = Arr::getChildren($eagerLoad, $name);
 
-            $tracker->setRelation($name, $relation, $queryCallback);
+            if ( ! $tracker->hasRelation($name)) {
+                $tracker->setRelation($name, $relation, $queryCallback);
+            }
 
             if (array_key_exists($name, $eagerLoad) || $relation->isEagerLoad()) {
                 $relation->attachMatchesToEntity($entity, $tracker->getRelationResults($name));
             } elseif ($relation->isLazyLoad()) {
+                $trackerIdDisposable = false;
                 $relation->attachLazyValueToEntity($entity, $tracker);
             }
         }
+
+        $tracker->setDisposable($trackerIdDisposable);
     }
 
     protected function getEntityDefaults()
@@ -360,7 +383,7 @@ class Mapper
 
     public function getRelation($name): Relation
     {
-        if (! $this->hasRelation($name)) {
+        if ( ! $this->hasRelation($name)) {
             throw new \InvalidArgumentException("Relation named {$name} is not registered for this mapper");
         }
 
@@ -368,7 +391,7 @@ class Mapper
             $this->relations[$name] = $this->orm->createRelation($this, $name, $this->relations[$name]);
         }
         $relation = $this->relations[$name];
-        if (! $relation instanceof Relation) {
+        if ( ! $relation instanceof Relation) {
             throw new \InvalidArgumentException("Relation named {$name} is not a proper Relation instance");
         }
 
@@ -411,7 +434,7 @@ class Mapper
 
     public function newSaveAction(EntityInterface $entity, $options): BaseAction
     {
-        if (! $entity->getPk()) {
+        if ( ! $entity->getPk()) {
             $action = new Insert($this, $entity, $options);
         } else {
             $action = new Update($this, $entity, $options);
@@ -438,7 +461,7 @@ class Mapper
 
     protected function assertCanPersistEntity($entity)
     {
-        if (! $entity || ! $entity instanceof $this->entityClass) {
+        if ( ! $entity || ! $entity instanceof $this->entityClass) {
             throw new \InvalidArgumentException(sprintf(
                 'Mapper %s can only persist entity of class %s. %s class provided',
                 __CLASS__,
