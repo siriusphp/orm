@@ -3,6 +3,9 @@
 return [
     "CREATE TABLE `products` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `created_at` DATETIME NULL,
+        `updated_at` DATETIME NULL,
+        `deleted_at` DATETIME NULL,
         `category_id` INTEGER NULL DEFAULT '0',
         `featured_image_id` INTEGER NULL DEFAULT '0',
         `sku` VARCHAR(50) NULL DEFAULT '0',

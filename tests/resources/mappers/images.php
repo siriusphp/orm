@@ -3,7 +3,7 @@
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationOption;
 
-return MapperConfig::make([
+return MapperConfig::fromArray([
     MapperConfig::TABLE     => 'images',
     MapperConfig::COLUMNS   => ['id', 'name', 'folder'],
     MapperConfig::RELATIONS => [

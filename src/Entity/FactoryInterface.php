@@ -7,5 +7,5 @@ use Sirius\Orm\Entity\Tracker;
 
 interface FactoryInterface
 {
-    public function newInstance($attributes = [], array $load = [], Tracker $tracker = null);
+    public function newEntity($attributes = []);
 }

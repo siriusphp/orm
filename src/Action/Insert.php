@@ -20,7 +20,7 @@ class Insert extends Update
         $connection = $this->mapper->getWriteConnection();
 
         $columns = array_merge(
-            Arr::only($this->entity->getArrayCopy(), $this->mapper->getColumns()),
+            $this->mapper->extractFromEntity($this->entity),
             $this->extraColumns,
             $this->mapper->getGuards()
         );

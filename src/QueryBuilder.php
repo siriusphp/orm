@@ -5,40 +5,43 @@ namespace Sirius\Orm;
 class QueryBuilder
 {
     /**
-     * @var Orm
+     * @var array
      */
-    protected $orm;
+    protected $queryClasses = [];
 
     /**
-     * @var Mapper
+     * @var QueryBuilder
      */
-    protected $mapper;
+    protected static $instance;
 
-    /**
-     * @var
-     */
-    protected $select;
-
-    public function __construct(Orm $orm, Mapper $mapper)
+    public static function getInstance()
     {
-        $this->orm    = $orm;
-        $this->mapper = $mapper;
+        if ( ! static::$instance) {
+            static::$instance = new static;
+        }
+
+        return static::$instance;
     }
 
-    public function newQuery($view = 'default'): Query
+    public function newQuery(Mapper $mapper): Query
     {
-        $queryClass = $this->getQueryClass($this->mapper);
+        $queryClass = $this->getQueryClass($mapper);
 
-        return new $queryClass($this->orm, $this->mapper, $this->orm->getConnectionLocator()->getRead());
+        return new $queryClass($mapper, $mapper->getReadConnection());
     }
 
     protected function getQueryClass(Mapper $mapper)
     {
-        $queryClass = get_class($mapper) . 'Query';
-        if (class_exists($queryClass)) {
-            return $queryClass;
+        $mapperClass = get_class($mapper);
+        if ( ! isset($this->queryClasses[$mapperClass])) {
+            $queryClass = $mapperClass . 'Query';
+            if (class_exists($queryClass)) {
+                $this->queryClasses[$mapperClass] = $queryClass;
+            } else {
+                $this->queryClasses[$mapperClass] = Query::class;
+            }
         }
 
-        return Query::class;
+        return $this->queryClasses[$mapperClass];
     }
 }

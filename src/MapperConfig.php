@@ -89,7 +89,7 @@ class MapperConfig
      */
     public $guards = [];
 
-    public static function make(array $array)
+    public static function fromArray(array $array)
     {
         $instance = new self;
         foreach ($array as $k => $v) {

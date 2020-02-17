@@ -12,7 +12,7 @@ class OrmTest extends BaseTestCase
 
     public function test_lazy_mapper_config()
     {
-        $mapperConfig = MapperConfig::make([
+        $mapperConfig = MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
@@ -25,7 +25,7 @@ class OrmTest extends BaseTestCase
 
     public function test_lazy_mapper_factory()
     {
-        $mapperConfig = MapperConfig::make([
+        $mapperConfig = MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
@@ -40,7 +40,7 @@ class OrmTest extends BaseTestCase
 
     public function test_mapper_instance()
     {
-        $mapperConfig = MapperConfig::make([
+        $mapperConfig = MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']

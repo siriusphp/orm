@@ -8,6 +8,7 @@ use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
+use Sirius\Orm\Helpers\QueryHelper;
 
 class ManyToMany extends Relation
 {
@@ -76,7 +77,7 @@ class ManyToMany extends Relation
     {
         $through          = $this->getOption(RelationOption::THROUGH_TABLE);
         $throughAlias     = $this->getOption(RelationOption::THROUGH_TABLE_ALIAS);
-        $throughReference = $query->reference($through, $throughAlias);
+        $throughReference = QueryHelper::reference($through, $throughAlias);
         $throughName      = $throughAlias ?? $through;
 
         $foreignTableName       = $this->foreignMapper->getTableAlias(true);

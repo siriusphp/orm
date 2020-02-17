@@ -3,7 +3,7 @@
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationOption;
 
-return MapperConfig::make([
+return MapperConfig::fromArray([
     MapperConfig::TABLE     => 'tags',
     MapperConfig::COLUMNS   => ['id', 'name'],
     MapperConfig::RELATIONS => [

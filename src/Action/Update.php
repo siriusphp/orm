@@ -35,7 +35,7 @@ class Update extends BaseAction
 
         $connection = $this->mapper->getWriteConnection();
 
-        $columns = Arr::only($this->entity->getArrayCopy(), $this->mapper->getColumns());
+        $columns = $this->mapper->extractFromEntity($this->entity);
         $columns = Arr::only($columns, array_keys($this->entity->getChanges()));
         $columns = array_merge(
             $columns,

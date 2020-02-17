@@ -15,12 +15,12 @@ class RelationTest extends BaseTestCase
 {
     public function test_multi_column_primary_key()
     {
-        $this->nativeMapper = Mapper::make($this->orm, MapperConfig::make([
+        $this->nativeMapper = Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE   => 'products',
             MapperConfig::COLUMNS => ['id', 'related_col_1', 'related_col_2']
         ]));
 
-        $this->foreignMapper = Mapper::make($this->orm, MapperConfig::make([
+        $this->foreignMapper = Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE       => 'categories',
             MapperConfig::PRIMARY_KEY => ['col_1', 'col_2'],
             MapperConfig::COLUMNS     => ['col_1', 'col_2', 'name']

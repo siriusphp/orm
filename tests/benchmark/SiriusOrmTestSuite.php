@@ -30,12 +30,12 @@ class SiriusOrmTestSuite extends AbstractTestSuite
 
         $this->initTables();
 
-        $this->orm->register('authors', Mapper::make($this->orm, MapperConfig::make([
+        $this->orm->register('authors', Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE => 'author',
             MapperConfig::COLUMNS => ['id', 'first_name', 'last_name', 'email']
         ])));
 
-        $this->orm->register('books', Mapper::make($this->orm, MapperConfig::make([
+        $this->orm->register('books', Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE => 'book',
             MapperConfig::COLUMNS => ['id', 'title', 'isbn', 'price', 'author_id'],
             MapperConfig::RELATIONS => [

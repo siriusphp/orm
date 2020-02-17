@@ -17,6 +17,7 @@ use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\Inflector;
+use Sirius\Orm\Helpers\QueryHelper;
 use Sirius\Orm\Relation\Relation;
 
 /**
@@ -49,6 +50,11 @@ class Mapper
      * @var string
      */
     protected $tableAlias = '';
+
+    /**
+     * @var string
+     */
+    protected $tableReference;
 
     /**
      * Table columns
@@ -120,6 +126,7 @@ class Mapper
         $mapper->columnAttributeMap      = $mapperConfig->columnAttributeMap;
         $mapper->scopes                  = $mapperConfig->scopes;
         $mapper->guards                  = $mapperConfig->guards;
+        $mapper->tableReference          = QueryHelper::reference($mapper->table, $mapper->tableAlias);
 
         if ($mapperConfig->relations) {
             $mapper->relations = array_merge($mapper->relations, $mapperConfig->relations);
@@ -136,16 +143,17 @@ class Mapper
         return $mapper;
     }
 
-    public function __construct(Orm $orm, QueryBuilder $queryBuilder = null, FactoryInterface $entityFactory = null)
+    public function __construct(Orm $orm, FactoryInterface $entityFactory = null, QueryBuilder $queryBuilder = null)
     {
         $this->orm = $orm;
         if ( ! $entityFactory) {
             $entityFactory = new GenericEntityFactory($orm, $this);
         }
         if ( ! $queryBuilder) {
-            $this->queryBuilder = new QueryBuilder($orm, $this);
+            $this->queryBuilder = QueryBuilder::getInstance();
         }
-        $this->entityFactory = $entityFactory;
+        $this->entityFactory  = $entityFactory;
+        $this->tableReference = QueryHelper::reference($this->table, $this->tableAlias);
     }
 
     public function __call(string $method, array $params)
@@ -164,7 +172,7 @@ class Mapper
     }
 
     /**
-     * Add behaviours to the
+     * Add behaviours to the mapper
      *
      * @param mixed ...$behaviours
      */
@@ -180,8 +188,32 @@ class Mapper
                     sprintf('Behaviour "%s" is already registered', $behaviour->getName())
                 );
             }
+            $behaviour->attachToMapper($this);
             $this->behaviours[$behaviour->getName()] = $behaviour;
         }
+    }
+
+    public function without(...$behaviours)
+    {
+        if (empty($behaviours)) {
+            return $this;
+        }
+        $mapper = clone $this;
+        foreach ($behaviours as $behaviour) {
+            unset($mapper->behaviours[$behaviour]);
+        }
+
+        return $mapper;
+    }
+
+    public function addScope($scope, callable $callback)
+    {
+        $this->scopes[$scope] = $callback;
+    }
+
+    public function getScope($scope)
+    {
+        return $this->scopes[$scope] ?? null;
     }
 
     public function registerCasts(CastingManager $castingManager)
@@ -228,6 +260,11 @@ class Mapper
         return ( ! $this->tableAlias && $returnTableIfNull) ? $this->table : $this->tableAlias;
     }
 
+    public function getTableReference()
+    {
+        return $this->tableReference;
+    }
+
     /**
      * @return array
      */
@@ -267,9 +304,16 @@ class Mapper
      */
     public function newEntity(array $data): EntityInterface
     {
-        $entity = $this->entityFactory->newInstance(array_merge($this->getEntityDefaults(), $data));
+        $entity = $this->entityFactory->newEntity(array_merge($this->getEntityDefaults(), $data));
 
         return $this->applyBehaviours(__FUNCTION__, $entity);
+    }
+
+    public function extractFromEntity(EntityInterface $entity): array
+    {
+        $data = Arr::only($entity->getArrayCopy(), $this->getColumns());
+
+        return $this->applyBehaviours(__FUNCTION__, $data);
     }
 
     public function newEntityFromRow(array $data = null, array $load = [], Tracker $tracker = null)
@@ -303,9 +347,6 @@ class Mapper
         $entities = [];
         $tracker  = new Tracker($this, $rows);
         foreach ($rows as $row) {
-            if ($row === null) {
-                continue;
-            }
             $entity     = $this->newEntityFromRow($row, $load, $tracker);
             $entities[] = $entity;
         }
@@ -405,7 +446,7 @@ class Mapper
 
     public function newQuery(): Query
     {
-        $query = $this->queryBuilder->newQuery();
+        $query = $this->queryBuilder->newQuery($this);
 
         return $this->applyBehaviours(__FUNCTION__, $query);
     }

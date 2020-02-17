@@ -80,7 +80,6 @@ class BaseTestCase extends TestCase
         $row    = $select->from($table)
                          ->where(...$conditions)
                          ->fetchOne();
-        print_r($select->__toString());
         $this->assertNotNull($row);
     }
 

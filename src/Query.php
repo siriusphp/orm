@@ -36,12 +36,11 @@ class Query extends Select
      */
     protected $scopes = [];
 
-    public function __construct(Orm $orm, Mapper $mapper, Connection $connection)
+    public function __construct(Mapper $mapper)
     {
-        parent::__construct($connection);
-        $this->orm    = $orm;
+        parent::__construct($mapper->getReadConnection());
         $this->mapper = $mapper;
-        $this->from($this->reference($this->mapper->getTable(), $this->mapper->getTableAlias()));
+        $this->from($this->mapper->getTableReference());
         $this->resetColumns();
         $this->columns($this->mapper->getTableAlias(true) . '.*');
     }

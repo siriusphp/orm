@@ -9,10 +9,6 @@ interface EntityInterface
 
     public function setPk($val);
 
-    public function set($attribute, $value);
-
-    public function get($attribute);
-
     public function getPersistanceState();
 
     public function setPersistanceState($state);

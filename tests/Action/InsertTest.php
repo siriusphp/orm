@@ -12,7 +12,7 @@ class InsertTest extends BaseTestCase
 {
     public function test_entity_is_inserted()
     {
-        $this->mapper = Mapper::make($this->orm, MapperConfig::make([
+        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
@@ -35,7 +35,7 @@ class InsertTest extends BaseTestCase
     public function test_entity_is_reverted()
     {
 
-        $this->mapper = Mapper::make($this->orm, MapperConfig::make([
+        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],

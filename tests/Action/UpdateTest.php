@@ -12,7 +12,7 @@ class UpdateTest extends BaseTestCase
 {
     public function test_entity_is_updated()
     {
-        $this->mapper = Mapper::make($this->orm, MapperConfig::make([
+        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
@@ -39,7 +39,7 @@ class UpdateTest extends BaseTestCase
     public function test_entity_is_reverted()
     {
 
-        $this->mapper = Mapper::make($this->orm, MapperConfig::make([
+        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE       => 'products',
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],

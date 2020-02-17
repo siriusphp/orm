@@ -24,19 +24,12 @@ class GenericEntityFactory implements FactoryInterface
         $this->mapper = $mapper;
     }
 
-    public function newInstance($attributes = [], array $load = [], Tracker $tracker = null)
+    public function newEntity($attributes = [])
     {
-        $attributes = $this->processAttributes($attributes, $load, $tracker);
+        $attributes = $this->mapColumnsToAttributes($attributes);
         $class = $this->mapper->getEntityClass() ?? GenericEntity::class;
 
         return new $class($attributes);
-    }
-
-    protected function processAttributes($attributes, array $load = [], Tracker $tracker = null)
-    {
-        $attributes = $this->mapColumnsToAttributes($attributes);
-
-        return $attributes;
     }
 
     protected function mapColumnsToAttributes($attributes)

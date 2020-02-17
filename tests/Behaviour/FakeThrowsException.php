@@ -13,6 +13,10 @@ class FakeThrowsException implements BehaviourInterface
         return 'fake';
     }
 
+    public function attachToMapper(Mapper $mapper)
+    {
+    }
+
     public function onDelete(Mapper $mapper, ActionInterface $delete)
     {
         $delete->prepend(new \Sirius\Orm\Tests\Action\FakeThrowsException());
