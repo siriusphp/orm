@@ -13,7 +13,7 @@ class SoftDelete extends Delete
     protected function execute()
     {
         $entityId = $this->entity->getPk();
-        if ( ! $entityId) {
+        if (! $entityId) {
             return;
         }
 
@@ -40,5 +40,4 @@ class SoftDelete extends Delete
             $this->entity->setPersistanceState(StateEnum::DELETED);
         }
     }
-
 }

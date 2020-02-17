@@ -63,7 +63,7 @@ class Tracker
 
     public function getRelationResults($name)
     {
-        if ( ! isset($this->relations[$name])) {
+        if (! isset($this->relations[$name])) {
             return null;
         }
 

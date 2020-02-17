@@ -71,7 +71,7 @@ class AttachEntities implements ActionInterface
         }
 
         $throughColumnPrefix = $this->relation->getOption(RelationOption::THROUGH_COLUMNS_PREFIX);
-        foreach((array)$this->relation->getOption(RelationOption::THROUGH_COLUMNS) as $col) {
+        foreach ((array)$this->relation->getOption(RelationOption::THROUGH_COLUMNS) as $col) {
             $insertColumns[$col] = $this->foreignEntity->get("{$throughColumnPrefix}{$col}");
         }
 

@@ -11,19 +11,36 @@ class Collection extends ArrayCollection
         'removed' => [],
         'added'   => []
     ];
+    /**
+     * @var callable
+     */
+    protected $castingFunction;
 
-    public function __construct(array $elements = [])
+    public function __construct(array $elements = [], callable $castingFunction = null)
     {
         parent::__construct($elements);
         $this->changes['removed'] = new ArrayCollection();
         $this->changes['added']   = new ArrayCollection();
+        $this->castingFunction = $castingFunction;
+    }
+
+    protected function castElement($data)
+    {
+        return $this->castingFunction ? $this->castingFunction($data) : $data;
     }
 
     public function add($element)
     {
+        $element = $this->castElement($element);
         $this->change('added', $element);
 
         return parent::add($element);
+    }
+
+    public function set($key, $value)
+    {
+        $value = $this->castElement($value);
+        parent::set($key, $value);
     }
 
     public function remove($key)
@@ -38,6 +55,7 @@ class Collection extends ArrayCollection
 
     public function removeElement($element)
     {
+        $element = $this->castElement($element);
         $removed = parent::removeElement($element);
         if ($removed) {
             $this->change('removed', $element);

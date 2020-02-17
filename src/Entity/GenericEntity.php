@@ -19,6 +19,11 @@ class GenericEntity implements EntityInterface
     protected $changed = [];
 
     protected $casts = [];
+    
+    /**
+     * @var CastingManager
+     */
+    protected $castingManager;
 
     public function __construct(array $attributes, CastingManager $castingManager = null)
     {

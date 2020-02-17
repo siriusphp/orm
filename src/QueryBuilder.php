@@ -16,7 +16,7 @@ class QueryBuilder
 
     public static function getInstance()
     {
-        if ( ! static::$instance) {
+        if (! static::$instance) {
             static::$instance = new static;
         }
 
@@ -33,7 +33,7 @@ class QueryBuilder
     protected function getQueryClass(Mapper $mapper)
     {
         $mapperClass = get_class($mapper);
-        if ( ! isset($this->queryClasses[$mapperClass])) {
+        if (! isset($this->queryClasses[$mapperClass])) {
             $queryClass = $mapperClass . 'Query';
             if (class_exists($queryClass)) {
                 $this->queryClasses[$mapperClass] = $queryClass;

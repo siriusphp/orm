@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
-use Atlas\Pdo\Connection;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Sql\Select;
@@ -44,6 +43,17 @@ class Query extends Select
         $this->resetColumns();
         $this->columns($this->mapper->getTableAlias(true) . '.*');
     }
+
+    public function __call(string $method, array $params)
+    {
+        $scope = $this->mapper->getScope($method);
+        if ($scope && is_callable($scope)) {
+            return $scope($this, ...$params);
+        }
+
+        return parent::__call($method, $params);
+    }
+
 
     public function load(...$relations): self
     {
@@ -114,15 +124,6 @@ class Query extends Select
         return $this;
     }
 
-    public function setScopes(array $scopes)
-    {
-        foreach ($scopes as $name => $callback) {
-            $this->scopes[$name] = $callback;
-        }
-
-        return $this;
-    }
-
     public function resetGuards()
     {
         $this->guards = [];
@@ -144,15 +145,6 @@ class Query extends Select
                 $this->where($column, $value);
             }
         }
-    }
-
-    public function reference($table, $tableAlias)
-    {
-        if (! $tableAlias || $table == $tableAlias) {
-            return $table;
-        }
-
-        return "{$table} as {$tableAlias}";
     }
 
     public function getStatement(): string

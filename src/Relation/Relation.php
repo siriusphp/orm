@@ -261,7 +261,8 @@ abstract class Relation
         );
     }
 
-    protected function relationWasChanged(EntityInterface $entity) {
+    protected function relationWasChanged(EntityInterface $entity)
+    {
         $changes = $entity->getChanges();
         return isset($changes[$this->name]) && $changes[$this->name];
     }
@@ -281,6 +282,4 @@ abstract class Relation
     {
         return $this->foreignMapper;
     }
-
-
 }

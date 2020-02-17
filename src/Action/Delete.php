@@ -7,9 +7,6 @@ use Sirius\Orm\Entity\StateEnum;
 
 class Delete extends BaseAction
 {
-    private $entityId;
-    private $entityState;
-
     protected function execute()
     {
         $entityId = $this->entity->getPk();

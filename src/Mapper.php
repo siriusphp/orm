@@ -146,10 +146,10 @@ class Mapper
     public function __construct(Orm $orm, FactoryInterface $entityFactory = null, QueryBuilder $queryBuilder = null)
     {
         $this->orm = $orm;
-        if ( ! $entityFactory) {
+        if (! $entityFactory) {
             $entityFactory = new GenericEntityFactory($orm, $this);
         }
-        if ( ! $queryBuilder) {
+        if (! $queryBuilder) {
             $this->queryBuilder = QueryBuilder::getInstance();
         }
         $this->entityFactory  = $entityFactory;
@@ -256,7 +256,7 @@ class Mapper
      */
     public function getTableAlias($returnTableIfNull = false)
     {
-        return ( ! $this->tableAlias && $returnTableIfNull) ? $this->table : $this->tableAlias;
+        return (! $this->tableAlias && $returnTableIfNull) ? $this->table : $this->tableAlias;
     }
 
     public function getTableReference()
@@ -322,7 +322,7 @@ class Mapper
         }
 
         $receivedTracker = ! ! $tracker;
-        if ( ! $tracker) {
+        if (! $tracker) {
             $receivedTracker = false;
             $tracker         = new Tracker($this, [$data]);
         }
@@ -331,7 +331,7 @@ class Mapper
         $this->injectRelations($entity, $tracker, $load);
         $entity->setPersistanceState(StateEnum::SYNCHRONIZED);
 
-        if ( ! $receivedTracker) {
+        if (! $receivedTracker) {
             $tracker->replaceRows([$entity]);
             if ($tracker->isDisposable()) {
                 unset($tracker);
@@ -386,7 +386,7 @@ class Mapper
             $queryCallback = $eagerLoad[$name] ?? null;
             $nextLoad      = Arr::getChildren($eagerLoad, $name);
 
-            if ( ! $tracker->hasRelation($name)) {
+            if (! $tracker->hasRelation($name)) {
                 $tracker->setRelation($name, $relation, $queryCallback);
             }
 
@@ -423,7 +423,7 @@ class Mapper
 
     public function getRelation($name): Relation
     {
-        if ( ! $this->hasRelation($name)) {
+        if (! $this->hasRelation($name)) {
             throw new \InvalidArgumentException("Relation named {$name} is not registered for this mapper");
         }
 
@@ -431,7 +431,7 @@ class Mapper
             $this->relations[$name] = $this->orm->createRelation($this, $name, $this->relations[$name]);
         }
         $relation = $this->relations[$name];
-        if ( ! $relation instanceof Relation) {
+        if (! $relation instanceof Relation) {
             throw new \InvalidArgumentException("Relation named {$name} is not a proper Relation instance");
         }
 
@@ -474,7 +474,7 @@ class Mapper
 
     public function newSaveAction(EntityInterface $entity, $options): BaseAction
     {
-        if ( ! $entity->getPk()) {
+        if (! $entity->getPk()) {
             $action = new Insert($this, $entity, $options);
         } else {
             $action = new Update($this, $entity, $options);
@@ -501,7 +501,7 @@ class Mapper
 
     protected function assertCanPersistEntity($entity)
     {
-        if ( ! $entity || ! $entity instanceof $this->entityClass) {
+        if (! $entity || ! $entity instanceof $this->entityClass) {
             throw new \InvalidArgumentException(sprintf(
                 'Mapper %s can only persist entity of class %s. %s class provided',
                 __CLASS__,

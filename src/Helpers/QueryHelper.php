@@ -5,10 +5,9 @@ namespace Sirius\Orm\Helpers;
 
 class QueryHelper
 {
-
     public static function reference($table, $tableAlias)
     {
-        if ( ! $tableAlias || $table == $tableAlias) {
+        if (! $tableAlias || $table == $tableAlias) {
             return $table;
         }
 

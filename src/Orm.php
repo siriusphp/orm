@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
+use InvalidArgumentException;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Helpers\Str;
@@ -42,7 +43,7 @@ class Orm implements MapperLocator
             $this->mappers[$mapperName] = $mapperOrConfigOrFactory;
             $mapperOrConfigOrFactory->registerCasts($this->castingManager);
         } else {
-            throw new \InvalidArgumentException('$mapperOrConfigOrFactory must be a Mapper instance, 
+            throw new InvalidArgumentException('$mapperOrConfigOrFactory must be a Mapper instance, 
             a MapperConfig instance or a callable that returns a Mapper instance');
         }
 
@@ -63,7 +64,7 @@ class Orm implements MapperLocator
         }
 
         if (! isset($this->mappers[$mapperName]) || ! $this->mappers[$mapperName]) {
-            throw new \InvalidArgumentException(sprintf('Mapper named %s is not registered', $mapperName));
+            throw new InvalidArgumentException(sprintf('Mapper named %s is not registered', $mapperName));
         }
 
         return $this->mappers[$mapperName];
@@ -115,7 +116,7 @@ class Orm implements MapperLocator
 
         $mapper = $mapperConfigOrFactory($this);
         if (! $mapper instanceof Mapper) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The mapper generated from the factory is not a valid `Mapper` instance'
             );
         }

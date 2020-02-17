@@ -88,7 +88,6 @@ class OneToMany extends Relation
     protected function addActionOnDelete(BaseAction $action)
     {
         $nativeEntity       = $action->getEntity();
-        $nativeEntityKey    = $nativeEntity->getPk();
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         // no cascade delete? treat as save so we can process the changes

@@ -42,7 +42,7 @@ class Timestamps implements BehaviourInterface
             }
         }
         if ($action instanceof Update && $this->updateColumn) {
-            if ( ! empty($action->getEntity()->getChanges())) {
+            if (! empty($action->getEntity()->getChanges())) {
                 $action->addColumns([$this->updateColumn => time()]);
             }
         }
