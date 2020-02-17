@@ -30,9 +30,7 @@ class BaseTestCase extends TestCase
 
         $this->connection = $connection;
         $connection->logQueries();
-        $connectionLocator = new ConnectionLocator(function () use ($connection) {
-            return $connection;
-        });
+        $connectionLocator = ConnectionLocator::new($this->connection);
         $this->orm         = new Orm($connectionLocator);
         $this->createTables();
     }

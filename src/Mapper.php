@@ -221,11 +221,17 @@ class Mapper
 
         $singular = Inflector::singularize($this->getTableAlias(true));
         $castingManager->register($singular, function ($value) use ($mapper, $castingManager) {
+            if ($value instanceof $this->entityClass) {
+                return $value;
+            }
             return $value !== null ? $mapper->newEntity($value, $castingManager) : null;
         });
 
         $plural = $this->getTableAlias(true);
         $castingManager->register($plural, function ($values) use ($mapper, $castingManager) {
+            if ($values instanceof Collection) {
+                return $values;
+            }
             $collection = new Collection();
             foreach ($values as $value) {
                 $collection->add($mapper->newEntity($value, $castingManager));

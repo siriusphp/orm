@@ -29,7 +29,7 @@ class GenericEntityFactory implements FactoryInterface
         $attributes = $this->mapColumnsToAttributes($attributes);
         $class = $this->mapper->getEntityClass() ?? GenericEntity::class;
 
-        return new $class($attributes);
+        return new $class($attributes, $this->orm->getCastingManager());
     }
 
     protected function mapColumnsToAttributes($attributes)
