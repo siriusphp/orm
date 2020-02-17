@@ -188,7 +188,6 @@ class Mapper
                     sprintf('Behaviour "%s" is already registered', $behaviour->getName())
                 );
             }
-            $behaviour->attachToMapper($this);
             $this->behaviours[$behaviour->getName()] = $behaviour;
         }
     }

@@ -15,7 +15,7 @@ class Update extends BaseAction
 
     /**
      * Add extra columns to be added to the insert.
-     * To be used by behaviours (eg: Timestamps)
+     * To be used by behaviours relations
      *
      * @param array $columns
      *
@@ -63,6 +63,9 @@ class Update extends BaseAction
 
     public function onSuccess()
     {
+        foreach ($this->extraColumns as $col => $value) {
+            $this->mapper->setEntityAttribute($this->entity, $col, $value);
+        }
         $this->entity->setPersistanceState(StateEnum::SYNCHRONIZED);
     }
 }
