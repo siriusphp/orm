@@ -11,12 +11,15 @@
          stopOnError="false">
     <testsuites>
         <testsuite name="sirius/orm">
-            <directory>tests/</directory>
+            <directory>./</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src</directory>
+            <directory suffix=".php">../src</directory>
         </whitelist>
     </filter>
+    <php>
+        <env name="DB_ENGINE" value="mysql"></env>
+    </php>
 </phpunit>

@@ -25,14 +25,17 @@ class BaseTestCase extends TestCase
     {
         parent::setUp();
 
-        // TODO: Change connection type to MYSQL/POSTGRES on env variable
-        $connection = Connection::new('sqlite::memory:');
+        if (getenv('DB_ENGINE') == 'mysql') {
+            $connection = Connection::new('mysql:host=localhost;dbname=sirius_orm', 'root', '');
+        } else {
+            $connection = Connection::new('sqlite::memory:');
+        }
 
         $this->connection = $connection;
         $connection->logQueries();
         $connectionLocator = ConnectionLocator::new($this->connection);
         $this->orm         = new Orm($connectionLocator);
-        $this->createTables();
+        $this->createTables(getenv('DB_ENGINE') ? getenv('DB_ENGINE') : 'generic');
     }
 
     public function createTables($fileName = 'generic')

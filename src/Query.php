@@ -5,6 +5,7 @@ namespace Sirius\Orm;
 
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
+use Sirius\Sql\Bindings;
 use Sirius\Sql\Select;
 
 class Query extends Select
@@ -52,6 +53,17 @@ class Query extends Select
         }
 
         return parent::__call($method, $params);
+    }
+
+    public function __clone()
+    {
+        $vars = get_object_vars($this);
+        unset($vars['mapper']);
+        foreach ($vars as $name => $prop) {
+            if (is_object($prop)) {
+                $this->$name = clone $prop;
+            }
+        }
     }
 
 
@@ -106,7 +118,7 @@ class Query extends Select
     {
         $this->resetOrderBy();
         $this->resetColumns();
-        $this->columns('COUNT(*)');
+        $this->columns('COUNT(*) AS total');
 
         return (int)$this->fetchValue();
     }
