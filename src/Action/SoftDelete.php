@@ -36,8 +36,8 @@ class SoftDelete extends Delete
     public function onSuccess()
     {
         $this->mapper->setEntityAttribute($this->entity, $this->getOption('deleted_at_column'), $this->now);
-        if ($this->entity->getPersistanceState() !== StateEnum::DELETED) {
-            $this->entity->setPersistanceState(StateEnum::DELETED);
+        if ($this->entity->getPersistenceState() !== StateEnum::DELETED) {
+            $this->entity->setPersistenceState(StateEnum::DELETED);
         }
     }
 }

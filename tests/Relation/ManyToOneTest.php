@@ -7,7 +7,7 @@ use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToOne;
-use Sirius\Orm\Relation\RelationOption;
+use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 
 class ManyToOneTest extends BaseTestCase
@@ -34,7 +34,7 @@ class ManyToOneTest extends BaseTestCase
     public function test_query_callback()
     {
         $relation = new ManyToOne('category', $this->nativeMapper, $this->foreignMapper, [
-            RelationOption::QUERY_CALLBACK => function (Query $query) {
+            RelationConfig::QUERY_CALLBACK => function (Query $query) {
                 return $query->where('status', 'active');
             }
         ]);
@@ -65,7 +65,7 @@ SQL;
     public function test_query_guards()
     {
         $relation = new ManyToOne('category', $this->nativeMapper, $this->foreignMapper, [
-            RelationOption::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
+            RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
         $tracker = new Tracker($this->nativeMapper, [
@@ -130,7 +130,7 @@ SQL;
 
         // don't know why would anybody do this but...
         $config                                                 = $this->getMapperConfig('products');
-        $config->relations['category'][RelationOption::CASCADE] = true;
+        $config->relations['category'][RelationConfig::CASCADE] = true;
         $this->nativeMapper                                     = $this->orm->register('products', $config)->get('products');
 
         $product = $this->nativeMapper

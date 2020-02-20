@@ -51,6 +51,12 @@
         ],
         "csfix": [
             "php php-cs-fixer.phar fix ./src --rules=@PSR2"
+        ],
+        "build-docs": [
+            "php couscous.phar generate --target=build/docs/ ./docs"
+        ],
+        "test": [
+            "vendor\\bin\\phpunit -c tests\\phpunit.xml"
         ]
     }
 }

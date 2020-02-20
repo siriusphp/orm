@@ -27,7 +27,7 @@ class DeleteTest extends BaseTestCase
         $this->mapper->delete($product);
         $this->assertNull($this->mapper->find(1));
         $this->assertNull($product->getPk());
-        $this->assertEquals(StateEnum::DELETED, $product->getPersistanceState());
+        $this->assertEquals(StateEnum::DELETED, $product->getPersistenceState());
     }
 
     public function test_entity_is_reverted()
@@ -48,6 +48,6 @@ class DeleteTest extends BaseTestCase
         $this->expectException(FailedActionException::class);
         $this->mapper->delete($product);
         $this->assertEquals(1, $product->getPk());
-        $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistanceState());
+        $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistenceState());
     }
 }

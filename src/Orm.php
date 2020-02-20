@@ -8,7 +8,7 @@ use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
-use Sirius\Orm\Relation\RelationOption;
+use Sirius\Orm\Relation\RelationConfig;
 
 class Orm implements MapperLocator
 {
@@ -80,25 +80,25 @@ class Orm implements MapperLocator
         return $this->get($mapperName)->delete($entity, ...$params);
     }
 
-    public function find($mapperName, EntityInterface $entity, ...$params)
+    public function find($mapperName, $id, ...$params)
     {
-        return $this->get($mapperName)->find($entity, ...$params);
+        return $this->get($mapperName)->find($id, ...$params);
     }
 
-    public function select($mapperName): Collection
+    public function select($mapperName): Query
     {
         return $this->get($mapperName)->newQuery();
     }
 
     public function createRelation(Mapper $nativeMapper, $name, $options): Relation
     {
-        $foreignMapper = $options[RelationOption::FOREIGN_MAPPER];
+        $foreignMapper = $options[RelationConfig::FOREIGN_MAPPER];
         if ($this->has($foreignMapper)) {
             if (! $foreignMapper instanceof Mapper) {
                 $foreignMapper = $this->get($foreignMapper);
             }
         }
-        $type          = $options[RelationOption::TYPE];
+        $type          = $options[RelationConfig::TYPE];
         $relationClass = __NAMESPACE__ . '\\Relation\\' . Str::className($type);
 
         if (! class_exists($relationClass)) {

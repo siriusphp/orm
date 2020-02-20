@@ -9,7 +9,7 @@ class CastingManager
 
     public function register($name, callable $func)
     {
-        if ( ! $name) {
+        if (! $name) {
             return; // ignore
         }
         $this->casts[$name] = $func;

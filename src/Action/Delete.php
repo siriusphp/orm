@@ -27,9 +27,9 @@ class Delete extends BaseAction
 
     public function onSuccess()
     {
-        if ($this->entity->getPersistanceState() !== StateEnum::DELETED) {
+        if ($this->entity->getPersistenceState() !== StateEnum::DELETED) {
             $this->entity->setPk(null);
-            $this->entity->setPersistanceState(StateEnum::DELETED);
+            $this->entity->setPersistenceState(StateEnum::DELETED);
         }
     }
 }

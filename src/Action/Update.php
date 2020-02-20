@@ -8,10 +8,10 @@ use Sirius\Orm\Helpers\Arr;
 
 class Update extends BaseAction
 {
-    private $entityId;
-    private $entityState;
+    protected $entityId;
+    protected $entityState;
 
-    private $extraColumns = [];
+    protected $extraColumns = [];
 
     /**
      * Add extra columns to be added to the insert.
@@ -23,7 +23,9 @@ class Update extends BaseAction
      */
     public function addColumns(array $columns)
     {
-        $this->extraColumns = array_merge($this->extraColumns, $columns);
+        foreach ($columns as $name => $value) {
+            $this->extraColumns[$name] = $value;
+        }
 
         return $this;
     }
@@ -31,7 +33,7 @@ class Update extends BaseAction
     protected function execute()
     {
         $this->entityId    = $this->entity->getPk();
-        $this->entityState = $this->entity->getPersistanceState();
+        $this->entityState = $this->entity->getPersistenceState();
 
         $connection = $this->mapper->getWriteConnection();
 
@@ -58,7 +60,7 @@ class Update extends BaseAction
         if (! $this->hasRun) {
             return;
         }
-        $this->entity->setPersistanceState($this->entityState);
+        $this->entity->setPersistenceState($this->entityState);
     }
 
     public function onSuccess()
@@ -66,6 +68,6 @@ class Update extends BaseAction
         foreach ($this->extraColumns as $col => $value) {
             $this->mapper->setEntityAttribute($this->entity, $col, $value);
         }
-        $this->entity->setPersistanceState(StateEnum::SYNCHRONIZED);
+        $this->entity->setPersistenceState(StateEnum::SYNCHRONIZED);
     }
 }

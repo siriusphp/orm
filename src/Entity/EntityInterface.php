@@ -9,9 +9,9 @@ interface EntityInterface
 
     public function setPk($val);
 
-    public function getPersistanceState();
+    public function getPersistenceState();
 
-    public function setPersistanceState($state);
+    public function setPersistenceState($state);
 
     public function getArrayCopy();
 

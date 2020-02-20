@@ -7,15 +7,15 @@ use Sirius\Orm\Helpers\Arr;
 
 class Insert extends Update
 {
-    private $entityId;
-    private $entityState;
+    protected $entityId;
+    protected $entityState;
 
-    private $extraColumns = [];
+    protected $extraColumns = [];
 
     protected function execute()
     {
         $this->entityId    = $this->entity->getPk();
-        $this->entityState = $this->entity->getPersistanceState();
+        $this->entityState = $this->entity->getPersistenceState();
 
         $connection = $this->mapper->getWriteConnection();
 
@@ -39,6 +39,6 @@ class Insert extends Update
             return;
         }
         $this->entity->setPK($this->entityId);
-        $this->entity->setPersistanceState($this->entityState);
+        $this->entity->setPersistenceState($this->entityState);
     }
 }

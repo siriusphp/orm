@@ -12,7 +12,8 @@ use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\GenericEntity;
-use Sirius\Orm\Entity\GenericEntityFactory;
+use Sirius\Orm\Entity\GenericEntityHydrator;
+use Sirius\Orm\Entity\HydratorInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
@@ -69,9 +70,9 @@ class Mapper
     protected $columnAttributeMap = [];
 
     /**
-     * @var FactoryInterface
+     * @var HydratorInterface
      */
-    protected $entityFactory;
+    protected $entityHydrator;
 
     /**
      * Default attributes
@@ -117,7 +118,7 @@ class Mapper
 
     public static function make(Orm $orm, MapperConfig $mapperConfig)
     {
-        $mapper                          = new static($orm, $mapperConfig->entityFactory);
+        $mapper                          = new static($orm, $mapperConfig->entityHydrator);
         $mapper->table                   = $mapperConfig->table;
         $mapper->tableAlias              = $mapperConfig->tableAlias;
         $mapper->primaryKey              = $mapperConfig->primaryKey;
@@ -143,16 +144,16 @@ class Mapper
         return $mapper;
     }
 
-    public function __construct(Orm $orm, FactoryInterface $entityFactory = null, QueryBuilder $queryBuilder = null)
+    public function __construct(Orm $orm, HydratorInterface $entityHydrator = null, QueryBuilder $queryBuilder = null)
     {
         $this->orm = $orm;
-        if (! $entityFactory) {
-            $entityFactory = new GenericEntityFactory($orm, $this);
+        if (! $entityHydrator) {
+            $entityHydrator = new GenericEntityHydrator($orm, $this);
         }
         if (! $queryBuilder) {
             $this->queryBuilder = QueryBuilder::getInstance();
         }
-        $this->entityFactory  = $entityFactory;
+        $this->entityHydrator = $entityHydrator;
         $this->tableReference = QueryHelper::reference($this->table, $this->tableAlias);
     }
 
@@ -205,12 +206,12 @@ class Mapper
         return $mapper;
     }
 
-    public function addScope($scope, callable $callback)
+    public function addQueryScope($scope, callable $callback)
     {
         $this->scopes[$scope] = $callback;
     }
 
-    public function getScope($scope)
+    public function getQueryScope($scope)
     {
         return $this->scopes[$scope] ?? null;
     }
@@ -224,6 +225,7 @@ class Mapper
             if ($value instanceof $this->entityClass) {
                 return $value;
             }
+
             return $value !== null ? $mapper->newEntity($value, $castingManager) : null;
         });
 
@@ -309,14 +311,14 @@ class Mapper
      */
     public function newEntity(array $data): EntityInterface
     {
-        $entity = $this->entityFactory->newEntity(array_merge($this->getEntityDefaults(), $data));
+        $entity = $this->entityHydrator->hydrate(array_merge($this->getEntityDefaults(), $data));
 
         return $this->applyBehaviours(__FUNCTION__, $entity);
     }
 
     public function extractFromEntity(EntityInterface $entity): array
     {
-        $data = Arr::only($entity->getArrayCopy(), $this->getColumns());
+        $data = $this->entityHydrator->extract($entity);
 
         return $this->applyBehaviours(__FUNCTION__, $data);
     }
@@ -335,7 +337,7 @@ class Mapper
 
         $entity = $this->newEntity($data);
         $this->injectRelations($entity, $tracker, $load);
-        $entity->setPersistanceState(StateEnum::SYNCHRONIZED);
+        $entity->setPersistenceState(StateEnum::SYNCHRONIZED);
 
         if (! $receivedTracker) {
             $tracker->replaceRows([$entity]);
@@ -475,7 +477,17 @@ class Mapper
         $this->assertCanPersistEntity($entity);
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
 
-        return $action->run();
+        $this->orm->getConnectionLocator()->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
     }
 
     public function newSaveAction(EntityInterface $entity, $options): BaseAction
@@ -495,7 +507,17 @@ class Mapper
 
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
 
-        return $action->run();
+        $this->orm->getConnectionLocator()->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
     }
 
     public function newDeleteAction(EntityInterface $entity, $options)

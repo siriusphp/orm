@@ -8,7 +8,7 @@ use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\ManyToOne;
-use Sirius\Orm\Relation\RelationOption;
+use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 
 class RelationTest extends BaseTestCase
@@ -28,7 +28,7 @@ class RelationTest extends BaseTestCase
 
         $relation = new ManyToOne('related', $this->nativeMapper, $this->foreignMapper);
 
-        $this->assertSame(['related_col_1', 'related_col_2'], $relation->getOption(RelationOption::NATIVE_KEY));
+        $this->assertSame(['related_col_1', 'related_col_2'], $relation->getOption(RelationConfig::NATIVE_KEY));
 
         $native1 = new GenericEntity(['related_col_1' => 10, 'related_col_2' => 10]);
         $native2 = new GenericEntity(['related_col_1' => 10, 'related_col_2' => 20]);

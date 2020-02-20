@@ -14,13 +14,13 @@ class OneToMany extends Relation
     protected function applyDefaults(): void
     {
         $nativeKey = $this->nativeMapper->getPrimaryKey();
-        if (! isset($this->options[RelationOption::NATIVE_KEY])) {
-            $this->options[RelationOption::NATIVE_KEY] = $nativeKey;
+        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
+            $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if (! isset($this->options[RelationOption::FOREIGN_KEY])) {
+        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
             $prefix                                     = Inflector::singularize($this->nativeMapper->getTable());
-            $this->options[RelationOption::FOREIGN_KEY] = $this->getKeyColumn($prefix, $nativeKey);
+            $this->options[RelationConfig::FOREIGN_KEY] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
         parent::applyDefaults();
@@ -28,21 +28,21 @@ class OneToMany extends Relation
 
     public function getQuery(Tracker $tracker)
     {
-        $nativeKey = $this->options[RelationOption::NATIVE_KEY];
+        $nativeKey = $this->options[RelationConfig::NATIVE_KEY];
         $nativePks = $tracker->pluck($nativeKey);
 
         $query = $this->foreignMapper
             ->newQuery()
-            ->where($this->options[RelationOption::FOREIGN_KEY], $nativePks);
+            ->where($this->options[RelationConfig::FOREIGN_KEY], $nativePks);
 
-        if ($this->getOption(RelationOption::QUERY_CALLBACK) &&
-            is_callable($this->getOption(RelationOption::QUERY_CALLBACK))) {
-            $callback = $this->options[RelationOption::QUERY_CALLBACK];
+        if ($this->getOption(RelationConfig::QUERY_CALLBACK) &&
+            is_callable($this->getOption(RelationConfig::QUERY_CALLBACK))) {
+            $callback = $this->options[RelationConfig::QUERY_CALLBACK];
             $query    = $callback($query);
         }
 
-        if ($this->getOption(RelationOption::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationOption::FOREIGN_GUARDS]);
+        if ($this->getOption(RelationConfig::FOREIGN_GUARDS)) {
+            $query->setGuards($this->options[RelationConfig::FOREIGN_GUARDS]);
         }
 
         return $query;
@@ -51,7 +51,7 @@ class OneToMany extends Relation
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
         // no point in linking entities if the native one is deleted
-        if ($nativeEntity->getPersistanceState() == StateEnum::DELETED) {
+        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
             return;
         }
 
@@ -76,13 +76,13 @@ class OneToMany extends Relation
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $state = $foreignEntity->getPersistanceState();
-        $foreignEntity->setPersistanceState(StateEnum::SYNCHRONIZED);
+        $state = $foreignEntity->getPersistenceState();
+        $foreignEntity->setPersistenceState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
         }
         $this->foreignMapper->setEntityAttribute($foreignEntity, $this->name, null);
-        $foreignEntity->setPersistanceState($state);
+        $foreignEntity->setPersistenceState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -102,8 +102,8 @@ class OneToMany extends Relation
             foreach ($foreignEntities as $foreignEntity) {
                 $deleteAction = $this->foreignMapper
                     ->newDeleteAction($foreignEntity, ['relations' => $remainingRelations]);
-                $action->append($deleteAction);
                 $action->append($this->newSyncAction($nativeEntity, $foreignEntity, 'delete'));
+                $action->append($deleteAction);
             }
         }
     }
@@ -127,8 +127,8 @@ class OneToMany extends Relation
                 $saveAction = $this->foreignMapper
                     ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
                 $saveAction->addColumns($this->getExtraColumnsForAction());
-                $action->append($saveAction);
                 $action->append($this->newSyncAction($nativeEntity, $foreignEntity, 'save'));
+                $action->append($saveAction);
             }
         }
 
@@ -137,8 +137,8 @@ class OneToMany extends Relation
             $saveAction = $this->foreignMapper
                 ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
             $saveAction->addColumns($this->getExtraColumnsForAction());
-            $action->append($saveAction);
             $action->append($this->newSyncAction($nativeEntity, $foreignEntity, 'delete'));
+            $action->append($saveAction);
         }
     }
 }

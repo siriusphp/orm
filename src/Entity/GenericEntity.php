@@ -19,7 +19,7 @@ class GenericEntity implements EntityInterface
     protected $changed = [];
 
     protected $casts = [];
-    
+
     /**
      * @var CastingManager
      */
@@ -31,6 +31,26 @@ class GenericEntity implements EntityInterface
         foreach ($attributes as $attr => $value) {
             $this->set($attr, $value);
         }
+    }
+
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
+    public function __set($name, $value)
+    {
+        return $this->set($name, $value);
+    }
+
+    public function __isset($name)
+    {
+        return isset($this->attributes[$name]);
+    }
+
+    public function __unset($name)
+    {
+        return $this->set($name, null);
     }
 
     protected function castAttribute($name, $value)
@@ -74,7 +94,6 @@ class GenericEntity implements EntityInterface
 
         if ($value instanceof LazyValueLoader) {
             $this->lazyLoaders[$attribute] = $value;
-
             return $this;
         }
 
@@ -99,7 +118,7 @@ class GenericEntity implements EntityInterface
         return $this->attributes[$attribute] ?? null;
     }
 
-    public function getPersistanceState()
+    public function getPersistenceState()
     {
         if (! empty($this->changed)) {
         }
@@ -107,7 +126,7 @@ class GenericEntity implements EntityInterface
         return $this->state;
     }
 
-    public function setPersistanceState($state)
+    public function setPersistenceState($state)
     {
         if ($state == StateEnum::SYNCHRONIZED) {
             $this->changed = [];
@@ -117,7 +136,13 @@ class GenericEntity implements EntityInterface
 
     public function getArrayCopy()
     {
-        return $this->attributes;
+        $copy = $this->attributes;
+        foreach ($copy as $k => $v) {
+            if (is_object($v) && method_exists($v, 'getArrayCopy')) {
+                $copy[$k] = $v->getArrayCopy();
+            }
+        }
+        return $copy;
     }
 
     public function getChanges()

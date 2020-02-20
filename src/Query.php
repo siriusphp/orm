@@ -47,7 +47,7 @@ class Query extends Select
 
     public function __call(string $method, array $params)
     {
-        $scope = $this->mapper->getScope($method);
+        $scope = $this->mapper->getQueryScope($method);
         if ($scope && is_callable($scope)) {
             return $scope($this, ...$params);
         }

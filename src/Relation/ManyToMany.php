@@ -16,56 +16,56 @@ class ManyToMany extends Relation
     {
         parent::applyDefaults();
 
-        $this->setOptionIfMissing(RelationOption::THROUGH_COLUMNS_PREFIX, 'pivot_');
+        $this->setOptionIfMissing(RelationConfig::THROUGH_COLUMNS_PREFIX, 'pivot_');
 
         $foreignKey = $this->foreignMapper->getPrimaryKey();
-        if (! isset($this->options[RelationOption::FOREIGN_KEY])) {
-            $this->options[RelationOption::FOREIGN_KEY] = $foreignKey;
+        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+            $this->options[RelationConfig::FOREIGN_KEY] = $foreignKey;
         }
 
         $nativeKey = $this->foreignMapper->getPrimaryKey();
-        if (! isset($this->options[RelationOption::NATIVE_KEY])) {
-            $this->options[RelationOption::NATIVE_KEY] = $nativeKey;
+        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
+            $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if (! isset($this->options[RelationOption::THROUGH_TABLE])) {
+        if (! isset($this->options[RelationConfig::THROUGH_TABLE])) {
             $tables = [$this->foreignMapper->getTable(), $this->nativeMapper->getTable()];
             sort($tables);
-            $this->options[RelationOption::THROUGH_TABLE] = implode('_', $tables);
+            $this->options[RelationConfig::THROUGH_TABLE] = implode('_', $tables);
         }
 
-        if (! isset($this->options[RelationOption::THROUGH_NATIVE_COLUMN])) {
+        if (! isset($this->options[RelationConfig::THROUGH_NATIVE_COLUMN])) {
             $prefix = Inflector::singularize($this->nativeMapper->getTableAlias(true));
 
-            $this->options[RelationOption::THROUGH_NATIVE_COLUMN] = $this->getKeyColumn($prefix, $nativeKey);
+            $this->options[RelationConfig::THROUGH_NATIVE_COLUMN] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
-        if (! isset($this->options[RelationOption::THROUGH_FOREIGN_COLUMN])) {
+        if (! isset($this->options[RelationConfig::THROUGH_FOREIGN_COLUMN])) {
             $prefix = Inflector::singularize($this->foreignMapper->getTableAlias(true));
 
-            $this->options[RelationOption::THROUGH_FOREIGN_COLUMN] = $this->getKeyColumn($prefix, $foreignKey);
+            $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN] = $this->getKeyColumn($prefix, $foreignKey);
         }
     }
 
     public function getQuery(Tracker $tracker)
     {
-        $nativeKey = $this->options[RelationOption::NATIVE_KEY];
+        $nativeKey = $this->options[RelationConfig::NATIVE_KEY];
         $nativePks = $tracker->pluck($nativeKey);
 
         $query = $this->foreignMapper
             ->newQuery();
 
         $query = $this->joinWithThroughTable($query)
-                      ->where($this->options[RelationOption::THROUGH_NATIVE_COLUMN], $nativePks);
+                      ->where($this->options[RelationConfig::THROUGH_NATIVE_COLUMN], $nativePks);
 
-        if ($this->getOption(RelationOption::QUERY_CALLBACK) &&
-            is_callable($this->getOption(RelationOption::QUERY_CALLBACK))) {
-            $callback = $this->options[RelationOption::QUERY_CALLBACK];
+        if ($this->getOption(RelationConfig::QUERY_CALLBACK) &&
+            is_callable($this->getOption(RelationConfig::QUERY_CALLBACK))) {
+            $callback = $this->options[RelationConfig::QUERY_CALLBACK];
             $query    = $callback($query);
         }
 
-        if ($this->getOption(RelationOption::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationOption::FOREIGN_GUARDS]);
+        if ($this->getOption(RelationConfig::FOREIGN_GUARDS)) {
+            $query->setGuards($this->options[RelationConfig::FOREIGN_GUARDS]);
         }
 
         $query = $this->addPivotColumns($query);
@@ -75,16 +75,16 @@ class ManyToMany extends Relation
 
     protected function joinWithThroughTable($query)
     {
-        $through          = $this->getOption(RelationOption::THROUGH_TABLE);
-        $throughAlias     = $this->getOption(RelationOption::THROUGH_TABLE_ALIAS);
+        $through          = $this->getOption(RelationConfig::THROUGH_TABLE);
+        $throughAlias     = $this->getOption(RelationConfig::THROUGH_TABLE_ALIAS);
         $throughReference = QueryHelper::reference($through, $throughAlias);
         $throughName      = $throughAlias ?? $through;
 
         $foreignTableName       = $this->foreignMapper->getTableAlias(true);
         $throughTableConditions = [];
 
-        foreach ((array)$this->options[RelationOption::FOREIGN_KEY] as $k => $col) {
-            $throughCols              = (array)$this->options[RelationOption::THROUGH_FOREIGN_COLUMN];
+        foreach ((array)$this->options[RelationConfig::FOREIGN_KEY] as $k => $col) {
+            $throughCols              = (array)$this->options[RelationConfig::THROUGH_FOREIGN_COLUMN];
             $throughCol               = $throughCols[$k];
             $throughTableConditions[] = "{$foreignTableName}.{$col} = {$throughName}.{$throughCol}";
         }
@@ -94,20 +94,20 @@ class ManyToMany extends Relation
 
     private function addPivotColumns($query)
     {
-        $throughColumns = $this->getOption(RelationOption::THROUGH_COLUMNS);
+        $throughColumns = $this->getOption(RelationConfig::THROUGH_COLUMNS);
 
-        $through      = $this->getOption(RelationOption::THROUGH_TABLE);
-        $throughAlias = $this->getOption(RelationOption::THROUGH_TABLE_ALIAS);
+        $through      = $this->getOption(RelationConfig::THROUGH_TABLE);
+        $throughAlias = $this->getOption(RelationConfig::THROUGH_TABLE_ALIAS);
         $throughName  = $throughAlias ?? $through;
 
         if (! empty($throughColumns)) {
-            $prefix = $this->getOption(RelationOption::THROUGH_COLUMNS_PREFIX);
+            $prefix = $this->getOption(RelationConfig::THROUGH_COLUMNS_PREFIX);
             foreach ($throughColumns as $col) {
                 $query->columns("{$throughName}.{$col} AS {$prefix}{$col}");
             }
         }
 
-        foreach ((array)$this->options[RelationOption::THROUGH_NATIVE_COLUMN] as $col) {
+        foreach ((array)$this->options[RelationConfig::THROUGH_NATIVE_COLUMN] as $col) {
             $query->columns("{$throughName}.{$col}");
         }
 
@@ -117,8 +117,8 @@ class ManyToMany extends Relation
     protected function computeKeyPairs()
     {
         $pairs      = [];
-        $nativeKey  = (array)$this->options[RelationOption::NATIVE_KEY];
-        $foreignKey = (array)$this->options[RelationOption::THROUGH_NATIVE_COLUMN];
+        $nativeKey  = (array)$this->options[RelationConfig::NATIVE_KEY];
+        $foreignKey = (array)$this->options[RelationConfig::THROUGH_NATIVE_COLUMN];
         foreach ($nativeKey as $k => $v) {
             $pairs[$v] = $foreignKey[$k];
         }
@@ -136,27 +136,47 @@ class ManyToMany extends Relation
             }
         }
 
-        $found = new Collection($found);
-        $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
+        if ($this->entityHasRelationLoaded($nativeEntity)) {
+            /** @var Collection $collection */
+            $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
+            if (!$collection->contains($foreignEntity)) {
+                $collection->add($foreignEntity);
+            }
+        } else {
+            $found = new Collection($found);
+            $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
+        }
+    }
+
+    protected function entityHasRelationLoaded(EntityInterface $entity)
+    {
+        return array_key_exists($this->name, $entity->getArrayCopy());
     }
 
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
+            $nativeKeyValue = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, $nativeKeyValue);
         }
     }
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $state = $foreignEntity->getPersistanceState();
-        $foreignEntity->setPersistanceState(StateEnum::SYNCHRONIZED);
+        $state = $foreignEntity->getPersistenceState();
+
+        $foreignEntity->setPersistenceState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
         }
         $this->foreignMapper->setEntityAttribute($foreignEntity, $this->name, null);
-        $foreignEntity->setPersistanceState($state);
+
+        $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
+        if ($collection instanceof Collection) {
+            $collection->removeElement($foreignEntity);
+        }
+
+        $foreignEntity->setPersistenceState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -188,11 +208,11 @@ class ManyToMany extends Relation
 
         /** @var Collection $foreignEntities */
         $foreignEntities = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
-        if (!$foreignEntities) {
+        if (! $foreignEntities) {
             return;
         }
 
-        $changes         = $foreignEntities->getChanges();
+        $changes = $foreignEntities->getChanges();
 
         // save the entities still in the collection
         foreach ($foreignEntities as $foreignEntity) {

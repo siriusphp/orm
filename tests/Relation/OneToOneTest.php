@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\Relation;
 
 use Sirius\Orm\Mapper;
-use Sirius\Orm\Relation\RelationOption;
+use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 
 class OneToOneTest extends BaseTestCase
@@ -31,10 +31,10 @@ class OneToOneTest extends BaseTestCase
     public function test_delete_with_cascade_true()
     {
         // reconfigure products-featured_image to use CASCADE
-        $config                                                       = $this->getMapperConfig('products');
-        $config->relations['featured_image'][RelationOption::CASCADE] = true;
-        $config->relations['featured_image'][RelationOption::FOREIGN_KEY] = 'id';
-        $this->nativeMapper                                           = $this->orm->register('products', $config)->get('products');
+        $config                                                           = $this->getMapperConfig('products');
+        $config->relations['featured_image'][RelationConfig::CASCADE]     = true;
+        $config->relations['featured_image'][RelationConfig::FOREIGN_KEY] = 'id';
+        $this->nativeMapper                                               = $this->orm->register('products', $config)->get('products');
 
         $this->insertRow('products', ['id' => 1, 'featured_image_id' => 2]);
         $this->insertRow('images', ['id' => 1, 'name' => 'img.jpg']);

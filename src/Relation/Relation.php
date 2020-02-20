@@ -55,8 +55,8 @@ abstract class Relation
 
     protected function applyDefaults(): void
     {
-        $this->setOptionIfMissing(RelationOption::LOAD_STRATEGY, RelationOption::LOAD_LAZY);
-        $this->setOptionIfMissing(RelationOption::CASCADE, false);
+        $this->setOptionIfMissing(RelationConfig::LOAD_STRATEGY, RelationConfig::LOAD_LAZY);
+        $this->setOptionIfMissing(RelationConfig::CASCADE, false);
     }
 
     protected function setOptionIfMissing($name, $value)
@@ -101,17 +101,17 @@ abstract class Relation
 
     public function isEagerLoad()
     {
-        return $this->options[RelationOption::LOAD_STRATEGY] == RelationOption::LOAD_EAGER;
+        return $this->options[RelationConfig::LOAD_STRATEGY] == RelationConfig::LOAD_EAGER;
     }
 
     public function isLazyLoad()
     {
-        return $this->options[RelationOption::LOAD_STRATEGY] == RelationOption::LOAD_LAZY;
+        return $this->options[RelationConfig::LOAD_STRATEGY] == RelationConfig::LOAD_LAZY;
     }
 
     public function isCascade()
     {
-        return $this->options[RelationOption::CASCADE] === true;
+        return $this->options[RelationConfig::CASCADE] === true;
     }
 
     protected function getKeyColumn($name, $column)
@@ -153,21 +153,21 @@ abstract class Relation
 
     public function getQuery(Tracker $tracker)
     {
-        $nativeKey = $this->options[RelationOption::NATIVE_KEY];
+        $nativeKey = $this->options[RelationConfig::NATIVE_KEY];
         $nativePks = $tracker->pluck($nativeKey);
 
         $query = $this->foreignMapper
             ->newQuery()
             ->where($this->foreignMapper->getPrimaryKey(), $nativePks);
 
-        if ($this->getOption(RelationOption::QUERY_CALLBACK) &&
-            is_callable($this->getOption(RelationOption::QUERY_CALLBACK))) {
-            $callback = $this->options[RelationOption::QUERY_CALLBACK];
+        if ($this->getOption(RelationConfig::QUERY_CALLBACK) &&
+            is_callable($this->getOption(RelationConfig::QUERY_CALLBACK))) {
+            $callback = $this->options[RelationConfig::QUERY_CALLBACK];
             $query    = $callback($query);
         }
 
-        if ($this->getOption(RelationOption::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationOption::FOREIGN_GUARDS]);
+        if ($this->getOption(RelationConfig::FOREIGN_GUARDS)) {
+            $query->setGuards($this->options[RelationConfig::FOREIGN_GUARDS]);
         }
 
         return $query;
@@ -181,8 +181,8 @@ abstract class Relation
     protected function computeKeyPairs()
     {
         $pairs      = [];
-        $nativeKey  = (array)$this->options[RelationOption::NATIVE_KEY];
-        $foreignKey = (array)$this->options[RelationOption::FOREIGN_KEY];
+        $nativeKey  = (array)$this->options[RelationConfig::NATIVE_KEY];
+        $foreignKey = (array)$this->options[RelationConfig::FOREIGN_KEY];
         foreach ($nativeKey as $k => $v) {
             $pairs[$v] = $foreignKey[$k];
         }
@@ -229,7 +229,7 @@ abstract class Relation
     protected function getExtraColumnsForAction()
     {
         $cols   = [];
-        $guards = $this->getOption(RelationOption::FOREIGN_GUARDS);
+        $guards = $this->getOption(RelationConfig::FOREIGN_GUARDS);
         if (is_array($guards)) {
             foreach ($guards as $col => $val) {
                 // guards that are strings (eg: 'deleted_at is null') can't be used as extra columns

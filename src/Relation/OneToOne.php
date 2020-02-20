@@ -13,7 +13,7 @@ class OneToOne extends OneToMany
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
         // no point in linking entities if the native one is deleted
-        if ($nativeEntity->getPersistanceState() == StateEnum::DELETED) {
+        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
             return;
         }
 

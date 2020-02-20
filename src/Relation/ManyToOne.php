@@ -14,13 +14,13 @@ class ManyToOne extends Relation
         parent::applyDefaults();
 
         $foreignKey = $this->foreignMapper->getPrimaryKey();
-        if (! isset($this->options[RelationOption::FOREIGN_KEY])) {
-            $this->options[RelationOption::FOREIGN_KEY] = $foreignKey;
+        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+            $this->options[RelationConfig::FOREIGN_KEY] = $foreignKey;
         }
 
-        if (! isset($this->options[RelationOption::NATIVE_KEY])) {
+        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
             $nativeKey                                 = $this->getKeyColumn($this->name, $foreignKey);
-            $this->options[RelationOption::NATIVE_KEY] = $nativeKey;
+            $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
     }
 
@@ -44,12 +44,12 @@ class ManyToOne extends Relation
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity = null): void
     {
         // no point in linking entities if the native one is deleted
-        if ($nativeEntity->getPersistanceState() == StateEnum::DELETED) {
+        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
             return;
         }
 
-        $nativeKey  = (array)$this->getOption(RelationOption::NATIVE_KEY);
-        $foreignKey = (array)$this->getOption(RelationOption::FOREIGN_KEY);
+        $nativeKey  = (array)$this->getOption(RelationConfig::NATIVE_KEY);
+        $foreignKey = (array)$this->getOption(RelationConfig::FOREIGN_KEY);
 
         foreach ($nativeKey as $k => $col) {
             $this->nativeMapper->setEntityAttribute(
@@ -64,16 +64,16 @@ class ManyToOne extends Relation
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        if ($nativeEntity->getPersistanceState() == StateEnum::DELETED) {
+        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
             return;
         }
 
         // required for DELETED entities that throw errors if they are changed
-        $state = $foreignEntity->getPersistanceState();
-        $foreignEntity->setPersistanceState(StateEnum::SYNCHRONIZED);
+        $state = $foreignEntity->getPersistenceState();
+        $foreignEntity->setPersistenceState(StateEnum::SYNCHRONIZED);
 
-        $nativeKey  = (array)$this->getOption(RelationOption::NATIVE_KEY);
-        $foreignKey = (array)$this->getOption(RelationOption::FOREIGN_KEY);
+        $nativeKey  = (array)$this->getOption(RelationConfig::NATIVE_KEY);
+        $foreignKey = (array)$this->getOption(RelationConfig::FOREIGN_KEY);
 
         foreach ($nativeKey as $k => $col) {
             $this->nativeMapper->setEntityAttribute(
@@ -84,7 +84,7 @@ class ManyToOne extends Relation
         }
 
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, null);
-        $state = $foreignEntity->getPersistanceState();
+        $state = $foreignEntity->getPersistenceState();
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -101,7 +101,7 @@ class ManyToOne extends Relation
                 $deleteAction       = $this->foreignMapper
                     ->newDeleteAction($foreignEntity, ['relations' => $remainingRelations]);
                 $action->prepend($deleteAction);
-                $action->append($this->newSyncAction($action->getEntity(), $foreignEntity, 'delete'));
+                $action->prepend($this->newSyncAction($action->getEntity(), $foreignEntity, 'delete'));
             }
         }
     }
@@ -118,7 +118,7 @@ class ManyToOne extends Relation
                 ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
             $saveAction->addColumns($this->getExtraColumnsForAction());
             $action->prepend($saveAction);
-            $action->append($this->newSyncAction($action->getEntity(), $foreignEntity, 'save'));
+            $action->prepend($this->newSyncAction($action->getEntity(), $foreignEntity, 'save'));
         }
     }
 }

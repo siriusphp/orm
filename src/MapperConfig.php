@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm;
 
 use Sirius\Orm\Entity\GenericEntity;
+use Sirius\Orm\Entity\HydratorInterface;
 
 /**
  * Class MapperConfig
@@ -20,7 +21,7 @@ class MapperConfig
     const COLUMNS = 'columns';
     const COLUMN_ATTRIBUTE_MAP = 'columnAttributeMap';
     const DEFAULT_ATTRIBUTES = 'entityDefaultAttributes';
-    const ENTITY_FACTORY = 'entityFactory';
+    const ENTITY_HYDRATOR = 'entityHydrator';
     const BEHAVIOURS = 'behaviours';
     const RELATIONS = 'relations';
     const SCOPES = 'scopes';
@@ -54,9 +55,9 @@ class MapperConfig
     public $columnAttributeMap = [];
 
     /**
-     * @var null|FactoryInterface
+     * @var null|HydratorInterface
      */
-    public $entityFactory = null;
+    public $entityHydrator = null;
 
     /**
      * Default attributes

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Relation;
 
-final class RelationOption
+final class RelationConfig
 {
     // general options
     const NAME = 'name';

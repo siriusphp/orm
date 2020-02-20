@@ -7,7 +7,7 @@ use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToMany;
-use Sirius\Orm\Relation\RelationOption;
+use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 
 class ManyToManyTest extends BaseTestCase
@@ -34,7 +34,7 @@ class ManyToManyTest extends BaseTestCase
     public function test_query_callback()
     {
         $relation = new ManyToMany('tags', $this->nativeMapper, $this->foreignMapper, [
-            RelationOption::QUERY_CALLBACK => function (Query $query) {
+            RelationConfig::QUERY_CALLBACK => function (Query $query) {
                 return $query->where('status', 'active');
             }
         ]);
@@ -66,7 +66,7 @@ SQL;
     public function test_query_guards()
     {
         $relation = new ManyToMany('category', $this->nativeMapper, $this->foreignMapper, [
-            RelationOption::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
+            RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
         $tracker = new Tracker($this->nativeMapper, [
@@ -131,9 +131,9 @@ SQL;
         $this->populateDb();
 
         // don't know why would anybody do this but...
-        $config                                                 = $this->getMapperConfig('products');
-        $config->relations['tags'][RelationOption::CASCADE] = true;
-        $this->nativeMapper                                     = $this->orm->register('products', $config)->get('products');
+        $config                                             = $this->getMapperConfig('products');
+        $config->relations['tags'][RelationConfig::CASCADE] = true;
+        $this->nativeMapper                                 = $this->orm->register('products', $config)->get('products');
 
         $product = $this->nativeMapper
             ->newQuery()

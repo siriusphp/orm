@@ -8,7 +8,7 @@ use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\OneToMany;
-use Sirius\Orm\Relation\RelationOption;
+use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 
 class OneToManyTest extends BaseTestCase
@@ -35,7 +35,7 @@ class OneToManyTest extends BaseTestCase
     public function test_query_callback()
     {
         $relation = new OneToMany('products', $this->nativeMapper, $this->foreignMapper, [
-            RelationOption::QUERY_CALLBACK => function (Query $query) {
+            RelationConfig::QUERY_CALLBACK => function (Query $query) {
                 return $query->where('deleted_at', null);
             }
         ]);
@@ -65,7 +65,7 @@ SQL;
     public function test_query_guards()
     {
         $relation = new OneToMany('products', $this->nativeMapper, $this->foreignMapper, [
-            RelationOption::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
+            RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
         $tracker = new Tracker($this->nativeMapper, [
@@ -119,7 +119,7 @@ SQL;
         $this->populateDb();
         // reconfigure products-featured_image to use CASCADE
         $config                                                 = $this->getMapperConfig('categories');
-        $config->relations['products'][RelationOption::CASCADE] = true;
+        $config->relations['products'][RelationConfig::CASCADE] = true;
         $this->nativeMapper                                     = $this->orm->register('categories', $config)->get('categories');
 
         $category = $this->nativeMapper

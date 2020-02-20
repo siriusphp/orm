@@ -33,7 +33,7 @@ class UpdateTest extends BaseTestCase
         $this->assertEquals(100, $product->get('price'));
         // verify guards
         $this->assertEquals(10, $product->get('category_id'));
-        $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistanceState());
+        $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistenceState());
     }
 
     public function test_entity_is_reverted()

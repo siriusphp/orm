@@ -6,8 +6,7 @@ use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
-use Sirius\Orm\Relation\RelationOption;
-use Sirius\Sql\Insert;
+use Sirius\Orm\Relation\RelationConfig;
 
 require_once __DIR__ . '/AbstractTestSuite.php';
 
@@ -18,32 +17,58 @@ require_once __DIR__ . '/AbstractTestSuite.php';
 class SiriusOrmTestSuite extends AbstractTestSuite
 {
 
+    /**
+     * @var Orm
+     */
     private $orm;
 
     function initialize()
     {
-        $loader = require_once "vendor/autoload.php";
-        $loader->add('', __DIR__ . '/src');
+        $loader = require_once "../../vendor/autoload.php";
+        $loader->add('', __DIR__ . '/../../src');
 
         $this->con = Connection::new('sqlite::memory:');
         $this->orm = new Orm(ConnectionLocator::new($this->con));
 
         $this->initTables();
 
-        $this->orm->register('authors', Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE => 'author',
-            MapperConfig::COLUMNS => ['id', 'first_name', 'last_name', 'email']
-        ])));
-
-        $this->orm->register('books', Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE => 'book',
-            MapperConfig::COLUMNS => ['id', 'title', 'isbn', 'price', 'author_id'],
+        $this->orm->register('products', Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE     => 'products',
+            MapperConfig::COLUMNS   => ['id', 'name', 'sku', 'price', 'category_id'],
             MapperConfig::RELATIONS => [
-                'author' => [
-                    RelationOption::FOREIGN_MAPPER => 'authors',
-                    RelationOption::TYPE => RelationOption::TYPE_MANY_TO_ONE
+                'images'   => [
+                    RelationConfig::FOREIGN_MAPPER => 'images',
+                    RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_MANY,
+                    RelationConfig::FOREIGN_KEY    => 'imageable_id',
+                    RelationConfig::FOREIGN_GUARDS => ['imageable_type' => 'products']
+                ],
+                'category' => [
+                    RelationConfig::FOREIGN_MAPPER => 'categories',
+                    RelationConfig::TYPE           => RelationConfig::TYPE_MANY_TO_ONE
+                ],
+                'tags'     => [
+                    RelationConfig::FOREIGN_MAPPER => 'tags',
+                    RelationConfig::TYPE           => RelationConfig::TYPE_MANY_TO_MANY
                 ]
             ]
+        ])));
+
+        $this->orm->register('categories', Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE   => 'categories',
+            MapperConfig::COLUMNS => ['id', 'name'],
+
+        ])));
+
+        $this->orm->register('tags', Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE   => 'tags',
+            MapperConfig::COLUMNS => ['id', 'name'],
+
+        ])));
+
+        $this->orm->register('images', Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE   => 'images',
+            MapperConfig::COLUMNS => ['id', 'path', 'imageable_id', 'imageable_type'],
+
         ])));
     }
 
@@ -61,79 +86,126 @@ class SiriusOrmTestSuite extends AbstractTestSuite
         $this->con->commit();
     }
 
-    function runAuthorInsertion($i)
-    {
-//        $insert = new Insert($this->con);
-//        $insert->into('author')->columns([
-//            'first_name' => 'John' . $i,
-//            'last_name'  => 'Doe' . $i,
-//        ]);
-//        $insert->perform();
-//        $this->authors[] = $this->con->lastInsertId();
-//        return;
 
-        $authorsMapper = $this->orm->get('authors');
-        $author = $authorsMapper->newEntity([
-            'first_name' => 'John' . $i,
-            'last_name'  => 'Doe' . $i,
+    function insert($i)
+    {
+        $product = $this->orm->get('products')->newEntity([
+            'name'     => 'Product #' . $i,
+            'sku'      => 'SKU #' . $i,
+            'price'    => sqrt(1000 + $i * 100),
+            'category' => [
+                'name' => 'Category #c' . $i
+            ],
+            'images'   => [
+                ['path' => 'image_' . $i . '.jpg']
+            ],
+            'tags'     => [
+                ['name' => 'Tag #t1_' . $i],
+                ['name' => 'Tag #t2_' . $i]
+            ]
         ]);
-        $authorsMapper->save($author);
-        $this->authors[] = $this->con->lastInsertId();
+
+        $this->orm->save('products', $product);
+
+        $this->products[] = $product->id;
+
+        return $product;
     }
 
-    function runBookInsertion($i)
+    public function test_insert()
     {
-//        $insert = new Insert($this->con);
-//        $insert->into('book')->columns([
-//            'title'     => 'Hello' . $i,
-//            'isbn'      => '1234' . $i,
-//            'price'     => $i,
-//            'author_id' => $this->authors[array_rand($this->authors)],
-//        ]);
-//        $insert->perform();
-//        $this->books[] = $this->con->lastInsertId();
-//        return;
-
-        $booksMapper = $this->orm->get('books');
-        $book = $booksMapper->newEntity([
-            'title'     => 'Hello' . $i,
-            'isbn'      => '1234' . $i,
-            'price'     => $i,
-            'author_id' => $this->authors[array_rand($this->authors)],
-        ]);
-        $booksMapper->save($book);
-        $this->books[] = $this->con->lastInsertId();
-
+        $product = $this->insert(0);
+        $product = $this->orm->find('products', $product->id);
+        $this->assertNotNull($product, 'Product not found');
+        $this->assertNotNull($product->category_id, 'Category was not associated with the product');
+        $this->assertNotNull($product->images[0]->path, 'Image not present');
+        $this->assertNotNull($product->tags[0]->name, 'Tag not present');
     }
 
-    function runPKSearch($i)
+    function prepare_update()
     {
-        $author = $this->orm->get('authors')->find($i);
+        $this->product = $this->insert(0);
+        $this->product = $this->orm->find('products', 1, ['category', 'images', 'tags']);
     }
 
-    function runHydrate($i)
+    function update($i)
     {
-        $stmt = $this->orm->get('books')
-            ->where('price', $i, '>')
-            ->limit(50)
-            ->get();
-
+        $this->product->name            = 'New product name ' . $i;
+        $this->product->category->name  = 'New category name ' . $i;
+        $this->product->images[0]->path = 'new_path_' . $i . '.jpg';
+        $this->product->tags[0]->name   = 'New tag name ' . $i;
+        $this->orm->save('products', $this->product);
     }
 
-    function runComplexQuery($i)
+    function test_update()
     {
-        $stmt = $this->orm->get('authors')
-            ->newQuery()
-            ->whereSprintf('id > %s OR first_name = %s ', (int)$this->authors[array_rand($this->authors)], 'John Doe')
-            ->count();
+
+        $this->product->name            = 'New product name';
+        $this->product->category->name  = 'New category name';
+        $this->product->images[0]->path = 'new_path.jpg';
+        $this->product->tags[0]->set('name', 'New tag name');
+        $this->orm->save('products', $this->product);
+        $product = $this->orm->find('products', 1, ['category', 'tags', 'images']);
+
+        $this->assertEquals('New product name', $product->name);
+        $this->assertEquals('New category name', $product->get('category')->name);
+        $this->assertEquals('new_path.jpg', $product->images[0]->path);
+
+        // order not preserved for some reason
+        $this->assertEquals('New tag name', $product->tags[1]->name);
+        $this->assertEquals('Tag #t2_0', $product->tags[0]->name);
     }
 
-    function runJoinSearch($i)
+    function find($i)
     {
-        $book = $this->orm->get('books')
-            ->where('title', 'Hello' . $i)
-            ->load('author')
-            ->first();
+        $this->orm->find('products', 1);
     }
 
+    function test_find()
+    {
+        $product = $this->orm->find('products', 1);
+        $lastRun = self::NB_TEST - 1;
+        $this->assertEquals('New product name ' . $lastRun, $product->name); // changed by "update"
+    }
+
+    function complexQuery($i)
+    {
+        $this->orm->select('products')
+                  ->join('INNER', 'categories', 'categories.id = products.category_id')
+                  ->where('products.id', 50, '>')
+                  ->where('categories.id', 300, '<')
+                  ->count();
+    }
+
+    function test_complexQuery()
+    {
+        $this->assertEquals(249, $this->orm->select('products')
+                                           ->join('INNER', 'categories', 'categories.id = products.category_id')
+                                           ->where('products.id', 50, '>')
+                                           ->where('categories.id', 300, '<')
+                                           ->count());
+    }
+
+    function relations($i)
+    {
+        $products = $this->orm->select('products')
+                              ->load('category', 'tags', 'images')
+                              ->where('price', 50, '>')
+                              ->limit(10)
+                              ->get();
+        foreach ($products as $product) {
+
+        }
+    }
+
+    function test_relations()
+    {
+        $product = $this->orm->get('products')->find(1);
+        $lastRun = self::NB_TEST - 1;
+        $this->assertEquals('New product name ' . $lastRun, $product->name);
+        $this->assertEquals('New category name ' . $lastRun, $product->category->name);
+        $this->assertEquals('new_path_' . $lastRun . '.jpg', $product->images[0]->path);
+        $this->assertEquals('New tag name ' . $lastRun, $product->tags[1]->name);
+        $this->assertEquals('Tag #t2_0', $product->tags[0]->name);
+    }
 }
