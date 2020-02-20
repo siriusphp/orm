@@ -1,0 +1,112 @@
+template:
+    url: https://github.com/siriusphp/Template-ReadTheDocs
+
+# List of directories to exclude from the processing (default contains "vendor" and "website")
+# Paths are relative to the repository root
+exclude:
+    - website
+    - vendor
+    - test
+    - src
+    - build
+
+# Base URL of the published website (no "/" at the end!)
+# You are advised to set and use this variable to write your links in the HTML layouts
+baseUrl: https://www.sirius.ro/php/sirius/sql
+paypal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SGXDKNJCXFPJU
+gacode: UA-535999-18
+
+projectName: Sirius\Orm
+title: Sirius\Orm
+subTitle: Fast and flexible PHP ORM solution built with DX in mind
+
+# The left menu bar
+menu:
+    sections:
+#        versions:
+#            name: Versions
+#            items:
+#                two:
+#                    text: "2.0"
+#                    relativeUrl:
+#                one:
+#                    text: "1.0"
+#                    relativeUrl: 1_0/
+        guide:
+            name: Getting started
+            items:
+                getting_started:
+                    text: Introduction
+                    relativeUrl:
+                mappers:
+                    text: Mappers
+                    relativeUrl: mappers.html
+                insert:
+                    text: Querying entities
+                    relativeUrl: queries.html
+                update:
+                    text: Working with entities
+                    relativeUrl: entities.html
+                delete:
+                    text: Behaviours
+                    relativeUrl: behaviours.html
+                other:
+                    text: Direct queries
+                    relativeUrl: direct_queries.html
+                limits:
+                    text: Limitations
+                    relativeUrl: limits.html
+        relations:
+            name: Relations
+            items:
+                getting_started:
+                    text: Basics
+                    relativeUrl: relations.html
+                one_to_one:
+                    text: One-to-one
+                    relativeUrl: relation_one_to_one.html
+                one_to_many:
+                    text: One-to-many
+                    relativeUrl: relation_one_to_many.html
+                many_to_one:
+                    text: Many-to-one
+                    relativeUrl: relation_many_to_one.html
+                many_to_many:
+                    text: Many-to-many
+                    relativeUrl: relation_many_to_many.html
+                eav:
+                    text: EAV relations
+                    relativeUrl: relation_eav.html
+        cookbook:
+            name: Cookbook
+            items:
+                custom_entities:
+                    text: Custom entities
+                    relativeUrl: cookbook_custom_entities.html
+                table-inheritance:
+                    text: Table inheritance
+                    relativeUrl: cookbook_table_inheritance.html
+                polymorphic_associations:
+                    text: Polymorphic associations
+                    relativeUrl: cookbook_polymorphic_associations.html
+                validation:
+                    text: Entity validation
+                    relativeUrl: cookbook_validation.html
+                testing:
+                    text: Testing
+                    relativeUrl: cookbook_testing.html
+        advanced:
+            name: Advanced
+            items:
+                guards:
+                    text: The guards
+                    relativeUrl: the_guards.html
+                actions:
+                    text: The actions
+                    relativeUrl: the_actions.html
+                tracker:
+                    text: The tracker
+                    relativeUrl: the_tracker.html
+                casting:
+                    text: The casting manager
+                    relativeUrl: the_casting_manager.html
