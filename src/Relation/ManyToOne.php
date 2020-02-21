@@ -6,6 +6,7 @@ use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
+use Sirius\Orm\Query;
 
 class ManyToOne extends Relation
 {
@@ -22,6 +23,21 @@ class ManyToOne extends Relation
             $nativeKey                                 = $this->getKeyColumn($this->name, $foreignKey);
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
+    }
+
+    public function joinSubselect(Query $query, string $reference)
+    {
+        $tableRef = $this->foreignMapper->getTableAlias(true);
+        $subselect = $query->subSelectForJoinWith()
+                           ->from($this->foreignMapper->getTable())
+                           ->columns($this->foreignMapper->getTable() . '.*')
+                           ->as($reference);
+
+        $subselect = $this->applyQueryCallback($subselect);
+
+        $subselect = $this->applyForeignGuards($subselect);
+
+        return $query->join('INNER', $subselect->getStatement(), $this->getJoinOnForSubselect());
     }
 
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)

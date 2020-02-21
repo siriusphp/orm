@@ -8,6 +8,7 @@ use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
+use Sirius\Orm\Query;
 
 class OneToMany extends Relation
 {
@@ -35,17 +36,26 @@ class OneToMany extends Relation
             ->newQuery()
             ->where($this->options[RelationConfig::FOREIGN_KEY], $nativePks);
 
-        if ($this->getOption(RelationConfig::QUERY_CALLBACK) &&
-            is_callable($this->getOption(RelationConfig::QUERY_CALLBACK))) {
-            $callback = $this->options[RelationConfig::QUERY_CALLBACK];
-            $query    = $callback($query);
-        }
+        $query = $this->applyQueryCallback($query);
 
-        if ($this->getOption(RelationConfig::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationConfig::FOREIGN_GUARDS]);
-        }
+        $query = $this->applyForeignGuards($query);
 
         return $query;
+    }
+
+    public function joinSubselect(Query $query, string $reference)
+    {
+        $tableRef = $this->foreignMapper->getTableAlias(true);
+        $subselect = $query->subSelectForJoinWith()
+                           ->columns($this->foreignMapper->getTable() . '.*')
+                           ->from($this->foreignMapper->getTable())
+                           ->as($reference);
+
+        $subselect = $this->applyQueryCallback($subselect);
+
+        $subselect = $this->applyForeignGuards($subselect);
+
+        return $query->join('INNER', $subselect->getStatement(), $this->getJoinOnForSubselect());
     }
 
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)

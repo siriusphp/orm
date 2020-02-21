@@ -27,11 +27,12 @@ use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
 $orm->register('products', MapperConfig::fromArray(
-    MapperConfig::ENTITY_CLASS      => Product::class,
+    MapperConfig::ENTITY_CLASS      => 'App\Entity\Product',
     MapperConfig::TABLE             => 'tbl_products',
     MapperConfig::TABLE_ALIAS       => 'products', // if you have tables with prefixes
     MapperConfig::PRIMARY_KEY       => 'product_id', // defaults to 'id'
     MapperConfig::COLUMNS           => ['id', 'name', 'price', 'sku'],
+    MapperConfig::CASTS             => ['id' => 'integer', 'price' => 'decimal:2'],
     MapperConfig::COLUMN_ATTRIBUTE_MAP => ['sku' => 'code'], // the entity works with the 'code' attribute
     MapperConfig::GUARDS            => ['published' => 1], // see "The guards" page
     MapperConfig::SCOPES            => ['sortRandom' => $callback], // see "The query scopes" page
@@ -41,7 +42,6 @@ $orm->register('products', MapperConfig::fromArray(
     ],
     MapperConfig::RELATIONS         => [
         'images' => [
-            RelationConfig::NAME => 'images',
             RelationConfig::FOREIGN_MAPPER => 'images'
             // see the Relation section for the rest
         ]

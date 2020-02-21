@@ -6,7 +6,6 @@ namespace Sirius\Orm\Relation;
 final class RelationConfig
 {
     // general options
-    const NAME = 'name';
     const TYPE = 'type';
     const NATIVE_KEY = 'native_key'; // linked columns in the native mapper
     const FOREIGN_KEY = 'foreign_key'; // linked columns in the foreign mapper

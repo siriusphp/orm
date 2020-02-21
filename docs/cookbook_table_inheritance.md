@@ -12,7 +12,7 @@ If you don't want the mapper to query multiple entity types you can use [guards]
 
 ```php
 $pageConfig = MapperConfig::fromArray([
-    MapperConfig::ENTITY_CLASS  => Page::class,
+    MapperConfig::ENTITY_CLASS  => 'App\Entity\Content\Page',
     MapperConfig::TABLE         => 'content',
     MapperConfig::GUARDS        => ['content_type' => 'page']
 ]);
@@ -40,7 +40,7 @@ class CustomHydrator extends GenericEntityHydrator {
 $customEntityHydrator = new CustomHydrator;
 
 $contentConfig = MapperConfig::fromArray([
-    MapperConfig::ENTITY_CLASS   => Content::class,
+    MapperConfig::ENTITY_CLASS   => 'App\Entity\Content',
     MapperConfig::TABLE          => 'content',
     MapperConfig::ENTITY_FACTORY => $customEntityHydrator
 ]);

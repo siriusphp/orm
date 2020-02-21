@@ -27,7 +27,7 @@ class QueryBuilder
     {
         $queryClass = $this->getQueryClass($mapper);
 
-        return new $queryClass($mapper, $mapper->getReadConnection());
+        return new $queryClass($mapper);
     }
 
     protected function getQueryClass(Mapper $mapper)

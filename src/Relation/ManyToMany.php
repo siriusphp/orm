@@ -9,6 +9,7 @@ use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\QueryHelper;
+use Sirius\Orm\Query;
 
 class ManyToMany extends Relation
 {
@@ -58,15 +59,9 @@ class ManyToMany extends Relation
         $query = $this->joinWithThroughTable($query)
                       ->where($this->options[RelationConfig::THROUGH_NATIVE_COLUMN], $nativePks);
 
-        if ($this->getOption(RelationConfig::QUERY_CALLBACK) &&
-            is_callable($this->getOption(RelationConfig::QUERY_CALLBACK))) {
-            $callback = $this->options[RelationConfig::QUERY_CALLBACK];
-            $query    = $callback($query);
-        }
+        $query = $this->applyQueryCallback($query);
 
-        if ($this->getOption(RelationConfig::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationConfig::FOREIGN_GUARDS]);
-        }
+        $query = $this->applyForeignGuards($query);
 
         $query = $this->addPivotColumns($query);
 
@@ -80,16 +75,13 @@ class ManyToMany extends Relation
         $throughReference = QueryHelper::reference($through, $throughAlias);
         $throughName      = $throughAlias ?? $through;
 
-        $foreignTableName       = $this->foreignMapper->getTableAlias(true);
-        $throughTableConditions = [];
+        $throughCols      = $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN];
+        $foreignTableName = $this->foreignMapper->getTableAlias(true);
+        $foreignKeys      = $this->options[RelationConfig::FOREIGN_KEY];
 
-        foreach ((array)$this->options[RelationConfig::FOREIGN_KEY] as $k => $col) {
-            $throughCols              = (array)$this->options[RelationConfig::THROUGH_FOREIGN_COLUMN];
-            $throughCol               = $throughCols[$k];
-            $throughTableConditions[] = "{$foreignTableName}.{$col} = {$throughName}.{$throughCol}";
-        }
+        $joinCondition = QueryHelper::joinCondition($foreignTableName, $foreignKeys, $throughName, $throughCols);
 
-        return $query->join('INNER', $throughReference, implode(' AND ', $throughTableConditions));
+        return $query->join('INNER', $throughReference, $joinCondition);
     }
 
     private function addPivotColumns($query)
@@ -112,6 +104,25 @@ class ManyToMany extends Relation
         }
 
         return $query;
+    }
+
+    public function joinSubselect(Query $query, string $reference)
+    {
+        $tableRef  = $this->foreignMapper->getTableAlias(true);
+        $subselect = $query->subSelectForJoinWith()
+                           ->from($this->foreignMapper->getTable())
+                           ->columns($this->foreignMapper->getTable() . '.*')
+                           ->as($reference);
+
+        $subselect = $this->joinWithThroughTable($subselect);
+
+        $subselect = $this->addPivotColumns($subselect);
+
+        $subselect = $this->applyQueryCallback($subselect);
+
+        $subselect = $this->applyForeignGuards($subselect);
+
+        return $query->join('INNER', $subselect->getStatement(), $this->getJoinOnForSubselect());
     }
 
     protected function computeKeyPairs()
@@ -139,7 +150,7 @@ class ManyToMany extends Relation
         if ($this->entityHasRelationLoaded($nativeEntity)) {
             /** @var Collection $collection */
             $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
-            if (!$collection->contains($foreignEntity)) {
+            if (! $collection->contains($foreignEntity)) {
                 $collection->add($foreignEntity);
             }
         } else {

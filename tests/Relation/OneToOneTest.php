@@ -93,4 +93,25 @@ class OneToOneTest extends BaseTestCase
         $image = $this->foreignMapper->find(3);
         $this->assertEquals('img.jpg', $image->get('name'));
     }
+
+    public function test_join_with() {
+        $query = $this->nativeMapper->newQuery()
+                                    ->joinWith('featured_image');
+
+        // the featured_image is not a real one-to-one relation
+        $expectedStatement = <<<SQL
+SELECT
+    products.*
+FROM
+    products
+    INNER JOIN (
+    SELECT
+        images.*
+    FROM
+        images
+    ) AS featured_image ON products.id = images.id
+SQL;
+
+        $this->assertSameStatement($expectedStatement, $query->getStatement());
+    }
 }

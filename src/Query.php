@@ -36,9 +36,9 @@ class Query extends Select
      */
     protected $scopes = [];
 
-    public function __construct(Mapper $mapper)
+    public function __construct(Mapper $mapper, Bindings $bindings = null, string $indent = '')
     {
-        parent::__construct($mapper->getReadConnection());
+        parent::__construct($mapper->getReadConnection(), $bindings, $indent);
         $this->mapper = $mapper;
         $this->from($this->mapper->getTableReference());
         $this->resetColumns();
@@ -80,6 +80,27 @@ class Query extends Select
         }
 
         return $this;
+    }
+
+    public function joinWith($name): Query
+    {
+        if (! $this->mapper->hasRelation($name)) {
+            throw new \InvalidArgumentException(
+                sprintf("Relation %s, not defined for %s", $name, $this->mapper->getTable())
+            );
+        }
+        $relation = $this->mapper->getRelation($name);
+
+        return $relation->joinSubselect($this, $name);
+    }
+
+    public function subSelectForJoinWith(): Query
+    {
+        $subselect = new Query($this->mapper, $this->bindings, $this->indent . '    ');
+        $subselect->resetFrom();
+        $subselect->resetColumns();
+
+        return $subselect;
     }
 
     public function first()

@@ -3,10 +3,8 @@
 namespace Sirius\Orm\Relation;
 
 use Sirius\Orm\Action\BaseAction;
-use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\Entity\Tracker;
 
 class OneToOne extends OneToMany
 {
@@ -50,7 +48,7 @@ class OneToOne extends OneToMany
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if (!$this->relationWasChanged($action->getEntity())) {
+        if (! $this->relationWasChanged($action->getEntity())) {
             return;
         }
         $foreignEntity = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);

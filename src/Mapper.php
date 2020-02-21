@@ -64,6 +64,12 @@ class Mapper
     protected $columns = [];
 
     /**
+     * Column casts
+     * @var array
+     */
+    protected $casts = ['id' => 'int'];
+
+    /**
      * Column aliases (table column => entity attribute)
      * @var array
      */
@@ -235,8 +241,10 @@ class Mapper
                 return $values;
             }
             $collection = new Collection();
-            foreach ($values as $value) {
-                $collection->add($mapper->newEntity($value, $castingManager));
+            if (is_array($values)) {
+                foreach ($values as $value) {
+                    $collection->add($mapper->newEntity($value, $castingManager));
+                }
             }
 
             return $collection;
@@ -559,5 +567,10 @@ class Mapper
     public function getWriteConnection()
     {
         return $this->orm->getConnectionLocator()->getWrite();
+    }
+
+    public function getCasts()
+    {
+        return $this->casts;
     }
 }

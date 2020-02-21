@@ -12,7 +12,7 @@ exclude:
 
 # Base URL of the published website (no "/" at the end!)
 # You are advised to set and use this variable to write your links in the HTML layouts
-baseUrl: https://www.sirius.ro/php/sirius/sql
+baseUrl: https://www.sirius.ro/php/sirius/orm
 paypal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SGXDKNJCXFPJU
 gacode: UA-535999-18
 
@@ -75,8 +75,11 @@ menu:
                     text: Many-to-many
                     relativeUrl: relation_many_to_many.html
                 eav:
-                    text: EAV relations
+                    text: EAV
                     relativeUrl: relation_eav.html
+                aggregatges:
+                    text: Aggregates
+                    relativeUrl: relation_aggregate.html
         cookbook:
             name: Cookbook
             items:

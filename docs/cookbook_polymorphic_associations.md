@@ -20,11 +20,10 @@ use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
 $productsConfig = MapperConfig::fromArray([
-    MapperConfig::ENTITY_CLASS  => Product::class,
+    MapperConfig::ENTITY_CLASS  => 'App\Entity\Product',
     MapperConfig::TABLE         => 'products',
     MapperConfig::RELATIONS => [
         'comments' => [
-            RelationConfig::NAME            => 'comments',
             RelationConfig::TYPE            => RelationConfig::TYPE_ONE_TO_MANY,
             RelationConfig::FOREIGN_MAPPER  => 'comments', // name of the comments mapper as registered in the ORM
             RelationConfig::FOREIGN_KEY     => 'commentable_id',
@@ -32,7 +31,7 @@ $productsConfig = MapperConfig::fromArray([
         ]       
     ]
 ]);
-$this->orm->register('products', $productsConfig);
+$orm->register('products', $productsConfig);
 ```
 
 After this set up all queries made on the products' related comments will have the guards added and any comment related to a product that is persisted to the database will have it's `commentable_type` column automatically set to 'product'
@@ -46,25 +45,24 @@ use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
 $productCommentsConfig = MapperConfig::fromArray([
-    MapperConfig::ENTITY_CLASS  => Comment::class,
+    MapperConfig::ENTITY_CLASS  => 'App\Entity\ProductComment',
     MapperConfig::TABLE         => 'comments',
     MapperConfig::GUARDS        => ['commentable_type' => 'product']
 ]);
 
 $productsConfig = MapperConfig::fromArray([
-    MapperConfig::ENTITY_CLASS  => Product::class,
+    MapperConfig::ENTITY_CLASS  => 'App\Entity\Product',
     MapperConfig::TABLE         => 'products',
     MapperConfig::RELATIONS     => [
         'comments' => [
-            RelationConfig::NAME            => 'comments',
             RelationConfig::TYPE            => RelationConfig::TYPE_ONE_TO_MANY,
             RelationConfig::FOREIGN_MAPPER  => 'product_comments', 
             RelationConfig::FOREIGN_KEY     => 'commentable_id'
         ]       
     ]
 ]);
-$this->orm->register('product_comments', $productCommentsConfig);
-$this->orm->register('products', $productsConfig);
+$orm->register('product_comments', $productCommentsConfig);
+$orm->register('products', $productsConfig);
 ```
 
 This solution relies on the mapper to ensure the proper value is set on the `commentable_type` column at the time it is persisted.

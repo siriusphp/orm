@@ -17,26 +17,26 @@ This ORM is build with a focus on DX and having less options to shoot yourself i
  
 Besides the options explained in the [relations page](relations.html) below you will find those specific to this "many to many" relations:
 
-> #### `through_table` / `RelationConfigs::THROUGH_TABLE`
+> ##### `through_table` / `RelationConfigs::THROUGH_TABLE`
 
 > - This is the table that links the entities together (products to tags). 
 > - It defaults to `{plural_of_table_1}_{plural_of_table_2}` where the tables are sorted alphabetically.
 A pivot table between `products` and `tags` will be `products_tags` and a pivot between `products` and `categories` would be `categories_products`
 
-> #### `through_table_alias` / `RelationConfigs::THROUGH_TABLE_ALIAS`
+> ##### `through_table_alias` / `RelationConfigs::THROUGH_TABLE_ALIAS`
 
 > - Not required. 
 > - The table alias is useful if you are dealing with tables that have prefix. If your DB has a `tbl_products_tags` the alias should be `products_tags`
 
-> #### `through_native_column` / `RelationConfigs::THROUGH_NATIVE_COLUMN`
+> ##### `through_native_column` / `RelationConfigs::THROUGH_NATIVE_COLUMN`
 
 > - This refers to the column(s) that should match with the native (ie: products) primary key column(s)
 
-> #### `through_foreign_column` / `RelationConfigs::THROUGH_FOREIGN_COLUMN`
+> ##### `through_foreign_column` / `RelationConfigs::THROUGH_FOREIGN_COLUMN`
 
 > - This refers to the column(s) that should match with the foreign (ie: tags) primary key column(s)
 
-> #### `through_guards` / `RelationConfigs::THROUGH_GUARDS`
+> ##### `through_guards` / `RelationConfigs::THROUGH_GUARDS`
 
 > - This refers to guards applied on the through table
 > - You can read more about guards [here](the_guards.md). 
@@ -45,12 +45,12 @@ You might have a "content_links"  table that holds references between any type o
 > - You might have a column called `native_id` that hold the ID of the product and `foreign_id` that holds the ID of the tag. However, for this set up to work, you would need some guards: `["native_type" => "product", "foreign_type" => "tag"]`
 > - The guards are also used when creating/updating rows in the "through table" so you can safely link products and tags together via the global content links table.
 
-> #### `through_columns` / `RelationConfigs::THROUGH_COLUMNS`
+> ##### `through_columns` / `RelationConfigs::THROUGH_COLUMNS`
 
 > - This option holds the list of columns that are available for modification in the "through table". 
 > - For example you may link products to tags but also specify a `position` column in the "through table" to let you sort the tags by their position.
 
-> #### `through_columns_prefix` / `RelationConfigs::THROUGH_COLUMNS_PREFIX`
+> ##### `through_columns_prefix` / `RelationConfigs::THROUGH_COLUMNS_PREFIX`
 
 > - This option is for attaching the "through columns" to the tag entity so you may change the. 
 Defaults to `pivot_`. 
@@ -61,20 +61,23 @@ With Sirius Orm you can do just this: `$product->tags[0]->pivot_position = 10;`
 ## Defining a many-to-many relation
 
 ```php
+use Sirius\Orm\Relation\RelationConfig;
+
 $orm->register('products', MapperConfig::fromArray([
     /**
      * other mapper config goes here
      */
     'relations' => [
         'tags' => [
-            'name'                   => 'tags',
-            'foreign_mapper'         => 'tags',
-            'through_table'          => 'products_to_tags',
-            'through_native_key'     => 'id',
-            'through_foreign_key'    => 'id',
-            'through_columns'        => ['position', 'created_at'],
-            'through_columns_prefix' => 'link_',
-            'query_callback'         => function($query) {
+            RelationConfig::TYPE                   => RelationConfig::TYPE_MANY_TO_MANY,
+            RelationConfig::FOREIGN_MAPPER         => 'tags',
+            RelationConfig::THROUGH_TABLE          => 'tbl_products_to_tags',
+            RelationConfig::THROUGH_TABLE_ALIAS    => 'products_tags',
+            RelationConfig::NATIVE_KEY             => 'product_id',
+            RelationConfig::FOREIGN_KEY            => 'tag_id',
+            RelationConfig::THROUGH_COLUMNS        => ['position', 'created_at'],
+            RelationConfig::THROUGH_COLUMNS_PREFIX => 'link_',
+            RelationConfig::QUERY_CALLBACK         => function($query) {
                 $query->orderBy('position DESC');
                 return $query;
              }

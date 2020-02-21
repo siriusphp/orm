@@ -6,7 +6,7 @@ title: The tracker | Sirius ORM
 
 The Sirius ORM solves the **n+1 problem** that many ORM face using a `Tracker` object. 
 
-Whenever a mapper is queried to retrieve some entities, a `Tracker` object stores the rows, 
+Whenever a mapper is queried for entities, a `Tracker` object stores the rows, 
 and the relations we might expect to be asked in the future relative to those rows/entities.
 
 For example, if you query the `Products` mapper for the first 10 products matching some

@@ -32,14 +32,14 @@ This would clone the mapper and let you work with it under the new configuration
 
 The Sirius ORM comes with 2 behaviours:
 
-> #### Soft Delete
+> ##### Soft Delete
 
 > ```php
 > $orm->get('products')
 >     ->use(new SoftDelete('name of the column with the date of delete'));
 > ```
 
-> #### Timestamps
+> ##### Timestamps
 
 > ```php
 > $orm->get('products')

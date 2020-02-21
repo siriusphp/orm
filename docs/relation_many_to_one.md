@@ -18,14 +18,17 @@ Most of the times (like in the examples above) you don't want to CASCADE delete 
 ## Definining a many-to-one relation
 
 ```php
+use Sirius\Orm\Relation\RelationConfig;
+
 $orm->register('products', MapperConfig::make(
     // other mapper config goes here
     'relations' => [
         'category' => [
-            'type'           => 'many_to_one',
-            'foreign_mapper' => 'categories',
-            'native_key'     => 'cat_id',            
-            'query_callback' => function($query) {
+            RelationConfig::TYPE           => 'many_to_one',
+            RelationConfig::FOREIGN_MAPPER => 'categories',
+            RelationConfig::NATIVE_KEY     => 'category_id',            
+            RelationConfig::FOREIGN_KEY    => 'id',            
+            RelationConfig::QUERY_CALLBACK => function($query) {
                 $query->orderBy('display_priority DESC');
                 return $query;
              }

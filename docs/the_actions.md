@@ -56,16 +56,3 @@ action tree.
 DELETE actions cascade for relations that have this option set to true, otherwise a DELETE action
 will also execute SAVE actions for the related entities. However, you should consider letting the DB
 handle this.
-
-Sirius ORM also gives you the option to choose how deep an action should go visavis the related entities:
-
-```php
-// go as deep as possible and save any changes made to related entities
-$productsMapper->save($product, true);
-
-// don't save anything but the product
-$productsMapper->save($product, false);
-
-// save only the products and the tags
-$productsMapper->save($product, ['tags']);
-```

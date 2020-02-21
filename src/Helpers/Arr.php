@@ -62,4 +62,20 @@ class Arr
 
         return $arr;
     }
+
+    public static function renameKeys(array $arr, array $newNames)
+    {
+        if (empty($newNames)) {
+            return $arr;
+        }
+
+        foreach (array_keys($newNames) as $name) {
+            if (isset($arr[$name])) {
+                $arr[$newNames[$name]] = $arr[$name];
+                unset($arr[$name]);
+            }
+        }
+
+        return $arr;
+    }
 }

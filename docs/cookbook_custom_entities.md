@@ -89,15 +89,23 @@ The hydrator for this entity should be able to transform an array (representing 
 
 ```php
 use Sirius\Orm\Entity\HydratorInterface;
+use Sirius\Orm\Entity\EntityInterface;
 
 class CategoryHydrator implements HydratorInterface {
 
-    public function newEntity($attributes = []){
+    public function hydrate($attributes = []){
         $category = new Category;
         $category->setPk($attributes['id']);
         $category->setName($attributes['name']);
         $category->setParentId($attributes['parent_id']);
     }
+
+    public function extract(EntityInterface $entity) {
+        /**
+         * Extract entity attributes that are to be persisted to the database 
+         */
+    }
+
 }
 ```
 

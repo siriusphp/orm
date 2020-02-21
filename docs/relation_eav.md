@@ -1,4 +1,10 @@
+---
+title: Entity-Attribute-Value | Sirius ORM
+---
+
 # Entity-Attribute-Value relations
+
+This feature is WIP.
 
 EAV is a strategy of designing the database so that on one table (the native entity) you store known data about the entity and on another table (the "EAV table") you hold multiple rows each pointing to an attribute and value of the native entity
 . The EAV table has one column for the name of the attribute and another with the value.
@@ -15,5 +21,3 @@ $product->meta_title = "SEO title";
 ``` 
 
 Given the fact that today's databases support JSON columns you can achieve the same result (ie: hold flexible data) using JSON columns. Still, it's a good feature for an ORM to provide.
-
-This feature is WIP.

@@ -31,6 +31,26 @@ class ManyToOneTest extends BaseTestCase
         $this->foreignMapper = $this->orm->get('categories');
     }
 
+    public function test_join_with() {
+        $query = $this->nativeMapper->newQuery()
+            ->joinWith('category');
+
+        $expectedStatement = <<<SQL
+SELECT
+    products.*
+FROM
+    products
+        INNER JOIN     (
+    SELECT
+        categories.*
+    FROM
+        categories
+    ) AS category ON products.category_id = categories.id
+SQL;
+
+        $this->assertSameStatement($expectedStatement, $query->getStatement());
+    }
+
     public function test_query_callback()
     {
         $relation = new ManyToOne('category', $this->nativeMapper, $this->foreignMapper, [

@@ -31,6 +31,31 @@ class ManyToManyTest extends BaseTestCase
         $this->foreignMapper = $this->orm->get('tags');
     }
 
+    public function test_join_with() {
+        $query = $this->nativeMapper->newQuery()
+                                    ->joinWith('tags');
+
+        $expectedStatement = <<<SQL
+SELECT
+    products.*
+FROM
+    products
+    INNER JOIN (
+    SELECT
+        tags.*,
+        products_tags.position AS pivot_position,
+        products_tags.product_id
+    FROM
+        tags
+            INNER JOIN products_tags ON tags.id = products_tags.tag_id
+    ORDER BY
+        position ASC
+    ) AS tags ON products.id = tags.id
+SQL;
+
+        $this->assertSameStatement($expectedStatement, $query->getStatement());
+    }
+
     public function test_query_callback()
     {
         $relation = new ManyToMany('tags', $this->nativeMapper, $this->foreignMapper, [

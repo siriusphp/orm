@@ -22,15 +22,22 @@ One use-case where you want to enable this behaviours is on "one order has many 
 In this case the `media` table holds other type of files, not just images
 
 ```php
+use Sirius\Orm\Relation\RelationConfig;
+
 $orm->register('products', MapperConfig::make(
     // other mapper config goes here
     'relations' => [
         'images' => [
-            'type'           => 'many_to_one',
-            'foreign_mapper' => 'media',
-            'foreign_key'    => 'p_id', 
-            'foreign_guards' => ['media_type' => 'image'],           
-            'query_callback' => function($query) {
+            RelationConfig::TYPE           => 'many_to_one',
+            RelationConfig::FOREIGN_MAPPER => 'media',
+            RelationConfig::NATIVE_KEY     => 'id', 
+            RelationConfig::FOREIGN_KEY    => 'product_id',
+            // the "media" mapper holds more than images 
+            RelationConfig::FOREIGN_GUARDS => [
+                'media_type' => 'image'
+            ],
+            // order the images by a specific field
+            RelationConfig::QUERY_CALLBACK => function($query) {
                 $query->orderBy('display_priority DESC');
                 return $query;
              }

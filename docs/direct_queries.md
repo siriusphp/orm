@@ -10,7 +10,7 @@ Constructing queries work the same as normal queries except the last part where 
 
 ```php
 $orm->get('reviews')
-    ->join('products', 'products.id = reviews.product_id')
+    ->join('INNER', 'products', 'products.id = reviews.product_id')
     ->where('products.name', 'Gold', 'contains')
     ->groupBy('product_id')
     ->select('product_id', 'AVERAGE(rating) as rating')
@@ -33,7 +33,7 @@ Here's another example for counting some matching rows:
 
 ```php
 $orm->get('reviews')
-    ->join('products', 'products.id = reviews.product_id')
+    ->join('INNER', 'products', 'products.id = reviews.product_id')
     ->where('products.name', 'Gold', 'contains')
     ->select('COUNT(reviews.id) as total_gold_reviews')
     ->fetchValue();
@@ -45,7 +45,7 @@ You can reuse queries to minimise the potential for errors:
 
 ```php
 $query = $orm->get('reviews')
-             ->join('products', 'products.id = reviews.product_id')
+             ->join('INNER', 'products', 'products.id = reviews.product_id')
              ->where('products.name', 'Gold', 'contains')
              ->groupBy('product_id');
 

@@ -12,8 +12,11 @@ use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\LazyValueLoader;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
+use Sirius\Orm\Helpers\QueryHelper;
 use Sirius\Orm\LazyLoader;
 use Sirius\Orm\Mapper;
+use Sirius\Orm\Query;
+use Sirius\Sql\Select;
 
 abstract class Relation
 {
@@ -145,6 +148,8 @@ abstract class Relation
 
     abstract public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity);
 
+    abstract public function joinSubselect(Query $query, string $reference);
+
     public function attachLazyValueToEntity(EntityInterface $entity, Tracker $tracker)
     {
         $valueLoader = new LazyValueLoader($entity, $tracker, $this);
@@ -160,15 +165,9 @@ abstract class Relation
             ->newQuery()
             ->where($this->foreignMapper->getPrimaryKey(), $nativePks);
 
-        if ($this->getOption(RelationConfig::QUERY_CALLBACK) &&
-            is_callable($this->getOption(RelationConfig::QUERY_CALLBACK))) {
-            $callback = $this->options[RelationConfig::QUERY_CALLBACK];
-            $query    = $callback($query);
-        }
+        $query = $this->applyQueryCallback($query);
 
-        if ($this->getOption(RelationConfig::FOREIGN_GUARDS)) {
-            $query->setGuards($this->options[RelationConfig::FOREIGN_GUARDS]);
-        }
+        $query = $this->applyForeignGuards($query);
 
         return $query;
     }
@@ -264,7 +263,38 @@ abstract class Relation
     protected function relationWasChanged(EntityInterface $entity)
     {
         $changes = $entity->getChanges();
+
         return isset($changes[$this->name]) && $changes[$this->name];
+    }
+
+    protected function applyQueryCallback(Select $query)
+    {
+        $queryCallback = $this->getOption(RelationConfig::QUERY_CALLBACK);
+        if ($queryCallback && is_callable($queryCallback)) {
+            $query = $queryCallback($query);
+        }
+
+        return $query;
+    }
+
+    protected function applyForeignGuards(Select $query)
+    {
+        $guards = $this->getOption(RelationConfig::FOREIGN_GUARDS);
+        if ($guards) {
+            $query->setGuards($guards);
+        }
+
+        return $query;
+    }
+
+    protected function getJoinOnForSubselect()
+    {
+        return QueryHelper::joinCondition(
+            $this->nativeMapper->getTableAlias(true),
+            $this->getOption(RelationConfig::NATIVE_KEY),
+            $this->foreignMapper->getTableAlias(true),
+            $this->getOption(RelationConfig::FOREIGN_KEY)
+        );
     }
 
     /**

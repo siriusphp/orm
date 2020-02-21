@@ -14,7 +14,7 @@ Example: guard to force the `content_type` column to be equal to `page`
 use Sirius\Orm\MapperConfig;
 
 $pageConfig = MapperConfig::fromArray([
-    MapperConfig::ENTITY_CLASS => Page::class,
+    MapperConfig::ENTITY_CLASS => 'App\Entity\Page',
     MapperConfig::TABLE => 'content',
     MapperConfig::GUARDS => ['content_type' => 'page'] //---- HERE
 ]);

@@ -62,6 +62,26 @@ SQL;
         ], $query->getBindValues());
     }
 
+    public function test_join_with() {
+        $query = $this->nativeMapper->newQuery()
+            ->joinWith('products');
+
+        $expectedStatement = <<<SQL
+SELECT
+    categories.*
+FROM
+    categories
+    INNER JOIN (
+    SELECT
+        products.*
+    FROM
+        products
+    ) AS products ON categories.id = products.category_id
+SQL;
+
+        $this->assertSameStatement($expectedStatement, $query->getStatement());
+    }
+
     public function test_query_guards()
     {
         $relation = new OneToMany('products', $this->nativeMapper, $this->foreignMapper, [

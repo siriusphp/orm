@@ -22,15 +22,23 @@ In this scenario you would probably want to do CASCADE delete but for this relat
 
 ## Definining a one-to-one relation
 
+Here's a typical example
+
 ```php
+use Sirius\Orm\Relation\RelationConfig;
+
 $orm->register('products', MapperConfig::make(
     // other mapper config goes here
-    'product_fields' => [
-        'images' => [
-            'type'           => 'one_to_one',
-            'foreign_mapper' => 'product_fields',
-            'foreign_key'    => 'product_id',
-            'cascade'        => true
+    'relations' => [
+        'fields' => [
+            RelationConfig::TYPE           => 'one_to_one',
+            RelationConfig::FOREIGN_MAPPER => 'product_fields',
+            RelationConfig::NATIVE_KEY     => 'id',
+            RelationConfig::FOREIGN_KEY    => 'product_id',
+            // most likely you want to cascade deletes if the DB doesn't
+            RelationConfig::CASCADE        => true,
+            // most likely you would want the fields from the start
+            RelationConfig::LOAD_STRATEGY  => RelationConfig::LOAD_EAGER
         ]       
     ]
 ));

@@ -24,7 +24,7 @@ class SiriusOrmTestSuite extends AbstractTestSuite
 
     function initialize()
     {
-        $loader = require_once "../../vendor/autoload.php";
+        $loader = require_once __DIR__ . "/../../vendor/autoload.php";
         $loader->add('', __DIR__ . '/../../src');
 
         $this->con = Connection::new('sqlite::memory:');

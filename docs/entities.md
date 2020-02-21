@@ -34,6 +34,18 @@ $product->category->name = 'New category name'; // this works with lazy loading
 $product->images->get(0)->path = 'new_image.jpg'; // this too
 ```
 
+One-to-many and Many-to-many relations return Collections, which extend the Doctrine's [ArrayCollection](https://www.doctrine-project.org/projects/doctrine-collections/en/1.6/index.html) so you can do things like
+
+```php
+if (!$product->images->isEmpty()) {
+    $product->images->first();
+}
+
+$paths = $product->images->map(function($image) {
+    return $image->path;
+});
+```
+
 ## Persisting the entities
 
 ```php

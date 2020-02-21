@@ -20,6 +20,7 @@ class MapperConfig
     const TABLE_ALIAS = 'tableAlias';
     const COLUMNS = 'columns';
     const COLUMN_ATTRIBUTE_MAP = 'columnAttributeMap';
+    const CASTS = 'casts';
     const DEFAULT_ATTRIBUTES = 'entityDefaultAttributes';
     const ENTITY_HYDRATOR = 'entityHydrator';
     const BEHAVIOURS = 'behaviours';
@@ -47,6 +48,12 @@ class MapperConfig
      * @var array
      */
     public $columns = [];
+
+    /**
+     * Columns casts
+     * @var array
+     */
+    public $casts = [];
 
     /**
      * Column aliases (table column => entity attribute)
