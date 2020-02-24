@@ -117,11 +117,6 @@ class Mapper
      */
     protected $orm;
 
-    /**
-     * @var Query
-     */
-    private $queryPrototype;
-
     public static function make(Orm $orm, MapperConfig $mapperConfig)
     {
         $mapper                          = new static($orm, $mapperConfig->entityHydrator);
@@ -153,19 +148,24 @@ class Mapper
     public function __construct(Orm $orm, HydratorInterface $entityHydrator = null, QueryBuilder $queryBuilder = null)
     {
         $this->orm = $orm;
+
         if (! $entityHydrator) {
-            $entityHydrator = new GenericEntityHydrator($orm, $this);
-        }
-        if (! $queryBuilder) {
-            $this->queryBuilder = QueryBuilder::getInstance();
+            $entityHydrator = new GenericEntityHydrator();
+            $entityHydrator->setMapper($this);
+            $entityHydrator->setCastingManager($orm->getCastingManager());
         }
         $this->entityHydrator = $entityHydrator;
-        $this->tableReference = QueryHelper::reference($this->table, $this->tableAlias);
+
+        if (! $queryBuilder) {
+            $queryBuilder = QueryBuilder::getInstance();
+        }
+        $this->queryBuilder = $queryBuilder;
     }
 
     public function __call(string $method, array $params)
     {
         switch ($method) {
+            case 'where':
             case 'where':
             case 'columns':
             case 'orderBy':
@@ -277,6 +277,10 @@ class Mapper
 
     public function getTableReference()
     {
+        if (!$this->tableReference) {
+            $this->tableReference = QueryHelper::reference($this->table, $this->tableAlias);
+        }
+
         return $this->tableReference;
     }
 
@@ -432,6 +436,17 @@ class Mapper
         return $entity->get($attribute);
     }
 
+    public function addRelation($name, $relation)
+    {
+        if (is_array($relation) || $relation instanceof Relation) {
+            $this->relations[$name] = $relation;
+            return;
+        }
+        throw new \InvalidArgumentException(
+            sprintf('The relation has to be an Relation instance or an array of configuration options')
+        );
+    }
+
     public function hasRelation($name): bool
     {
         return isset($this->relations[$name]);
@@ -490,10 +505,11 @@ class Mapper
         try {
             $action->run();
             $this->getWriteConnection()->commit();
-
+            $this->orm->getConnectionLocator()->lockToWrite(false);
             return true;
         } catch (\Exception $e) {
             $this->getWriteConnection()->rollBack();
+            $this->orm->getConnectionLocator()->lockToWrite(false);
             throw $e;
         }
     }

@@ -5,7 +5,7 @@ namespace Sirius\Orm;
 
 interface MapperLocator
 {
-    public function has($mapperName): bool;
+    public function has($name): bool;
 
-    public function get($mapperName): Mapper;
+    public function get($name): Mapper;
 }

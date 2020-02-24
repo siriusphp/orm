@@ -3,37 +3,40 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
+use Sirius\Orm\CastingManager;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Mapper;
-use Sirius\Orm\Orm;
 
 class GenericEntityHydrator implements HydratorInterface
 {
     /**
-     * @var Orm
+     * @var $castingManager
      */
-    protected $orm;
+    protected $castingManager;
 
     /**
      * @var Mapper
      */
     protected $mapper;
 
-    public function __construct(Orm $orm, Mapper $mapper)
+    public function setMapper(Mapper $mapper)
     {
-        $this->orm    = $orm;
         $this->mapper = $mapper;
     }
 
-    public function hydrate($attributes = [])
+    public function setCastingManager(CastingManager $castingManager)
     {
-        $attributes = $this->orm
-            ->getCastingManager()
-            ->castArray($attributes, $this->mapper->getCasts());
+        $this->castingManager = $castingManager;
+    }
+
+    public function hydrate(array $attributes = [])
+    {
+        $attributes = $this->castingManager
+                           ->castArray($attributes, $this->mapper->getCasts());
         $attributes = Arr::renameKeys($attributes, $this->mapper->getColumnAttributeMap());
         $class      = $this->mapper->getEntityClass() ?? GenericEntity::class;
 
-        return new $class($attributes, $this->orm->getCastingManager());
+        return new $class($attributes, $this->castingManager);
     }
 
     public function extract(EntityInterface $entity)
@@ -42,9 +45,8 @@ class GenericEntityHydrator implements HydratorInterface
             $entity->getArrayCopy(),
             array_flip($this->mapper->getColumnAttributeMap())
         );
-        $data = $this->orm
-            ->getCastingManager()
-            ->castArrayForDb($data, $this->mapper->getCasts());
+        $data = $this->castingManager
+                     ->castArrayForDb($data, $this->mapper->getCasts());
 
         return Arr::only($data, $this->mapper->getColumns());
     }

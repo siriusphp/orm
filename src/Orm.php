@@ -8,12 +8,19 @@ use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
+use Sirius\Orm\Relation\RelationBuilder;
 use Sirius\Orm\Relation\RelationConfig;
 
 class Orm implements MapperLocator
 {
+    /**
+     * @var array
+     */
     protected $mappers = [];
 
+    /**
+     * @var array
+     */
     protected $lazyMappers = [];
 
     /**
@@ -26,21 +33,31 @@ class Orm implements MapperLocator
      */
     protected $castingManager;
 
-    public function __construct(ConnectionLocator $connectionLocator, CastingManager $castingManager = null)
-    {
+    /**
+     * @var RelationBuilder
+     */
+    protected $relationBuilder;
+
+    public function __construct(
+        ConnectionLocator $connectionLocator,
+        CastingManager $castingManager = null
+    ){
         $this->connectionLocator = $connectionLocator;
+
         if (! $castingManager) {
             $castingManager = new CastingManager();
         }
         $this->castingManager = $castingManager;
+
+        $this->relationBuilder = new RelationBuilder($this);
     }
 
-    public function register($mapperName, $mapperOrConfigOrFactory): self
+    public function register($name, $mapperOrConfigOrFactory): self
     {
         if ($mapperOrConfigOrFactory instanceof MapperConfig || is_callable($mapperOrConfigOrFactory)) {
-            $this->lazyMappers[$mapperName] = $mapperOrConfigOrFactory;
+            $this->lazyMappers[$name] = $mapperOrConfigOrFactory;
         } elseif ($mapperOrConfigOrFactory instanceof Mapper) {
-            $this->mappers[$mapperName] = $mapperOrConfigOrFactory;
+            $this->mappers[$name] = $mapperOrConfigOrFactory;
             $mapperOrConfigOrFactory->registerCasts($this->castingManager);
         } else {
             throw new InvalidArgumentException('$mapperOrConfigOrFactory must be a Mapper instance, 
@@ -50,24 +67,24 @@ class Orm implements MapperLocator
         return $this;
     }
 
-    public function has($mapperName): bool
+    public function has($name): bool
     {
-        return isset($this->mappers[$mapperName]) || isset($this->lazyMappers[$mapperName]);
+        return isset($this->mappers[$name]) || isset($this->lazyMappers[$name]);
     }
 
-    public function get($mapperName): Mapper
+    public function get($name): Mapper
     {
-        if (isset($this->lazyMappers[$mapperName])) {
-            $this->mappers[$mapperName] = $this->buildMapper($this->lazyMappers[$mapperName]);
-            $this->mappers[$mapperName]->registerCasts($this->castingManager);
-            unset($this->lazyMappers[$mapperName]);
+        if (isset($this->lazyMappers[$name])) {
+            $this->mappers[$name] = $this->buildMapper($this->lazyMappers[$name]);
+            $this->mappers[$name]->registerCasts($this->castingManager);
+            unset($this->lazyMappers[$name]);
         }
 
-        if (! isset($this->mappers[$mapperName]) || ! $this->mappers[$mapperName]) {
-            throw new InvalidArgumentException(sprintf('Mapper named %s is not registered', $mapperName));
+        if ( ! isset($this->mappers[$name]) || ! $this->mappers[$name]) {
+            throw new InvalidArgumentException(sprintf('Mapper named %s is not registered', $name));
         }
 
-        return $this->mappers[$mapperName];
+        return $this->mappers[$name];
     }
 
     public function save($mapperName, EntityInterface $entity, ...$params)
@@ -92,20 +109,7 @@ class Orm implements MapperLocator
 
     public function createRelation(Mapper $nativeMapper, $name, $options): Relation
     {
-        $foreignMapper = $options[RelationConfig::FOREIGN_MAPPER];
-        if ($this->has($foreignMapper)) {
-            if (! $foreignMapper instanceof Mapper) {
-                $foreignMapper = $this->get($foreignMapper);
-            }
-        }
-        $type          = $options[RelationConfig::TYPE];
-        $relationClass = __NAMESPACE__ . '\\Relation\\' . Str::className($type);
-
-        if (! class_exists($relationClass)) {
-            throw new InvalidArgumentException("{$relationClass} does not exist");
-        }
-
-        return new $relationClass($name, $nativeMapper, $foreignMapper, $options);
+        return $this->relationBuilder->newRelation($nativeMapper, $name, $options);
     }
 
     private function buildMapper($mapperConfigOrFactory): Mapper

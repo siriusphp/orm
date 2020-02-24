@@ -7,7 +7,7 @@ use Sirius\Orm\Entity\Tracker;
 
 interface HydratorInterface
 {
-    public function hydrate($attributes = []);
+    public function hydrate(array $attributes = []);
 
     public function extract(EntityInterface $entity);
 }

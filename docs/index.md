@@ -11,7 +11,7 @@ title: Sirius ORM | Fast yet flexibile ORM built with DX in mind
 [![Coverage Status](https://img.shields.io/scrutinizer/coverage/g/siriusphp/orm.svg?style=flat-square)](https://scrutinizer-ci.com/g/siriusphp/orm/code-structure)
 [![Quality Score](https://img.shields.io/scrutinizer/g/siriusphp/orm.svg?style=flat-square)](https://scrutinizer-ci.com/g/siriusphp/orm)
 
-Sirius ORM is a fast yet flexible data mapper solution developed with DX in mind.
+Sirius ORM is a [fast](https://github.com/adrianmiu/forked-php-orm-benchmark) yet flexible data mapper solution developed with DX in mind.
 
 ### Installation
 
