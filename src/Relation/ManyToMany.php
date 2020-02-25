@@ -3,6 +3,7 @@
 namespace Sirius\Orm\Relation;
 
 use Sirius\Orm\Action\BaseAction;
+use Sirius\Orm\Action\DeletePivotRows;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
@@ -13,6 +14,8 @@ use Sirius\Orm\Query;
 
 class ManyToMany extends Relation
 {
+    use HasAggregates;
+
     protected function applyDefaults(): void
     {
         parent::applyDefaults();
@@ -202,13 +205,15 @@ class ManyToMany extends Relation
         } else {
             // retrieve them again from the DB since the related collection might not have everything
             // for example due to a relation query callback
-            $foreignEntities = $this->getQuery(new Tracker($this->nativeMapper, [$nativeEntity->getArrayCopy()]))
+            $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->getArrayCopy()]))
                                     ->get();
 
             foreach ($foreignEntities as $entity) {
                 $deleteAction = $this->foreignMapper
                     ->newDeleteAction($entity, ['relations' => $remainingRelations]);
                 $action->append($deleteAction);
+                $deletePivotAction = new DeletePivotRows($this, $nativeEntity, $entity);
+                $action->append($deletePivotAction);
             }
         }
     }

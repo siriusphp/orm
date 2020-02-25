@@ -6,7 +6,8 @@ use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Orm;
 
-class RelationBuilder {
+class RelationBuilder
+{
 
     /**
      * @var Orm

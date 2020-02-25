@@ -39,7 +39,7 @@ class RelationTest extends BaseTestCase
         $this->assertTrue($relation->entitiesBelongTogether($native1, $foreign1));
         $this->assertFalse($relation->entitiesBelongTogether($native1, $foreign2));
 
-        $tracker = new Tracker($this->nativeMapper, [
+        $tracker = new Tracker([
             $native1->getArrayCopy(),
             $native2->getArrayCopy(),
         ]);

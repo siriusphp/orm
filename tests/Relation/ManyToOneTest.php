@@ -27,7 +27,7 @@ class ManyToOneTest extends BaseTestCase
         parent::setUp();
         $this->loadMappers();
 
-        $this->nativeMapper  = $this->orm->get('products');
+        $this->nativeMapper  = $this->orm->get('content_products');
         $this->foreignMapper = $this->orm->get('categories');
     }
 
@@ -37,15 +37,15 @@ class ManyToOneTest extends BaseTestCase
 
         $expectedStatement = <<<SQL
 SELECT
-    products.*
+    content_products.*
 FROM
-    products
+    content_products
         INNER JOIN     (
     SELECT
         categories.*
     FROM
         categories
-    ) AS category ON products.category_id = categories.id
+    ) AS category ON content_products.category_id = category.id
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
@@ -59,7 +59,7 @@ SQL;
             }
         ]);
 
-        $tracker = new Tracker($this->nativeMapper, [
+        $tracker = new Tracker([
             ['category_id' => 10],
             ['category_id' => 11],
         ]);
@@ -88,7 +88,7 @@ SQL;
             RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
-        $tracker = new Tracker($this->nativeMapper, [
+        $tracker = new Tracker([
             ['category_id' => 10],
             ['category_id' => 11],
         ]);
@@ -117,15 +117,18 @@ SQL;
 
         $products = $this->nativeMapper
             ->newQuery()
-            ->load('category')
+            ->load('category', 'category.parent')
             ->get();
 
+        // 3 queries: one for products, one for categories, one for category parents
+        $this->assertEquals(3, count($this->connectionLocator->getQueries()));
         $category1 = $products[0]->get('category');
         $category2 = $products[1]->get('category');
         $this->assertNotNull($category1);
         $this->assertEquals(10, $category1->getPk());
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
+        $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
     }
 
     public function test_lazy_load()
@@ -142,6 +145,7 @@ SQL;
         $this->assertEquals(10, $category1->getPk());
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
+        $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
     }
 
     public function test_delete_with_cascade_true()
@@ -149,9 +153,9 @@ SQL;
         $this->populateDb();
 
         // don't know why would anybody do this but...
-        $config                                                 = $this->getMapperConfig('products');
+        $config                                                 = $this->getMapperConfig('content_products');
         $config->relations['category'][RelationConfig::CASCADE] = true;
-        $this->nativeMapper                                     = $this->orm->register('products', $config)->get('products');
+        $this->nativeMapper                                     = $this->orm->register('content_products', $config)->get('content_products');
 
         $product = $this->nativeMapper
             ->newQuery()
@@ -229,8 +233,9 @@ SQL;
 
     protected function populateDb(): void
     {
-        $this->insertRow('categories', ['id' => 10, 'name' => 'Category']);
-        $this->insertRow('products', ['category_id' => 10, 'sku' => 'abc', 'price' => 10.5]);
-        $this->insertRow('products', ['category_id' => 10, 'sku' => 'xyz', 'price' => 20.5]);
+        $this->insertRow('categories', ['id' => 10, 'parent_id' => 20, 'name' => 'Category']);
+        $this->insertRow('categories', ['id' => 20, 'name' => 'Parent']);
+        $this->insertRow('content_products', ['content_id' => 10, 'category_id' => 10, 'sku' => 'abc', 'price' => 10.5]);
+        $this->insertRow('content_products', ['content_id' => 20, 'category_id' => 10, 'sku' => 'xyz', 'price' => 20.5]);
     }
 }

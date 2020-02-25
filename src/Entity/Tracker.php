@@ -6,6 +6,7 @@ namespace Sirius\Orm\Entity;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
+use Sirius\Orm\Relation\Aggregate;
 use Sirius\Orm\Relation\Relation;
 
 class Tracker
@@ -25,35 +26,32 @@ class Tracker
     /**
      * @var array
      */
-    protected $relationCallbacks = [];
+    protected $relationCallback = [];
+
+    /**
+     * @var array
+     */
+    protected $relationNextLoad = [];
 
     /**
      * @var array
      */
     protected $relationResults = [];
 
-    /**
-     * @var bool
-     */
-    protected $disposable = false;
-
-    public function __construct(Mapper $mapper, array $rows = [])
+    public function __construct(array $rows = [])
     {
-        $this->mapper = $mapper;
         $this->rows   = $rows;
     }
 
-    public function setRelation($name, Relation $relation, $callback, $overwrite = false)
+    public function setRelation($name, Relation $relation, $callback, array $nextLoad = [], $overwrite = false)
     {
         if ($overwrite || ! isset($this->relations[$name])) {
-            $this->relations[$name]         = $relation;
-            $this->relationCallbacks[$name] = $callback;
+            $this->relations[$name]        = $relation;
+            $this->relationCallback[$name] = $callback;
+            if (!empty($nextLoad)) {
+                $this->relationNextLoad[$name] = $nextLoad;
+            }
         }
-    }
-
-    public function setDisposable(bool $disposable = false)
-    {
-        $this->disposable = $disposable;
     }
 
     public function hasRelation($name)
@@ -61,7 +59,7 @@ class Tracker
         return isset($this->relations[$name]);
     }
 
-    public function getRelationResults($name)
+    public function getResultsForRelation($name)
     {
         if (! isset($this->relations[$name])) {
             return null;
@@ -73,9 +71,15 @@ class Tracker
 
         /** @var Query $query */
         $query         = $this->relations[$name]->getQuery($this);
-        $queryCallback = $this->relationCallbacks[$name] ?? null;
+        $queryCallback = $this->relationCallback[$name] ?? null;
         if ($queryCallback && is_callable($queryCallback)) {
             $query = $queryCallback($query);
+        }
+        $queryNextLoad = $this->relationNextLoad[$name] ?? [];
+        if ($queryNextLoad && !empty($queryNextLoad)) {
+            foreach ($queryNextLoad as $next => $callback) {
+                $query = $query->load([$next => $callback]);
+            }
         }
 
         $results                      = $query->get();
@@ -84,13 +88,36 @@ class Tracker
         return $this->relationResults[$name];
     }
 
+    public function getAggregateResults(Aggregate $aggregate)
+    {
+        $name = $aggregate->getName();
+
+        if (isset($this->aggregateResults[$name])) {
+            return $this->aggregateResults[$name];
+        }
+
+        /** @var Query $query */
+        $query         = $aggregate->getQuery($this);
+
+        $results                      = $query->fetchAll();
+        $this->aggregateResults[$name] = $results instanceof Collection ? $results->getValues() : $results;
+
+        return $this->aggregateResults[$name];
+    }
+
     public function pluck($columns)
     {
         $result = [];
         foreach ($this->rows as $row) {
-            $result[] = $this->getColumnsFromRow($row, $columns);
+            $value = $this->getColumnsFromRow($row, $columns);
+            if ($value && !in_array($value, $result)) {
+                $result[] = $value;
+            }
         }
 
+        /**
+         * @todo check if array_unique() performs better
+         */
         return $result;
     }
 
@@ -123,10 +150,5 @@ class Tracker
     public function replaceRows(array $entities)
     {
         $this->rows = $entities;
-    }
-
-    public function isDisposable()
-    {
-        return $this->disposable;
     }
 }

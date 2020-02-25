@@ -5,7 +5,7 @@ namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\Relation\Relation;
 
-class LazyValueLoader
+class LazyRelation implements LazyLoader
 {
     /**
      * @var EntityInterface
@@ -29,7 +29,7 @@ class LazyValueLoader
 
     public function load()
     {
-        $results = $this->tracker->getRelationResults($this->relation->getOption('name'));
+        $results = $this->tracker->getResultsForRelation($this->relation->getOption('name'));
         $this->relation->attachMatchesToEntity($this->entity, $results);
     }
 }

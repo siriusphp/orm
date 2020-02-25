@@ -12,6 +12,8 @@ use Sirius\Orm\Query;
 
 class OneToMany extends Relation
 {
+    use HasAggregates;
+
     protected function applyDefaults(): void
     {
         $nativeKey = $this->nativeMapper->getPrimaryKey();
@@ -106,7 +108,7 @@ class OneToMany extends Relation
         } else {
             // retrieve them again from the DB since the related collection might not have everything
             // for example due to a relation query callback
-            $foreignEntities = $this->getQuery(new Tracker($this->nativeMapper, [$nativeEntity->getArrayCopy()]))
+            $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->getArrayCopy()]))
                                     ->get();
 
             foreach ($foreignEntities as $foreignEntity) {

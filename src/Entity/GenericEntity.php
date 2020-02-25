@@ -92,7 +92,7 @@ class GenericEntity implements EntityInterface
     {
         $this->preventChangesIfDeleted();
 
-        if ($value instanceof LazyValueLoader) {
+        if ($value instanceof LazyLoader) {
             $this->lazyLoaders[$attribute] = $value;
             return $this;
         }
@@ -172,11 +172,14 @@ class GenericEntity implements EntityInterface
     protected function maybeLazyLoad($attribute): void
     {
         if (isset($this->lazyLoaders[$attribute])) {
-            /** @var LazyValueLoader $lazyLoader */
+            // preserve state
+            $state = $this->state;
+            /** @var LazyLoader $lazyLoader */
             $lazyLoader = $this->lazyLoaders[$attribute];
             $lazyLoader->load();
             unset($this->changed[$attribute]);
             unset($this->lazyLoaders[$attribute]);
+            $this->state = $state;
         }
     }
 }

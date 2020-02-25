@@ -18,36 +18,32 @@ class QueryTest extends BaseTestCase
     {
         parent::setUp();
 
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
-        ]));
+        $this->mapper = $this->orm->get('products');
     }
 
     public function test_find()
     {
-        $this->insertRow('products', [
-            'sku'   => 'abc',
-            'price' => 10.5
+        $this->insertRow('content', [
+            'content_type' => 'product',
+            'title'   => 'Product 1'
         ]);
         $entity = $this->mapper->find(1);
-        $this->assertSame('abc', $entity->get('sku'));
+        $this->assertSame('Product 1', $entity->title);
 
         $this->assertNull($this->mapper->find(2));
     }
 
     public function test_query_get()
     {
-        $this->insertRows('products', ['sku', 'price'], [
-            ['sku-1', 10],
-            ['sku-2', 20],
-            ['sku-3', 30],
-            ['sku-4', 40],
+        $this->insertRows('content', ['content_type', 'title'], [
+            ['product', 'Product 1'],
+            ['product', 'Product 2'],
+            ['product', 'Product 3'],
+            ['product', 'Product 4'],
         ]);
 
         $result = $this->mapper->newQuery()
-                               ->where('price', '20', '>=')
+                               ->where('title', 'Product 2', '>=')
                                ->get();
 
         $this->assertEquals(3, count($result));
@@ -55,11 +51,11 @@ class QueryTest extends BaseTestCase
 
     public function test_query_paginate()
     {
-        $this->insertRows('products', ['sku', 'price'], [
-            ['sku-1', 10],
-            ['sku-2', 20],
-            ['sku-3', 30],
-            ['sku-4', 40],
+        $this->insertRows('content', ['content_type', 'title'], [
+            ['product', 'Product 1'],
+            ['product', 'Product 2'],
+            ['product', 'Product 3'],
+            ['product', 'Product 4'],
         ]);
 
         $result = $this->mapper->newQuery()
@@ -76,27 +72,11 @@ class QueryTest extends BaseTestCase
 
 
         $result = $this->mapper->newQuery()
-                               ->where('price', 50, '>')
+                               ->where('title', 'Product 5', '>')
                                ->paginate(3, 2);
 
         $this->assertEquals(0, $result->getTotalCount());
         $this->assertEquals(0, $result->getPageStart());
         $this->assertEquals(0, $result->getPageEnd());
-    }
-
-    public function test_guards()
-    {
-        $this->insertRows('products', ['category_id', 'sku', 'price'], [
-            [1, 'sku-1', 10],
-            [2, 'sku-2', 20],
-            [2, 'sku-3', 30],
-            [1, 'sku-4', 40],
-        ]);
-
-        $result = $this->mapper->newQuery()
-                               ->setGuards(['category_id' => 1])
-                               ->get();
-
-        $this->assertEquals(2, count($result));
     }
 }

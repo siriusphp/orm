@@ -28,11 +28,6 @@ class SoftDelete extends Delete
         $update->perform();
     }
 
-    public function revert()
-    {
-        return; // no change to the entity has actually been performed
-    }
-
     public function onSuccess()
     {
         $this->mapper->setEntityAttribute($this->entity, $this->getOption('deleted_at_column'), $this->now);

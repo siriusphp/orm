@@ -14,6 +14,7 @@ final class RelationConfig
     const LOAD_STRATEGY = 'load_strategy';
     const CASCADE = 'cascade';
     const QUERY_CALLBACK = 'query_callback';
+    const AGGREGATES = 'aggregates';
 
     // through options
     const THROUGH_TABLE = 'through_table';
@@ -41,4 +42,8 @@ final class RelationConfig
     const TYPE_ONE_TO_MANY = 'one_to_many';
     const TYPE_MANY_TO_ONE = 'many_to_one';
     const TYPE_MANY_TO_MANY = 'many_to_many';
+
+    // AGGREGATES
+    const AGG_FUNCTION = 'function';
+    const AGG_CALLBACK = 'callback';
 }

@@ -32,6 +32,12 @@ class Update extends BaseAction
 
     protected function execute()
     {
+        $conditions = $this->getConditions();
+
+        if (empty($conditions)) {
+            return;
+        }
+
         $this->entityId    = $this->entity->getPk();
         $this->entityState = $this->entity->getPersistenceState();
 
@@ -50,7 +56,7 @@ class Update extends BaseAction
             $updateSql = new \Sirius\Sql\Update($connection);
             $updateSql->table($this->mapper->getTable())
                       ->columns($columns)
-                      ->where($this->mapper->getPrimaryKey(), $this->entity->getPk());
+                      ->whereAll($conditions, false);
             $updateSql->perform();
         }
     }

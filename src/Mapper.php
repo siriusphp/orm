@@ -19,7 +19,9 @@ use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\QueryHelper;
+use Sirius\Orm\Relation\Aggregate;
 use Sirius\Orm\Relation\Relation;
+use Sirius\Orm\Relation\RelationConfig;
 
 /**
  * @method array where($column, $value, $condition)
@@ -129,6 +131,10 @@ class Mapper
         $mapper->scopes                  = $mapperConfig->scopes;
         $mapper->guards                  = $mapperConfig->guards;
         $mapper->tableReference          = QueryHelper::reference($mapper->table, $mapper->tableAlias);
+
+        if (isset($mapperConfig->casts) && !empty($mapperConfig->casts)) {
+            $mapper->casts = $mapperConfig->casts;
+        }
 
         if ($mapperConfig->relations) {
             $mapper->relations = array_merge($mapper->relations, $mapperConfig->relations);
@@ -344,18 +350,16 @@ class Mapper
         $receivedTracker = ! ! $tracker;
         if (! $tracker) {
             $receivedTracker = false;
-            $tracker         = new Tracker($this, [$data]);
+            $tracker         = new Tracker([$data]);
         }
 
         $entity = $this->newEntity($data);
         $this->injectRelations($entity, $tracker, $load);
+        $this->injectAggregates($entity, $tracker, $load);
         $entity->setPersistenceState(StateEnum::SYNCHRONIZED);
 
         if (! $receivedTracker) {
             $tracker->replaceRows([$entity]);
-            if ($tracker->isDisposable()) {
-                unset($tracker);
-            }
         }
 
         return $entity;
@@ -364,15 +368,12 @@ class Mapper
     public function newCollectionFromRows(array $rows, array $load = []): Collection
     {
         $entities = [];
-        $tracker  = new Tracker($this, $rows);
+        $tracker  = new Tracker($rows);
         foreach ($rows as $row) {
             $entity     = $this->newEntityFromRow($row, $load, $tracker);
             $entities[] = $entity;
         }
         $tracker->replaceRows($entities);
-        if ($tracker->isDisposable()) {
-            unset($tracker);
-        }
 
         return new Collection($entities);
     }
@@ -385,40 +386,54 @@ class Mapper
         array $load = []
     ): PaginatedCollection {
         $entities = [];
-        $tracker  = new Tracker($this, $rows);
+        $tracker  = new Tracker($rows);
         foreach ($rows as $row) {
             $entity     = $this->newEntityFromRow($row, $load, $tracker);
             $entities[] = $entity;
         }
         $tracker->replaceRows($entities);
-        if ($tracker->isDisposable()) {
-            unset($tracker);
-        }
 
         return new PaginatedCollection($entities, $totalCount, $perPage, $currentPage);
     }
 
     protected function injectRelations(EntityInterface $entity, Tracker $tracker, array $eagerLoad = [])
     {
-        $trackerIdDisposable = true;
         foreach (array_keys($this->relations) as $name) {
             $relation      = $this->getRelation($name);
             $queryCallback = $eagerLoad[$name] ?? null;
             $nextLoad      = Arr::getChildren($eagerLoad, $name);
 
             if (! $tracker->hasRelation($name)) {
-                $tracker->setRelation($name, $relation, $queryCallback);
+                $tracker->setRelation($name, $relation, $queryCallback, $nextLoad);
             }
 
-            if (array_key_exists($name, $eagerLoad) || $relation->isEagerLoad()) {
-                $relation->attachMatchesToEntity($entity, $tracker->getRelationResults($name));
+            if (array_key_exists($name, $eagerLoad) || in_array($name, $eagerLoad) || $relation->isEagerLoad()) {
+                #$relation->attachLazyRelationToEntity($entity, $tracker);
+                #$this->getEntityAttribute($entity, $name);
+                $relation->attachMatchesToEntity($entity, $tracker->getResultsForRelation($name));
             } elseif ($relation->isLazyLoad()) {
-                $trackerIdDisposable = false;
-                $relation->attachLazyValueToEntity($entity, $tracker);
+                $relation->attachLazyRelationToEntity($entity, $tracker);
             }
         }
+    }
 
-        $tracker->setDisposable($trackerIdDisposable);
+    protected function injectAggregates(EntityInterface $entity, Tracker $tracker, array $eagerLoad = [])
+    {
+        foreach (array_keys($this->relations) as $name) {
+            $relation      = $this->getRelation($name);
+            if (!method_exists($relation, 'getAggregates')) {
+                continue;
+            }
+            $aggregates = $relation->getAggregates();
+            foreach ($aggregates as $aggName => $aggregate) {
+                /** @var $aggregate Aggregate */
+                if (array_key_exists($aggName, $eagerLoad) || $aggregate->isEagerLoad()) {
+                    $aggregate->attachAggregateToEntity($entity, $tracker->getAggregateResults($aggregate));
+                } elseif ($aggregate->isLazyLoad()) {
+                    $aggregate->attachLazyAggregateToEntity($entity, $tracker);
+                }
+            }
+        }
     }
 
     protected function getEntityDefaults()
@@ -516,7 +531,7 @@ class Mapper
 
     public function newSaveAction(EntityInterface $entity, $options): BaseAction
     {
-        if (! $entity->getPk()) {
+        if (! $this->getEntityAttribute($entity, $this->primaryKey)) {
             $action = new Insert($this, $entity, $options);
         } else {
             $action = new Update($this, $entity, $options);

@@ -24,92 +24,89 @@ class OneToOneTest extends BaseTestCase
         parent::setUp();
         $this->loadMappers();
 
-        $this->foreignMapper = $this->orm->get('images');
         $this->nativeMapper  = $this->orm->get('products');
+        $this->foreignMapper = $this->orm->get('content_products');
     }
 
     public function test_delete_with_cascade_true()
     {
         // reconfigure products-featured_image to use CASCADE
         $config                                                           = $this->getMapperConfig('products');
-        $config->relations['featured_image'][RelationConfig::CASCADE]     = true;
-        $config->relations['featured_image'][RelationConfig::FOREIGN_KEY] = 'id';
+        $config->relations['fields'][RelationConfig::CASCADE]     = true;
         $this->nativeMapper                                               = $this->orm->register('products', $config)->get('products');
 
-        $this->insertRow('products', ['id' => 1, 'featured_image_id' => 2]);
-        $this->insertRow('images', ['id' => 1, 'name' => 'img.jpg']);
+        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
+        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
 
         $product = $this->nativeMapper->find(1);
-        $this->assertNotNull($product->get('featured_image'));
+        $this->assertNotNull($product->fields);
         $this->assertTrue($this->nativeMapper->delete($product, true));
-        $this->assertRowDeleted('products', 'id', 1);
-        $this->assertRowDeleted('images', 'id', 2);
+        $this->assertRowDeleted('content', 'id', 1);
+        $this->assertRowDeleted('content_products', 'content_id', 1);
     }
 
     public function test_delete_with_cascade_false()
     {
-        $this->insertRow('products', ['id' => 1, 'featured_image_id' => 2]);
-        $this->insertRow('images', ['id' => 1, 'name' => 'img.jpg']);
+        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
+        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
 
         $product = $this->nativeMapper->find(1);
-        $product->get('featured_image')->set('name', 'image.png');
+        $product->fields->featured_image_id  = 3;
 
-        $this->assertTrue($this->nativeMapper->delete($product, true));
-        $this->assertRowDeleted('products', 'id', 1);
-        $image = $this->foreignMapper->find(1);
-        $this->assertEquals('image.png', $image->get('name'));
+        $this->assertTrue($this->nativeMapper->delete($product, false));
+        $this->assertRowDeleted('content', 'id', 1);
+        $fields = $this->foreignMapper->find(1);
+        $this->assertEquals('2', $fields->featured_image_id);
     }
 
     public function test_save_with_relations()
     {
-        $this->insertRow('products', ['id' => 3, 'featured_image_id' => 3]);
-        $this->insertRow('images', ['id' => 3, 'name' => 'img.jpg']);
+        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
+        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
 
-        $product = $this->nativeMapper->find(3);
-        $product->set('sku', 'abc');
-        $product->get('featured_image')->set('name', 'image.png');
+        $product = $this->nativeMapper->find(1);
+        $product->title = 'Product 2';
+        $product->fields->featured_image_id = 3;
 
-        $this->assertTrue($this->nativeMapper->save($product, ['featured_image']));
+        $this->assertTrue($this->nativeMapper->save($product));
 
-        $product = $this->nativeMapper->find(3);
-        $this->assertEquals('abc', $product->get('sku'));
-        $image = $this->foreignMapper->find(3);
-        $this->assertEquals('image.png', $image->get('name'));
+        $product = $this->nativeMapper->find(1);
+        $this->assertEquals('Product 2', $product->title);
+        $this->assertEquals(3, $product->fields->featured_image_id);
     }
 
     public function test_save_without_relations()
     {
-        $this->insertRow('products', ['id' => 3, 'featured_image_id' => 3]);
-        $this->insertRow('images', ['id' => 3, 'name' => 'img.jpg']);
+        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
+        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
 
-        $product = $this->nativeMapper->find(3);
-        $product->set('sku', 'abc');
-        $product->get('featured_image')->set('name', 'image.png');
+        $product = $this->nativeMapper->find(1);
+        $product->title = 'Product 2';
+        $product->fields->featured_image_id = 3;
 
         $this->assertTrue($this->nativeMapper->save($product, false));
 
-        $product = $this->nativeMapper->find(3);
-        $this->assertEquals('abc', $product->get('sku'));
-        $image = $this->foreignMapper->find(3);
-        $this->assertEquals('img.jpg', $image->get('name'));
+        $product = $this->nativeMapper->find(1);
+        $this->assertEquals('Product 2', $product->title);
+        $this->assertEquals(2, $product->fields->featured_image_id);
     }
 
     public function test_join_with() {
         $query = $this->nativeMapper->newQuery()
-                                    ->joinWith('featured_image');
+                                    ->joinWith('fields');
 
         // the featured_image is not a real one-to-one relation
         $expectedStatement = <<<SQL
 SELECT
-    products.*
+    content.*
 FROM
-    products
-    INNER JOIN (
+    content
+        INNER JOIN     (
     SELECT
-        images.*
+        content_products.*
     FROM
-        images
-    ) AS featured_image ON products.id = images.id
+        content_products
+    ) AS fields ON content.id = fields.content_id
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());

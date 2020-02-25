@@ -60,7 +60,7 @@ class OrmTest extends BaseTestCase
     public function test_exception_thrown_on_unknown_mapper()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->orm->get('products');
+        $this->orm->get('pages');
     }
 
     public function test_exception_thrown_on_invalid_mapper_factory()

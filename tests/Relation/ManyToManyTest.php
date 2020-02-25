@@ -37,9 +37,9 @@ class ManyToManyTest extends BaseTestCase
 
         $expectedStatement = <<<SQL
 SELECT
-    products.*
+    content.*
 FROM
-    products
+    content
     INNER JOIN (
     SELECT
         tags.*,
@@ -50,7 +50,7 @@ FROM
             INNER JOIN products_tags ON tags.id = products_tags.tag_id
     ORDER BY
         position ASC
-    ) AS tags ON products.id = tags.id
+    ) AS tags ON content.id = tags.id
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
@@ -59,12 +59,15 @@ SQL;
     public function test_query_callback()
     {
         $relation = new ManyToMany('tags', $this->nativeMapper, $this->foreignMapper, [
+            RelationConfig::THROUGH_TABLE   => 'products_tags',
+            RelationConfig::THROUGH_NATIVE_COLUMN   => 'product_id',
+            RelationConfig::THROUGH_COLUMNS => ['position'],
             RelationConfig::QUERY_CALLBACK => function (Query $query) {
                 return $query->where('status', 'active');
             }
         ]);
 
-        $tracker = new Tracker($this->nativeMapper, [
+        $tracker = new Tracker([
             ['id' => 10],
             ['id' => 11],
         ]);
@@ -72,7 +75,7 @@ SQL;
 
         $expectedSql = <<<SQL
 SELECT
-    tags.*, products_tags.product_id
+    tags.*, products_tags.position AS pivot_position, products_tags.product_id
 FROM
     tags
     INNER JOIN products_tags ON tags.id = products_tags.tag_id
@@ -91,10 +94,12 @@ SQL;
     public function test_query_guards()
     {
         $relation = new ManyToMany('category', $this->nativeMapper, $this->foreignMapper, [
+            RelationConfig::THROUGH_TABLE   => 'products_tags',
+            RelationConfig::THROUGH_NATIVE_COLUMN   => 'product_id',
             RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
-        $tracker = new Tracker($this->nativeMapper, [
+        $tracker = new Tracker([
             ['id' => 10],
             ['id' => 11],
         ]);
@@ -168,6 +173,8 @@ SQL;
 
         $tag = $this->foreignMapper->find(1);
         $this->assertNull($tag);
+        $this->assertRowDeleted('products_tags', 'product_id = 1 AND tag_id = 1');
+        $this->assertRowDeleted('products_tags', 'product_id = 1 AND tag_id = 2');
     }
 
     public function test_delete_with_cascade_false()
@@ -184,7 +191,16 @@ SQL;
         $this->assertNotNull($tag);
     }
 
+    public function test_aggregates()
+    {
+        $this->populateDb();
 
+        $product = $this->nativeMapper->find(1, ['tags_count']);
+
+        $this->assertEquals(3, count($this->connectionLocator->getQueries()));
+        $this->assertEquals(2, $product->tags_count);
+        $this->assertEquals(2, $product->tags_count);
+    }
 
     public function test_save_with_relations()
     {
@@ -240,7 +256,11 @@ SQL;
             [1, 'tag_1'],
             [2, 'tag_2'],
         ]);
-        $this->insertRows('products', ['id', 'category_id', 'sku', 'price'], [
+        $this->insertRows('content', ['id', 'content_type', 'title', 'description'], [
+            [1, 'product', 'Product 1', 'Product description 1'],
+            [2, 'product', 'Product 2', 'Product description 2'],
+        ]);
+        $this->insertRows('content_products', ['content_id', 'category_id', 'sku', 'price'], [
             [1, 10, 'abc', 10],
             [2, 10, 'xyz', 20],
         ]);

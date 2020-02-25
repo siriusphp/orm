@@ -20,6 +20,10 @@ class BaseTestCase extends TestCase
      * @var Connection
      */
     protected $connection;
+    /**
+     * @var \Atlas\Pdo\ConnectionLocator|ConnectionLocator
+     */
+    protected $connectionLocator;
 
     public function setUp(): void
     {
@@ -32,10 +36,12 @@ class BaseTestCase extends TestCase
         }
 
         $this->connection = $connection;
-        $connection->logQueries();
         $connectionLocator = ConnectionLocator::new($this->connection);
+        $this->connectionLocator = $connectionLocator;
         $this->orm         = new Orm($connectionLocator);
         $this->createTables(getenv('DB_ENGINE') ? getenv('DB_ENGINE') : 'generic');
+        $this->loadMappers();
+        $connectionLocator->logQueries();
     }
 
     public function createTables($fileName = 'generic')
@@ -51,6 +57,7 @@ class BaseTestCase extends TestCase
         $this->orm->register('tags', $this->getMapperConfig('tags'));
         $this->orm->register('categories', $this->getMapperConfig('categories'));
         $this->orm->register('products', $this->getMapperConfig('products'));
+        $this->orm->register('content_products', $this->getMapperConfig('content_products'));
 
     }
 

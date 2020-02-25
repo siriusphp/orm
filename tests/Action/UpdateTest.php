@@ -12,45 +12,39 @@ class UpdateTest extends BaseTestCase
 {
     public function test_entity_is_updated()
     {
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
-            MapperConfig::GUARDS      => ['category_id' => 10]
-        ]));
+        $mapper = $this->orm->get('products');
 
-        $product = $this->mapper->newEntity(['sku' => 'abc', 'price' => 10.5, 'category_id' => 20]);
-        $this->mapper->save($product);
+        $product = $mapper->newEntity(['title' => 'Product 1']);
+        $mapper->save($product);
 
         // reload after insert
-        $product = $this->mapper->find($product->getPk());
-        $this->assertEquals(10.5, $product->get('price'));
-        $product->set('price', 100);
-        $this->mapper->save($product);
+        $product = $mapper->find($product->getPk());
+        $product->description = 'Description product 1';
+        $mapper->save($product);
 
         // reload after save
-        $product = $this->mapper->find($product->getPk());
-        $this->assertEquals(100, $product->get('price'));
-        // verify guards
-        $this->assertEquals(10, $product->get('category_id'));
+        $product = $mapper->find($product->getPk());
+        $this->assertEquals('Description product 1', $product->description);
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistenceState());
     }
 
     public function test_entity_is_reverted()
     {
 
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
+        $mapper = Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE     => 'content',
+            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
+            MapperConfig::GUARDS    => ['content_type' => 'product'],
             MapperConfig::BEHAVIOURS  => [new \Sirius\Orm\Tests\Behaviour\FakeThrowsException()]
         ]));
 
-        $this->insertRow('products', ['sku' => 'abc', 'price' => 10.5, 'category_id' => 20]);
+        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
 
-        $product = $this->mapper->find(1);
+        $product = $mapper->find(1);
+        $product->title = 'Product 2';
 
         $this->expectException(\Exception::class);
-        $this->mapper->save($product);
+        $mapper->save($product);
+        $this->assertEquals(StateEnum::CHANGED, $product->getPersistenceState());
     }
 }

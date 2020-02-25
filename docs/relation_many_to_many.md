@@ -57,6 +57,11 @@ Defaults to `pivot_`.
 > - I don't know about other ORMs but Eloquent forces you to use the `->pivot` property of a foreign entity to do that. 
 With Sirius Orm you can do just this: `$product->tags[0]->pivot_position = 10;`
 
+> ##### `aggregates` / `RelationConfig::AGGREGATES`
+
+> - here you have a list of aggregated values that can be eager/lazy loaded to an entity (count, average, sums)
+> - check the [relation aggregates](relation_aggregate.md) page for more details
+
 
 ## Defining a many-to-many relation
 

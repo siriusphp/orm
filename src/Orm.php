@@ -41,7 +41,7 @@ class Orm implements MapperLocator
     public function __construct(
         ConnectionLocator $connectionLocator,
         CastingManager $castingManager = null
-    ){
+    ) {
         $this->connectionLocator = $connectionLocator;
 
         if (! $castingManager) {
@@ -80,7 +80,7 @@ class Orm implements MapperLocator
             unset($this->lazyMappers[$name]);
         }
 
-        if ( ! isset($this->mappers[$name]) || ! $this->mappers[$name]) {
+        if (! isset($this->mappers[$name]) || ! $this->mappers[$name]) {
             throw new InvalidArgumentException(sprintf('Mapper named %s is not registered', $name));
         }
 

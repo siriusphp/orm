@@ -6,6 +6,10 @@ use Sirius\Orm\Relation\RelationConfig;
 return MapperConfig::fromArray([
     MapperConfig::TABLE     => 'images',
     MapperConfig::COLUMNS   => ['id', 'name', 'folder'],
+    MapperConfig::CASTS     => [
+        'id' => 'int',
+        'content_id' => 'int'
+    ],
     MapperConfig::RELATIONS => [
         'products_where_featured' => [
             RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_MANY,

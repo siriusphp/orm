@@ -76,4 +76,3 @@ You can use the `RelationConfig` class constants to make sure you're not making 
 > - this is for situations where the _foreign guards_ option is not enough you can use a function to executed on the query before retrieving the related entities
 > - unlike the _foreign guards_ which are applied on subsequent SAVE operations the _query callback_ is for retrieval only. 
 You can use this for sorting or limiting the results. 
-

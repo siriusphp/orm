@@ -12,43 +12,37 @@ class InsertTest extends BaseTestCase
 {
     public function test_entity_is_inserted()
     {
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
-            MapperConfig::GUARDS      => ['category_id' => 10]
-        ]));
+        $mapper = $this->orm->get('products');
 
-        $product = $this->mapper->newEntity(['sku' => 'abc', 'price' => 10.5, 'category_id' => 20]);
+        $product = $mapper->newEntity(['title' => 'Product 1']);
 
         $this->assertNull($product->getPk());
 
-        $this->mapper->save($product);
+        $mapper->save($product);
 
         $this->assertNotNull($product->getPk());
 
-        // verify guards
-        $product = $this->mapper->find($product->getPk());
-        $this->assertEquals(10, $product->get('category_id'));
+        $product = $mapper->find($product->getPk());
+        $this->assertEquals('Product 1', $product->title);
     }
 
     public function test_entity_is_reverted()
     {
 
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
+        $mapper = Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE     => 'content',
+            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
+            MapperConfig::GUARDS    => ['content_type' => 'product'],
             MapperConfig::BEHAVIOURS  => [new \Sirius\Orm\Tests\Behaviour\FakeThrowsException()]
         ]));
 
         $this->expectException(\Exception::class);
 
-        $product = $this->mapper->newEntity(['sku' => 'abc', 'price' => 10.5, 'category_id' => 20]);
+        $product = $mapper->newEntity(['title' => 'Product 1']);
 
         $this->assertNull($product->getPk());
 
-        $this->mapper->save($product);
+        $mapper->save($product);
 
         $this->assertNull($product->getPk());
     }

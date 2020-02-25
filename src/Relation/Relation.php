@@ -9,7 +9,7 @@ use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\DetachEntities;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Entity\EntityInterface;
-use Sirius\Orm\Entity\LazyValueLoader;
+use Sirius\Orm\Entity\LazyRelation;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\QueryHelper;
@@ -79,6 +79,14 @@ abstract class Relation
     }
 
     /**
+     * @return array
+     */
+    public function getKeyPairs(): array
+    {
+        return $this->keyPairs;
+    }
+
+    /**
      * Checks if a native entity belongs and a foreign entity belong together according to this relation
      * It verifies if the attributes are properly linked
      *
@@ -89,6 +97,9 @@ abstract class Relation
      */
     public function entitiesBelongTogether(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
+        /**
+         * @todo make this method protected
+         */
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
             $foreignKeyValue = $this->foreignMapper->getEntityAttribute($foreignEntity, $foreignCol);
@@ -150,9 +161,9 @@ abstract class Relation
 
     abstract public function joinSubselect(Query $query, string $reference);
 
-    public function attachLazyValueToEntity(EntityInterface $entity, Tracker $tracker)
+    public function attachLazyRelationToEntity(EntityInterface $entity, Tracker $tracker)
     {
-        $valueLoader = new LazyValueLoader($entity, $tracker, $this);
+        $valueLoader = new LazyRelation($entity, $tracker, $this);
         $this->nativeMapper->setEntityAttribute($entity, $this->name, $valueLoader);
     }
 
@@ -292,7 +303,7 @@ abstract class Relation
         return QueryHelper::joinCondition(
             $this->nativeMapper->getTableAlias(true),
             $this->getOption(RelationConfig::NATIVE_KEY),
-            $this->foreignMapper->getTableAlias(true),
+            $this->name,
             $this->getOption(RelationConfig::FOREIGN_KEY)
         );
     }

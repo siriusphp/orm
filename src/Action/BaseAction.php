@@ -110,6 +110,25 @@ abstract class BaseAction implements ActionInterface
         }
     }
 
+    protected function getConditions()
+    {
+        $entityPk = (array)$this->mapper->getPrimaryKey();
+        $conditions = [];
+        foreach ($entityPk as $col) {
+            $val = $this->mapper->getEntityAttribute($this->entity, $col);
+            if ($val) {
+                $conditions[$col] = $val;
+            }
+        }
+
+        // not enough columns? reset
+        if (count($conditions) != count($entityPk)) {
+            return [];
+        }
+
+        return $conditions;
+    }
+
     public function run($calledByAnotherAction = false)
     {
         $executed = [];
@@ -150,7 +169,7 @@ abstract class BaseAction implements ActionInterface
 
     public function revert()
     {
-        throw new \BadMethodCallException(sprintf('%s must implement `revert()`', get_class($this)));
+        return; // each action implements it's own logic if necessary
     }
 
     protected function undo(array $executed)
