@@ -7,7 +7,7 @@ use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
-use Sirius\Orm\Behaviours\BehaviourInterface;
+use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Orm\Entity\EntityInterface;
@@ -90,7 +90,7 @@ class Mapper
 
     /**
      * List of behaviours to be attached to the mapper
-     * @var array[BehaviourInterface]
+     * @var BehaviourInterface[]
      */
     protected $behaviours = [];
 
@@ -136,7 +136,7 @@ class Mapper
             $mapper->casts = $mapperConfig->casts;
         }
 
-        if ($mapperConfig->relations) {
+        if (!empty($mapperConfig->relations)) {
             $mapper->relations = array_merge($mapper->relations, $mapperConfig->relations);
         }
 
@@ -144,7 +144,7 @@ class Mapper
             $mapper->entityClass = $mapperConfig->entityClass;
         }
 
-        if ($mapperConfig->behaviours && ! empty($mapperConfig->behaviours)) {
+        if (isset($mapperConfig->behaviours) && ! empty($mapperConfig->behaviours)) {
             $mapper->use(...$mapperConfig->behaviours);
         }
 
@@ -233,23 +233,23 @@ class Mapper
         $mapper = $this;
 
         $singular = Inflector::singularize($this->getTableAlias(true));
-        $castingManager->register($singular, function ($value) use ($mapper, $castingManager) {
+        $castingManager->register($singular, function ($value) use ($mapper) {
             if ($value instanceof $this->entityClass) {
                 return $value;
             }
 
-            return $value !== null ? $mapper->newEntity($value, $castingManager) : null;
+            return $value !== null ? $mapper->newEntity($value) : null;
         });
 
         $plural = $this->getTableAlias(true);
-        $castingManager->register($plural, function ($values) use ($mapper, $castingManager) {
+        $castingManager->register($plural, function ($values) use ($mapper) {
             if ($values instanceof Collection) {
                 return $values;
             }
             $collection = new Collection();
             if (is_array($values)) {
                 foreach ($values as $value) {
-                    $collection->add($mapper->newEntity($value, $castingManager));
+                    $collection->add($mapper->newEntity($value));
                 }
             }
 

@@ -7,8 +7,10 @@ use Sirius\Orm\Entity\StateEnum;
 
 class SoftDelete extends Delete
 {
-    private $entityId;
-    private $entityState;
+    /**
+     * @var int
+     */
+    protected $now;
 
     protected function execute()
     {
