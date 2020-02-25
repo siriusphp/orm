@@ -529,7 +529,7 @@ class Mapper
         }
     }
 
-    public function newSaveAction(EntityInterface $entity, $options): BaseAction
+    public function newSaveAction(EntityInterface $entity, $options): Update
     {
         if (! $this->getEntityAttribute($entity, $this->primaryKey)) {
             $action = new Insert($this, $entity, $options);

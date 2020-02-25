@@ -33,8 +33,8 @@ class OneToOne extends OneToMany
         if (! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
-            $nativeEntity  = $action->getEntity();
-            $foreignEntity = $nativeEntity->get($this->name);
+            $foreignEntity = $this->nativeMapper
+                                  ->getEntityAttribute($action->getEntity(), $this->name);
 
             if ($foreignEntity) {
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));

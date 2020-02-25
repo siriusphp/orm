@@ -27,7 +27,6 @@ class ManyToOne extends Relation
 
     public function joinSubselect(Query $query, string $reference)
     {
-        $tableRef = $this->foreignMapper->getTableAlias(true);
         $subselect = $query->subSelectForJoinWith()
                            ->from($this->foreignMapper->getTable())
                            ->columns($this->foreignMapper->getTable() . '.*')
@@ -89,7 +88,6 @@ class ManyToOne extends Relation
         $foreignEntity->setPersistenceState(StateEnum::SYNCHRONIZED);
 
         $nativeKey  = (array)$this->getOption(RelationConfig::NATIVE_KEY);
-        $foreignKey = (array)$this->getOption(RelationConfig::FOREIGN_KEY);
 
         foreach ($nativeKey as $k => $col) {
             $this->nativeMapper->setEntityAttribute(
@@ -100,7 +98,7 @@ class ManyToOne extends Relation
         }
 
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, null);
-        $state = $foreignEntity->getPersistenceState();
+        $foreignEntity->setPersistenceState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -109,8 +107,8 @@ class ManyToOne extends Relation
         if (! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
-            $nativeEntity  = $action->getEntity();
-            $foreignEntity = $nativeEntity->get($this->name);
+            $foreignEntity = $this->nativeMapper
+                                  ->getEntityAttribute($action->getEntity(), $this->name);
 
             if ($foreignEntity) {
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
