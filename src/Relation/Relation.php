@@ -157,6 +157,8 @@ abstract class Relation
 
     abstract public function attachMatchesToEntity(EntityInterface $nativeEntity, array $queryResult);
 
+    abstract public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity);
+
     abstract public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity);
 
     abstract public function joinSubselect(Query $query, string $reference);
