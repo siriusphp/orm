@@ -10,6 +10,7 @@ use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
+use Sirius\Orm\Entity\Behaviours;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Entity\GenericEntityHydrator;
@@ -89,10 +90,9 @@ class Mapper
     protected $entityDefaultAttributes = [];
 
     /**
-     * List of behaviours to be attached to the mapper
-     * @var BehaviourInterface[]
+     * @var Behaviours
      */
-    protected $behaviours = [];
+    protected $behaviours;
 
     /**
      * @var array
@@ -166,6 +166,7 @@ class Mapper
             $queryBuilder = QueryBuilder::getInstance();
         }
         $this->queryBuilder = $queryBuilder;
+        $this->behaviours = new Behaviours();
     }
 
     public function __call(string $method, array $params)
@@ -191,29 +192,15 @@ class Mapper
      */
     public function use(...$behaviours)
     {
-        if (empty($behaviours)) {
-            return;
-        }
         foreach ($behaviours as $behaviour) {
-            /** @var $behaviour BehaviourInterface */
-            if (isset($this->behaviours[$behaviour->getName()])) {
-                throw new \BadMethodCallException(
-                    sprintf('Behaviour "%s" is already registered', $behaviour->getName())
-                );
-            }
-            $this->behaviours[$behaviour->getName()] = $behaviour;
+            $this->behaviours->add($behaviour);
         }
     }
 
     public function without(...$behaviours)
     {
-        if (empty($behaviours)) {
-            return $this;
-        }
         $mapper = clone $this;
-        foreach ($behaviours as $behaviour) {
-            unset($mapper->behaviours[$behaviour]);
-        }
+        $mapper->behaviours = $this->behaviours->without(...$behaviours);
 
         return $mapper;
     }
@@ -331,14 +318,14 @@ class Mapper
     {
         $entity = $this->entityHydrator->hydrate(array_merge($this->getEntityDefaults(), $data));
 
-        return $this->applyBehaviours(__FUNCTION__, $entity);
+        return $this->behaviours->apply($this, __FUNCTION__, $entity);
     }
 
     public function extractFromEntity(EntityInterface $entity): array
     {
         $data = $this->entityHydrator->extract($entity);
 
-        return $this->applyBehaviours(__FUNCTION__, $data);
+        return $this->behaviours->apply($this, __FUNCTION__, $data);
     }
 
     public function newEntityFromRow(array $data = null, array $load = [], Tracker $tracker = null)
@@ -408,8 +395,6 @@ class Mapper
             }
 
             if (array_key_exists($name, $eagerLoad) || in_array($name, $eagerLoad) || $relation->isEagerLoad()) {
-                #$relation->attachLazyRelationToEntity($entity, $tracker);
-                #$this->getEntityAttribute($entity, $name);
                 $relation->attachMatchesToEntity($entity, $tracker->getResultsForRelation($name));
             } elseif ($relation->isLazyLoad()) {
                 $relation->attachLazyRelationToEntity($entity, $tracker);
@@ -493,7 +478,7 @@ class Mapper
     {
         $query = $this->queryBuilder->newQuery($this);
 
-        return $this->applyBehaviours(__FUNCTION__, $query);
+        return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 
     public function find($pk, array $load = [])
@@ -537,7 +522,7 @@ class Mapper
             $action = new Update($this, $entity, $options);
         }
 
-        return $this->applyBehaviours('save', $action);
+        return $this->behaviours->apply($this, 'save', $action);
     }
 
     public function delete(EntityInterface $entity, $withRelations = true)
@@ -563,7 +548,7 @@ class Mapper
     {
         $action = new Delete($this, $entity, $options);
 
-        return $this->applyBehaviours('delete', $action);
+        return $this->behaviours->apply($this, 'delete', $action);
     }
 
     protected function assertCanPersistEntity($entity)
@@ -576,18 +561,6 @@ class Mapper
                 get_class($entity)
             ));
         }
-    }
-
-    protected function applyBehaviours($target, $result, ...$args)
-    {
-        foreach ($this->behaviours as $behaviour) {
-            $method = 'on' . Helpers\Str::className($target);
-            if (method_exists($behaviour, $method)) {
-                $result = $behaviour->{$method}($this, $result, ...$args);
-            }
-        }
-
-        return $result;
     }
 
     public function getReadConnection()
