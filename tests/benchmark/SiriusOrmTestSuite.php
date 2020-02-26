@@ -1,7 +1,6 @@
 <?php
 
 
-use Atlas\Pdo\Connection;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -27,7 +26,7 @@ class SiriusOrmTestSuite extends AbstractTestSuite
         $loader = require_once __DIR__ . "/../../vendor/autoload.php";
         $loader->add('', __DIR__ . '/../../src');
 
-        $this->con = Connection::new('sqlite::memory:');
+        $this->con = \Sirius\Orm\Connection::new('sqlite::memory:');
         $this->orm = new Orm(ConnectionLocator::new($this->con));
 
         $this->initTables();

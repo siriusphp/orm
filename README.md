@@ -6,7 +6,16 @@
 [![Coverage Status](https://img.shields.io/scrutinizer/coverage/g/siriusphp/orm.svg?style=flat-square)](https://scrutinizer-ci.com/g/siriusphp/orm/code-structure)
 [![Quality Score](https://img.shields.io/scrutinizer/g/siriusphp/orm.svg?style=flat-square)](https://scrutinizer-ci.com/g/siriusphp/orm)
 
-Sirius ORM is a fast yet flexible data mapper solution developed with DX in mind.
+Sirius ORM is a [fast and lightweight](https://github.com/adrianmiu/forked-php-orm-benchmark) yet flexible data mapper solution developed with DX in mind. It offers:
+
+1. Mapping rows to your own entities
+2. Relations and relation aggregates (COUNT/AVERAGE)
+3. Eager-loading & lazy-loading (without increasing the number of queries)
+4. Queries that let you JOIN with relations (not tables)
+5. Deep persistence
+6. Dynamically defined mappers
+7. Speed & low memory usage (no Entity Manager)
+8. 90+% code coverage
 
 ### Installation
 
