@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use Atlas\Pdo\Connection;
+use Sirius\Orm\Connection;
 use PHPUnit\Framework\TestCase;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Orm;

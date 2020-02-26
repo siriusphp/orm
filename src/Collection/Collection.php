@@ -26,7 +26,8 @@ class Collection extends ArrayCollection
 
     protected function castElement($data)
     {
-        return $this->castingFunction ? $this->castingFunction($data) : $data;
+        $castFunction = $this->castingFunction;
+        return $castFunction ? call_user_func($castFunction, $data) : $data;
     }
 
     public function add($element)

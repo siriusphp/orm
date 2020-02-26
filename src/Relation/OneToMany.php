@@ -47,7 +47,6 @@ class OneToMany extends Relation
 
     public function joinSubselect(Query $query, string $reference)
     {
-        $tableRef = $this->foreignMapper->getTableAlias(true);
         $subselect = $query->subSelectForJoinWith()
                            ->columns($this->foreignMapper->getTable() . '.*')
                            ->from($this->foreignMapper->getTable())

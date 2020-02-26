@@ -40,4 +40,6 @@ trait HasAggregates
 
         return $this->aggregates;
     }
+
+    abstract public function getOption($name);
 }

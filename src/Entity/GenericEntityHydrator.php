@@ -10,7 +10,7 @@ use Sirius\Orm\Mapper;
 class GenericEntityHydrator implements HydratorInterface
 {
     /**
-     * @var $castingManager
+     * @var CastingManager
      */
     protected $castingManager;
 

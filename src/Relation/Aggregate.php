@@ -11,6 +11,19 @@ use Sirius\Orm\Query;
 
 class Aggregate
 {
+    /**
+     * @var string
+     */
+    protected $name;
+    /**
+     * @var Relation
+     */
+    protected $relation;
+    /**
+     * @var array
+     */
+    protected $options;
+
     public function __construct(string $name, Relation $relation, array $options)
     {
         $this->name = $name;
@@ -50,7 +63,6 @@ class Aggregate
 
     public function attachAggregateToEntity(EntityInterface $entity, array $results)
     {
-        $keys = $this->relation->getKeyPairs();
         $found = null;
         foreach ($results as $row) {
             if ($this->entityMatchesRow($entity, $row)) {

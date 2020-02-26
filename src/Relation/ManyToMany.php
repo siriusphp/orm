@@ -111,7 +111,6 @@ class ManyToMany extends Relation
 
     public function joinSubselect(Query $query, string $reference)
     {
-        $tableRef  = $this->foreignMapper->getTableAlias(true);
         $subselect = $query->subSelectForJoinWith()
                            ->from($this->foreignMapper->getTable())
                            ->columns($this->foreignMapper->getTable() . '.*')
@@ -194,7 +193,6 @@ class ManyToMany extends Relation
     protected function addActionOnDelete(BaseAction $action)
     {
         $nativeEntity       = $action->getEntity();
-        $nativeEntityKey    = $nativeEntity->getPk();
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         // no cascade delete? treat as save so we can process the changes
@@ -220,7 +218,6 @@ class ManyToMany extends Relation
     {
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
-        /** @var Collection $foreignEntities */
         $foreignEntities = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
         if (! $foreignEntities) {
             return;

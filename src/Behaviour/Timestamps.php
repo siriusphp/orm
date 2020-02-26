@@ -31,7 +31,7 @@ class Timestamps implements BehaviourInterface
         return 'timestamps';
     }
 
-    public function onSave(Mapper $mapper, ActionInterface $action)
+    public function onSave(/** @scrutinizer ignore-unused */Mapper $mapper, ActionInterface $action)
     {
         if ($action instanceof Insert) {
             if ($this->createColumn) {

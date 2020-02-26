@@ -135,9 +135,12 @@ class Query extends Select
         return $this->mapper->newPaginatedCollectionFromRows($this->fetchAll(), $total, $perPage, $page, $this->load);
     }
 
-    public function chunk($count, $callback)
+    /**
+     * @todo implement this feature
+     */
+    /*public function chunk($count, $callback)
     {
-    }
+    }*/
 
     public function count()
     {

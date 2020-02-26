@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
-use Atlas\Pdo\Connection;
-
 class ConnectionLocator extends \Atlas\Pdo\ConnectionLocator
 {
     public static function new(...$args)
