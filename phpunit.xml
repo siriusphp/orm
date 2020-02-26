@@ -1,4 +1,4 @@
-<phpunit bootstrap="bootstrap.php"
+<phpunit bootstrap="tests/bootstrap.php"
          backupGlobals="false"
          backupStaticAttributes="false"
          colors="true"
@@ -10,17 +10,17 @@
          stopOnFailure="false"
          stopOnError="false">
     <logging>
-        <log type="coverage-clover" target="./../build/logs/clover.xml"/>
-        <log type="coverage-html" target="./../build/coverage/"/>
+        <log type="coverage-clover" target="./build/logs/clover.xml"/>
+        <log type="coverage-html" target="./build/coverage/"/>
     </logging>
     <testsuites>
         <testsuite name="sirius/orm">
-            <directory>./</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./../src</directory>
+            <directory suffix=".php">./src</directory>
         </whitelist>
     </filter>
 </phpunit>
