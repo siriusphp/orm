@@ -132,6 +132,7 @@ SQL;
             ->load('tags')
             ->get();
 
+        $this->assertExpectedQueries(3); // products + fields + tags
         $tag1 = $products[0]->get('tags')[0];
         $tag2 = $products[1]->get('tags')[0];
         $this->assertNotNull($tag1);
@@ -147,6 +148,7 @@ SQL;
             ->newQuery()
             ->get();
 
+        $this->assertExpectedQueries(2); // products + fields
         $tag1 = $products[0]->get('tags')[0];
         $tag2 = $products[1]->get('tags')[0];
         $this->assertNotNull($tag1);
@@ -154,6 +156,7 @@ SQL;
         $this->assertEquals(1, $tag1->get('pivot_position'));
         $this->assertEquals(1, $tag2->get('pivot_position'));
         $this->assertEquals($tag1->getPk(), $tag2->getPk()); // the tags are not the same object (due to the pivot) but they have the same ID
+        $this->assertExpectedQueries(3); // products + fields + tags
     }
 
     public function test_delete_with_cascade_true()
@@ -197,7 +200,7 @@ SQL;
 
         $product = $this->nativeMapper->find(1, ['tags_count']);
 
-        $this->assertEquals(3, count($this->connectionLocator->getQueries()));
+        $this->assertExpectedQueries(3);
         $this->assertEquals(2, $product->tags_count);
         $this->assertEquals(2, $product->tags_count);
     }

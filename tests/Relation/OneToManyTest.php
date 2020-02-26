@@ -120,6 +120,7 @@ SQL;
             ->load('products')
             ->first();
 
+        $this->assertExpectedQueries(2); // category + products
         $this->assertEquals(3, count($category->get('products')));
     }
 
@@ -131,7 +132,9 @@ SQL;
             ->newQuery()
             ->first();
 
+        $this->assertExpectedQueries(1); // category only
         $this->assertEquals(3, count($category->get('products')));
+        $this->assertExpectedQueries(2); // category + products
     }
 
     public function test_delete_with_cascade_true()
@@ -234,7 +237,7 @@ SQL;
 
         $this->assertEquals(3, $category->products_count);
         $this->assertEquals(3, $category->products_count);
-        $this->assertEquals(2, count($this->connectionLocator->getQueries()));
+        $this->assertExpectedQueries(2);
     }
 
     protected function populateDb(): void

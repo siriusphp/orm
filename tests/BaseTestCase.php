@@ -73,6 +73,11 @@ class BaseTestCase extends TestCase
         $this->connection->perform($insert->getStatement(), $insert->getBindValues());
     }
 
+    public function assertExpectedQueries($expected)
+    {
+        $this->assertEquals($expected, count($this->connectionLocator->getQueries()));
+    }
+
     public function assertRowDeleted($table, ...$conditions)
     {
         $select = new Select($this->connection);

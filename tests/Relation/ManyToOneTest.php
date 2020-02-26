@@ -120,8 +120,7 @@ SQL;
             ->load('category', 'category.parent')
             ->get();
 
-        // 3 queries: one for products, one for categories, one for category parents
-        $this->assertEquals(3, count($this->connectionLocator->getQueries()));
+        $this->assertExpectedQueries(3); // products + category + category parent
         $category1 = $products[0]->get('category');
         $category2 = $products[1]->get('category');
         $this->assertNotNull($category1);
@@ -139,6 +138,7 @@ SQL;
             ->newQuery()
             ->get();
 
+        $this->assertExpectedQueries(1); // products + category + category parent
         $category1 = $products[0]->get('category');
         $category2 = $products[1]->get('category');
         $this->assertNotNull($category1);
@@ -146,6 +146,7 @@ SQL;
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
         $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
+        $this->assertExpectedQueries(3); // products + category + category parent
     }
 
     public function test_delete_with_cascade_true()
