@@ -27,7 +27,7 @@ trait HasAggregates
         }
 
         foreach ($aggregatesList as $name => $options) {
-            $agg = new Aggregate($name, $this, $options);
+            $agg = new Aggregate($name, /** @scrutinizer ignore-type */ $this, $options);
             $aggregates[$name] = $agg;
         }
 

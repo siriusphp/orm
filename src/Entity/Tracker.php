@@ -69,26 +69,7 @@ class Tracker
             return $this->relationResults[$name];
         }
 
-        /** @var Relation $relation */
-        $relation      = $this->relations[$name];
-        /** @var Query $query */
-        $query         = $relation->getQuery($this);
-
-        $queryCallback = $this->relationCallback[$name] ?? null;
-        if ($queryCallback && is_callable($queryCallback)) {
-            $query = $queryCallback($query);
-        }
-
-        $queryNextLoad = $this->relationNextLoad[$name] ?? [];
-        if ($queryNextLoad && !empty($queryNextLoad)) {
-            foreach ($queryNextLoad as $next => $callback) {
-                $query = $query->load([$next => $callback]);
-            }
-        }
-
-        $results = $query->get();
-        $results = $results instanceof Collection ? $results->getValues() : $results;
-        $results = $relation->indexQueryResults($results);
+        $results = $this->queryRelation($name);
 
         $this->relationResults[$name] = $results;
 
@@ -157,5 +138,36 @@ class Tracker
     public function replaceRows(array $entities)
     {
         $this->rows = $entities;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return array
+     */
+    protected function queryRelation($name)
+    {
+        /** @var Relation $relation */
+        $relation = $this->relations[$name];
+        /** @var Query $query */
+        $query = $relation->getQuery($this);
+
+        $queryCallback = $this->relationCallback[$name] ?? null;
+        if ($queryCallback && is_callable($queryCallback)) {
+            $query = $queryCallback($query);
+        }
+
+        $queryNextLoad = $this->relationNextLoad[$name] ?? [];
+        if ($queryNextLoad && ! empty($queryNextLoad)) {
+            foreach ($queryNextLoad as $next => $callback) {
+                $query = $query->load([$next => $callback]);
+            }
+        }
+
+        $results = $query->get();
+        $results = $results instanceof Collection ? $results->getValues() : $results;
+        $results = $relation->indexQueryResults($results);
+
+        return $results;
     }
 }

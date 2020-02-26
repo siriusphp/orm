@@ -87,19 +87,19 @@ class Orm implements MapperLocator
         return $this->mappers[$name];
     }
 
-    public function save($mapperName, EntityInterface $entity, ...$params)
+    public function save($mapperName, EntityInterface $entity, $withRelations = true)
     {
-        return $this->get($mapperName)->save($entity, ...$params);
+        return $this->get($mapperName)->save($entity, $withRelations);
     }
 
-    public function delete($mapperName, EntityInterface $entity, ...$params)
+    public function delete($mapperName, EntityInterface $entity, $withRelations = true)
     {
-        return $this->get($mapperName)->delete($entity, ...$params);
+        return $this->get($mapperName)->delete($entity, $withRelations);
     }
 
-    public function find($mapperName, $id, ...$params)
+    public function find($mapperName, $id, array $load = [])
     {
-        return $this->get($mapperName)->find($id, ...$params);
+        return $this->get($mapperName)->find($id, $load);
     }
 
     public function select($mapperName): Query

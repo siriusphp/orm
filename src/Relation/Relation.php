@@ -13,7 +13,6 @@ use Sirius\Orm\Entity\LazyRelation;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\QueryHelper;
-use Sirius\Orm\LazyLoader;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 use Sirius\Sql\Select;
@@ -155,6 +154,10 @@ abstract class Relation
         }
     }
 
+    abstract protected function addActionOnSave(BaseAction $action);
+
+    abstract protected function addActionOnDelete(BaseAction $action);
+
     abstract public function attachMatchesToEntity(EntityInterface $nativeEntity, array $queryResult);
 
     abstract public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity);
@@ -257,9 +260,14 @@ abstract class Relation
             return $relations;
         }
 
-        $children = Arr::getChildren(array_combine($relations, $relations), $this->name);
+        $arr = array_combine($relations, $relations);
+        if (is_array($arr)) {
+            $children = Arr::getChildren($arr, $this->name);
 
-        return array_keys($children);
+            return array_keys($children);
+        }
+
+        return [];
     }
 
     protected function getExtraColumnsForAction()
