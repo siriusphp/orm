@@ -67,13 +67,9 @@ class OneToMany extends Relation
             return;
         }
 
-        $found = [];
-        foreach ($result as $foreignEntity) {
-            if ($this->entitiesBelongTogether($nativeEntity, $foreignEntity)) {
-                $found[] = $foreignEntity;
-                $this->attachEntities($nativeEntity, $foreignEntity);
-            }
-        }
+        $nativeId = $this->getEntityId($this->nativeMapper, $nativeEntity, array_keys($this->keyPairs));
+
+        $found = $result[$nativeId] ?? [];
 
         $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, new Collection($found));
     }

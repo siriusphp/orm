@@ -41,15 +41,16 @@ class ManyToOne extends Relation
 
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
-        $found = null;
-        foreach ($result as $foreignEntity) {
-            if ($this->entitiesBelongTogether($nativeEntity, $foreignEntity)) {
-                $found = $foreignEntity;
-                break;
-            }
+        // no point in linking entities if the native one is deleted
+        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
+            return;
         }
 
-        $this->attachEntities($nativeEntity, $found);
+        $nativeId = $this->getEntityId($this->nativeMapper, $nativeEntity, array_keys($this->keyPairs));
+
+        $found = $result[$nativeId] ?? [];
+
+        $this->attachEntities($nativeEntity, $found[0] ?? null);
     }
 
     /**

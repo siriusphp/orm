@@ -69,12 +69,16 @@ class Tracker
             return $this->relationResults[$name];
         }
 
+        /** @var Relation $relation */
+        $relation      = $this->relations[$name];
         /** @var Query $query */
-        $query         = $this->relations[$name]->getQuery($this);
+        $query         = $relation->getQuery($this);
+
         $queryCallback = $this->relationCallback[$name] ?? null;
         if ($queryCallback && is_callable($queryCallback)) {
             $query = $queryCallback($query);
         }
+
         $queryNextLoad = $this->relationNextLoad[$name] ?? [];
         if ($queryNextLoad && !empty($queryNextLoad)) {
             foreach ($queryNextLoad as $next => $callback) {
@@ -82,8 +86,11 @@ class Tracker
             }
         }
 
-        $results                      = $query->get();
-        $this->relationResults[$name] = $results instanceof Collection ? $results->getValues() : $results;
+        $results = $query->get();
+        $results = $results instanceof Collection ? $results->getValues() : $results;
+        $results = $relation->indexQueryResults($results);
+
+        $this->relationResults[$name] = $results;
 
         return $this->relationResults[$name];
     }

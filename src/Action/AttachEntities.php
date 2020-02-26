@@ -51,7 +51,7 @@ class AttachEntities implements ActionInterface
         /**
          * @todo store current attribute values
          */
-        $this->relation->attachMatchesToEntity($this->nativeEntity, [$this->foreignEntity]);
+        $this->relation->attachEntities($this->nativeEntity, $this->foreignEntity);
         $this->maybeUpdatePivotRow();
     }
 

@@ -142,28 +142,26 @@ class ManyToMany extends Relation
 
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
-        $found = [];
-        foreach ($result as $foreignEntity) {
-            if ($this->entitiesBelongTogether($nativeEntity, $foreignEntity)) {
-                $found[] = $foreignEntity;
-                $this->attachEntities($nativeEntity, $foreignEntity);
-            }
-        }
+        $nativeId = $this->getEntityId($this->nativeMapper, $nativeEntity, array_keys($this->keyPairs));
 
-        if ($this->entityHasRelationLoaded($nativeEntity)) {
+        $found = $result[$nativeId] ?? [];
+
+        if (!empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
             /** @var Collection $collection */
             $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
-            if (! $collection->contains($foreignEntity)) {
-                $collection->add($foreignEntity);
+            foreach ($found as $foreignEntity) {
+                if (! $collection->contains($foreignEntity)) {
+                    $collection->add($foreignEntity);
+                }
             }
         } else {
-            $found = new Collection($found);
-            $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
+            $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, new Collection($found));
         }
     }
 
     protected function entityHasRelationLoaded(EntityInterface $entity)
     {
+        // lazy loaded relations are not included in `getArrayCopy()`
         return array_key_exists($this->name, $entity->getArrayCopy());
     }
 

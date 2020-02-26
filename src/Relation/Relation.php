@@ -183,6 +183,30 @@ abstract class Relation
         return $query;
     }
 
+    public function indexQueryResults(array $entities)
+    {
+        $result = [];
+
+        foreach ($entities as $entity) {
+            $entityId = $this->getEntityId($this->foreignMapper, $entity, array_values($this->keyPairs));
+            if (!isset($result[$entityId])) {
+                $result[$entityId] = [];
+            }
+            $result[$entityId][] = $entity;
+        }
+
+        return $result;
+    }
+
+    protected function getEntityId(Mapper $mapper, EntityInterface $entity, array $keyColumns)
+    {
+        $entityKeys = [];
+        foreach ($keyColumns as $col) {
+            $entityKeys[] = $mapper->getEntityAttribute($entity, $col);
+        }
+        return implode('-', $entityKeys);
+    }
+
     /**
      * Method used by `entitiesBelongTogether` to check
      * if a foreign entity belongs to the native entity

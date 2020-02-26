@@ -15,16 +15,11 @@ class OneToOne extends OneToMany
             return;
         }
 
-        $found = null;
-        foreach ($result as $foreignEntity) {
-            if ($this->entitiesBelongTogether($nativeEntity, $foreignEntity)) {
-                $found = $foreignEntity;
-                $this->attachEntities($nativeEntity, $foreignEntity);
-                break;
-            }
-        }
+        $nativeId = $this->getEntityId($this->nativeMapper, $nativeEntity, array_keys($this->keyPairs));
 
-        $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found);
+        $found = $result[$nativeId] ?? [];
+
+        $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found[0] ?? null);
     }
 
     protected function addActionOnDelete(BaseAction $action)
