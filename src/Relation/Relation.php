@@ -129,24 +129,20 @@ abstract class Relation
 
     protected function getKeyColumn($name, $column)
     {
-        if (is_array($column)) {
-            $keyColumn = [];
-            foreach ($column as $col) {
-                $keyColumn[] = $name . '_' . $col;
-            }
-
-            return $keyColumn;
+        if (!is_array($column)) {
+            return $name . '_' . $column;
         }
 
-        return $name . '_' . $column;
+        $keyColumn = [];
+        foreach ($column as $col) {
+            $keyColumn[] = $name . '_' . $col;
+        }
+
+        return $keyColumn;
     }
 
     public function addActions(BaseAction $action)
     {
-        if (! $this->cascadeIsAllowedForAction($action)) {
-            return;
-        }
-
         if ($action instanceof Delete) {
             $this->addActionOnDelete($action);
         } elseif ($action instanceof Insert || $action instanceof Update) {
@@ -227,22 +223,6 @@ abstract class Relation
         }
 
         return $pairs;
-    }
-
-    /**
-     * @param BaseAction $action
-     *
-     * @return bool|mixed|null
-     * @see BaseAction::$options
-     */
-    protected function cascadeIsAllowedForAction(BaseAction $action)
-    {
-        $relations = $action->getOption('relations');
-        if (is_array($relations) && ! in_array($this->name, $relations)) {
-            return false;
-        }
-
-        return $relations;
     }
 
     /**
