@@ -36,8 +36,8 @@ class MapperTest extends BaseTestCase
             'price' => '100.343'
         ]);
 
-        $this->assertEquals(100.34, $product->get('value'));
-        $this->assertEquals(10, $product->get('category_id'));
-        $this->assertEquals(20, $product->get('featured_image_id'));
+        $this->assertEquals(100.34, $product->value);
+        $this->assertEquals(10, $product->category_id);
+        $this->assertEquals(20, $product->featured_image_id);
     }
 }

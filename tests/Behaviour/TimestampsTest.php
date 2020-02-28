@@ -27,12 +27,12 @@ class TimestampsTest extends BaseTestCase
 
         $product = $this->mapper->newEntity(['title' => 'Product 1']);
 
-        $this->assertNull($product->get('created_at'));
-        $this->assertNull($product->get('updated_at'));
+        $this->assertNull($product->created_at);
+        $this->assertNull($product->updated_at);
 
         $this->assertTrue($this->mapper->save($product));
 
-        $this->assertNotNull($product->get('created_at'));
-        $this->assertNotNull($product->get('updated_at'));
+        $this->assertNotNull($product->created_at);
+        $this->assertNotNull($product->updated_at);
     }
 }

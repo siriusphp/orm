@@ -14,7 +14,7 @@ class Insert extends Update
 
     protected function execute()
     {
-        $this->entityId    = $this->entity->getPk();
+        $this->entityId    = $this->mapper->getEntityPk($this->entity);
         $this->entityState = $this->entity->getPersistenceState();
 
         $connection = $this->mapper->getWriteConnection();
@@ -30,7 +30,7 @@ class Insert extends Update
         $insertSql->into($this->mapper->getTable())
                   ->columns($columns);
         $insertSql->perform();
-        $this->entity->setPk($connection->lastInsertId());
+        $this->mapper->setEntityPk($this->entity, $connection->lastInsertId());
     }
 
     public function revert()
@@ -38,7 +38,7 @@ class Insert extends Update
         if (! $this->hasRun) {
             return;
         }
-        $this->entity->setPK($this->entityId);
+        $this->mapper->setEntityPk($this->entity, $this->entityId);
         $this->entity->setPersistenceState($this->entityState);
     }
 }

@@ -133,11 +133,11 @@ SQL;
             ->get();
 
         $this->assertExpectedQueries(3); // products + fields + tags
-        $tag1 = $products[0]->get('tags')[0];
-        $tag2 = $products[1]->get('tags')[0];
+        $tag1 = $products[0]->tags[0];
+        $tag2 = $products[1]->tags[0];
         $this->assertNotNull($tag1);
         $this->assertNotNull($tag2);
-        $this->assertEquals($tag1->getPk(), $tag2->getPk());
+        $this->assertEquals($tag1->id, $tag2->id);
     }
 
     public function test_lazy_load()
@@ -149,13 +149,13 @@ SQL;
             ->get();
 
         $this->assertExpectedQueries(2); // products + fields
-        $tag1 = $products[0]->get('tags')[0];
-        $tag2 = $products[1]->get('tags')[0];
+        $tag1 = $products[0]->tags[0];
+        $tag2 = $products[1]->tags[0];
         $this->assertNotNull($tag1);
         $this->assertNotNull($tag2);
-        $this->assertEquals(1, $tag1->get('pivot_position'));
-        $this->assertEquals(1, $tag2->get('pivot_position'));
-        $this->assertEquals($tag1->getPk(), $tag2->getPk()); // the tags are not the same object (due to the pivot) but they have the same ID
+        $this->assertEquals(1, $tag1->pivot_position);
+        $this->assertEquals(1, $tag2->pivot_position);
+        $this->assertEquals($tag1->id, $tag2->id); // the tags are not the same object (due to the pivot) but they have the same ID
         $this->assertExpectedQueries(3); // products + fields + tags
     }
 
@@ -213,23 +213,23 @@ SQL;
             ->newQuery()
             ->first();
 
-        $tag = $product->get('tags')[0];
-        $tag->set('name', 'New tag');
-        $tag->set('pivot_position', 3);
+        $tag = $product->tags[0];
+        $tag->name = 'New tag';
+        $tag->pivot_position = 3;
 
         $this->nativeMapper->save($product);
 
-        $product = $this->nativeMapper->find($product->getPk());
+        $product = $this->nativeMapper->find($product->id);
         $updatedTag = null;
-        foreach ($product->get('tags') as $tag) {
-            if (!$updatedTag && $tag->get('name') == 'New tag') {
+        foreach ($product->tags as $tag) {
+            if (!$updatedTag && $tag->name == 'New tag') {
                 $updatedTag = $tag;
             }
         }
 
         $this->assertNotNull($updatedTag);
-        $this->assertEquals('New tag', $updatedTag->get('name'));
-        $this->assertEquals(3, $updatedTag->get('pivot_position'));
+        $this->assertEquals('New tag', $updatedTag->name);
+        $this->assertEquals(3, $updatedTag->pivot_position);
     }
 
     public function test_save_without_relations()
@@ -240,17 +240,17 @@ SQL;
             ->newQuery()
             ->first();
 
-        $tag = $product->get('tags')[0];
-        $tag->set('name', 'New tag');
-        $tag->set('pivot_position', 3);
+        $tag = $product->tags[0];
+        $tag->name = 'New tag';
+        $tag->pivot_position = 3;
 
         $this->nativeMapper->save($product, false);
 
-        $product = $this->nativeMapper->find($product->getPk());
-        $tag = $product->get('tags')[0];
+        $product = $this->nativeMapper->find($product->id);
+        $tag = $product->tags[0];
 
-        $this->assertEquals('tag_1', $tag->get('name'));
-        $this->assertEquals(1, $tag->get('pivot_position'));
+        $this->assertEquals('tag_1', $tag->name);
+        $this->assertEquals(1, $tag->pivot_position);
     }
 
     protected function populateDb(): void

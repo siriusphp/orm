@@ -121,10 +121,10 @@ SQL;
             ->get();
 
         $this->assertExpectedQueries(3); // products + category + category parent
-        $category1 = $products[0]->get('category');
-        $category2 = $products[1]->get('category');
+        $category1 = $products[0]->category;
+        $category2 = $products[1]->category;
         $this->assertNotNull($category1);
-        $this->assertEquals(10, $category1->getPk());
+        $this->assertEquals(10, $category1->id);
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
         $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
@@ -139,10 +139,10 @@ SQL;
             ->get();
 
         $this->assertExpectedQueries(1); // products + category + category parent
-        $category1 = $products[0]->get('category');
-        $category2 = $products[1]->get('category');
+        $category1 = $products[0]->category;
+        $category2 = $products[1]->category;
         $this->assertNotNull($category1);
-        $this->assertEquals(10, $category1->getPk());
+        $this->assertEquals(10, $category1->id);
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
         $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
@@ -164,7 +164,7 @@ SQL;
 
         $this->assertTrue($this->nativeMapper->delete($product));
 
-        $category = $this->foreignMapper->find($product->get('category_id'));
+        $category = $this->foreignMapper->find($product->category_id);
         $this->assertNull($category);
     }
 
@@ -178,7 +178,7 @@ SQL;
 
         $this->assertTrue($this->nativeMapper->delete($product));
 
-        $category = $this->foreignMapper->find($product->get('category_id'));
+        $category = $this->foreignMapper->find($product->category_id);
         $this->assertNotNull($category);
     }
 
@@ -194,10 +194,10 @@ SQL;
             'name' => 'New Category'
         ]);
 
-        $product->set('category', $category);
+        $product->category = $category;
 
         $this->nativeMapper->save($product);
-        $this->assertEquals($category->getPk(), $product->get('category_id'));
+        $this->assertEquals($category->id, $product->category_id);
     }
 
     public function test_save_with_relations()
@@ -208,12 +208,12 @@ SQL;
             ->newQuery()
             ->first();
 
-        $category = $product->get('category');
-        $category->set('name', 'New category');
+        $category = $product->category;
+        $category->name = 'New category';
 
         $this->nativeMapper->save($product);
-        $category = $this->foreignMapper->find($category->getPk());
-        $this->assertEquals('New category', $category->get('name'));
+        $category = $this->foreignMapper->find($category->id);
+        $this->assertEquals('New category', $category->name);
     }
 
     public function test_save_without_relations()
@@ -224,12 +224,12 @@ SQL;
             ->newQuery()
             ->first();
 
-        $category = $product->get('category');
-        $category->set('name', 'New category');
+        $category = $product->category;
+        $category->name = 'New category';
 
         $this->nativeMapper->save($product, false);
-        $category = $this->foreignMapper->find($category->getPk());
-        $this->assertEquals('Category', $category->get('name'));
+        $category = $this->foreignMapper->find($category->id);
+        $this->assertEquals('Category', $category->name);
     }
 
     protected function populateDb(): void

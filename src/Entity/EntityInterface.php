@@ -5,10 +5,6 @@ namespace Sirius\Orm\Entity;
 
 interface EntityInterface
 {
-    public function getPk();
-
-    public function setPk($val);
-
     public function getPersistenceState();
 
     public function setPersistenceState($state);

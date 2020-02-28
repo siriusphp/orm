@@ -428,12 +428,35 @@ class Mapper
 
     public function setEntityAttribute(EntityInterface $entity, $attribute, $value)
     {
-        return $entity->set($attribute, $value);
+        return $this->entityHydrator->set($entity, $attribute, $value);
     }
 
     public function getEntityAttribute(EntityInterface $entity, $attribute)
     {
-        return $entity->get($attribute);
+        return $this->entityHydrator->get($entity, $attribute);
+    }
+
+    public function setEntityPk(EntityInterface $entity, $value)
+    {
+        if (is_array($this->primaryKey)) {
+            foreach ($this->primaryKey as $k => $col) {
+                $this->entityHydrator->set($entity, $col, $value[$k]);
+            }
+        }
+        return $this->entityHydrator->set($entity, $this->primaryKey, $value);
+    }
+
+    public function getEntityPk(EntityInterface $entity)
+    {
+        if (is_array($this->primaryKey)) {
+            $result = [];
+            foreach ($this->primaryKey as $col) {
+                $result[] = $this->entityHydrator->get($entity, $col);
+            }
+
+            return $result;
+        }
+        return $this->entityHydrator->get($entity, $this->primaryKey);
     }
 
     public function addRelation($name, $relation)

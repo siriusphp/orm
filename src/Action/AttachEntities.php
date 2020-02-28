@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Action;
 
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\Relation\ManyToMany;
 use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Relation\RelationConfig;
@@ -26,14 +27,26 @@ class AttachEntities implements ActionInterface
      * @var string
      */
     protected $actionType;
+    /**
+     * @var Mapper
+     */
+    protected $nativeMapper;
+    /**
+     * @var Mapper
+     */
+    protected $foreignMapper;
 
     public function __construct(
+        Mapper $nativeMapper,
         EntityInterface $nativeEntity,
+        Mapper $foreignMapper,
         EntityInterface $foreignEntity,
         Relation $relation,
         string $actionType
     ) {
+        $this->nativeMapper  = $nativeMapper;
         $this->nativeEntity  = $nativeEntity;
+        $this->foreignMapper = $foreignMapper;
         $this->foreignEntity = $foreignEntity;
         $this->relation      = $relation;
         $this->actionType    = $actionType;
@@ -70,8 +83,8 @@ class AttachEntities implements ActionInterface
 
         $throughNativeColumns = (array) $this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
         $throughForeignColumns = (array) $this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
-        $nativeKey = (array) $this->nativeEntity->getPk();
-        $foreignKey = (array) $this->foreignEntity->getPk();
+        $nativeKey = (array) $this->nativeMapper->getEntityPk($this->nativeEntity);
+        $foreignKey = (array) $this->foreignMapper->getEntityPk($this->foreignEntity);
 
         $delete = new \Sirius\Sql\Delete($conn);
         $delete->from($throughTable);

@@ -121,7 +121,7 @@ SQL;
             ->first();
 
         $this->assertExpectedQueries(2); // category + products
-        $this->assertEquals(3, count($category->get('products')));
+        $this->assertEquals(3, count($category->products));
     }
 
     public function test_lazy_load()
@@ -133,7 +133,7 @@ SQL;
             ->first();
 
         $this->assertExpectedQueries(1); // category only
-        $this->assertEquals(3, count($category->get('products')));
+        $this->assertEquals(3, count($category->products));
         $this->assertExpectedQueries(2); // category + products
     }
 
@@ -148,10 +148,10 @@ SQL;
         $category = $this->nativeMapper
             ->newQuery()
             ->first();
-        $product = $category->get('products')[0];
+        $product = $category->products[0];
 
         $this->assertTrue($this->nativeMapper->delete($category, true));
-        $this->assertNull($category->getPk());
+        $this->assertNull($category->id);
         $this->assertNotNull($product->content_id); // related entities are not deleted via the relations bc possible relation query callback
         $this->assertRowDeleted('content_products', 'content_id', 1);
         $this->assertRowDeleted('content_products', 'content_id', 2);
@@ -165,15 +165,15 @@ SQL;
             ->newQuery()
             ->first();
         /** @var Collection $products */
-        $products = $category->get('products');
-        $products[0]->set('sku', 'sku_1');
+        $products = $category->products;
+        $products[0]->sku = 'sku_1';
         $products->removeElement($products[1]);
 
         $this->assertTrue($this->nativeMapper->delete($category, true));
         // check if the first product was updated
         $product = $this->foreignMapper->find($products[0]->content_id);
         $this->assertNotNull($product);
-        $this->assertEquals('sku_1', $product->get('sku'));
+        $this->assertEquals('sku_1', $product->sku);
     }
 
     public function test_insert()
@@ -188,11 +188,11 @@ SQL;
             'sku' => 'New sku'
         ]);
         /** @var Collection $products */
-        $products = $category->get('products');
+        $products = $category->products;
         $products->add($product);
 
         $this->nativeMapper->save($category);
-        $this->assertEquals($category->getPk(), $product->get('category_id'));
+        $this->assertEquals($category->id, $product->category_id);
     }
 
     public function test_save_with_relations()
@@ -219,12 +219,12 @@ SQL;
             ->newQuery()
             ->first();
         /** @var Collection $products */
-        $products = $category->get('products');
-        $products[0]->set('sku', 'sku_1');
+        $products = $category->products;
+        $products[0]->sku = 'sku_1';
 
         $this->nativeMapper->save($category, false);
         $product = $this->foreignMapper->find($products[0]->content_id);
-        $this->assertEquals('abc', $product->get('sku'));
+        $this->assertEquals('abc', $product->sku);
     }
 
     public function test_aggregates()

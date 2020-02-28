@@ -16,13 +16,13 @@ class InsertTest extends BaseTestCase
 
         $product = $mapper->newEntity(['title' => 'Product 1']);
 
-        $this->assertNull($product->getPk());
+        $this->assertNull($product->id);
 
         $mapper->save($product);
 
-        $this->assertNotNull($product->getPk());
+        $this->assertNotNull($product->id);
 
-        $product = $mapper->find($product->getPk());
+        $product = $mapper->find($product->id);
         $this->assertEquals('Product 1', $product->title);
     }
 
@@ -40,10 +40,10 @@ class InsertTest extends BaseTestCase
 
         $product = $mapper->newEntity(['title' => 'Product 1']);
 
-        $this->assertNull($product->getPk());
+        $this->assertNull($product->id);
 
         $mapper->save($product);
 
-        $this->assertNull($product->getPk());
+        $this->assertNull($product->id);
     }
 }

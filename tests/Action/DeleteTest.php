@@ -22,7 +22,7 @@ class DeleteTest extends BaseTestCase
 
         $mapper->delete($product);
         $this->assertNull($mapper->find(1));
-        $this->assertNull($product->getPk());
+        $this->assertNull($product->id);
         $this->assertEquals(StateEnum::DELETED, $product->getPersistenceState());
     }
 
@@ -44,7 +44,7 @@ class DeleteTest extends BaseTestCase
 
         $this->expectException(FailedActionException::class);
         $mapper->delete($product);
-        $this->assertEquals(1, $product->getPk());
+        $this->assertEquals(1, $product->id);
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistenceState());
     }
 }

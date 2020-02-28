@@ -72,23 +72,7 @@ class GenericEntity implements EntityInterface
         return $this->castingManager->cast($type, $value);
     }
 
-    public function getPk()
-    {
-        /**
-         * @todo implement a way to retrieve the proper PK columns
-         */
-        return $this->get($this->primaryKey);
-    }
-
-    public function setPk($val)
-    {
-        /**
-         * @todo implement a way to retrieve the proper PK columns
-         */
-        $this->set($this->primaryKey, $val);
-    }
-
-    public function set($attribute, $value = null)
+    protected function set($attribute, $value = null)
     {
         $this->preventChangesIfDeleted();
 
@@ -107,7 +91,7 @@ class GenericEntity implements EntityInterface
         return $this;
     }
 
-    public function get($attribute)
+    protected function get($attribute)
     {
         if (! $attribute) {
             return null;

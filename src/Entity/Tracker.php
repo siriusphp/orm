@@ -112,7 +112,7 @@ class Tracker
             $result = [];
             foreach ($columns as $column) {
                 if ($row instanceof GenericEntity) {
-                    $result[] = $row->get($column);
+                    $result[] = $row->{$column};
                 } else {
                     $result[] = $row[$column] ?? null;
                 }
@@ -123,7 +123,7 @@ class Tracker
 
         $column = is_array($columns) ? $columns[0] : $columns;
 
-        return $row instanceof GenericEntity ? $row->get($column) : ($row[$column] ?? null);
+        return $row instanceof GenericEntity ? $row->{$column} : ($row[$column] ?? null);
     }
 
     /**

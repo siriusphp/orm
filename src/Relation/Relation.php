@@ -244,7 +244,9 @@ abstract class Relation
     {
         if ($actionType == 'delete') {
             return new DetachEntities(
+                $this->nativeMapper,
                 $nativeEntity,
+                $this->foreignMapper,
                 $foreignEntity,
                 $this,
                 'save'
@@ -252,7 +254,9 @@ abstract class Relation
         }
 
         return new AttachEntities(
+            $this->nativeMapper,
             $nativeEntity,
+            $this->foreignMapper,
             $foreignEntity,
             $this,
             'save'

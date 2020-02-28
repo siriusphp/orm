@@ -37,12 +37,12 @@ class Category implements EntityInterface
 
     protected $_changes;
 
-    public function getPk()
+    public function getId()
     {
         return $this->id;
     }
 
-    public function setPk($val){
+    public function setId($val){
         $this->id = $val;
     }
 
@@ -95,7 +95,7 @@ class CategoryHydrator implements HydratorInterface {
 
     public function hydrate($attributes = []){
         $category = new Category;
-        $category->setPk($attributes['id']);
+        $category->setId($attributes['id']);
         $category->setName($attributes['name']);
         $category->setParentId($attributes['parent_id']);
     }
@@ -106,6 +106,13 @@ class CategoryHydrator implements HydratorInterface {
          */
     }
 
+    public function set($entity, $attribute, $value) {
+        // set a single attribute
+    }
+
+    public function get($entity, $attribute) {
+        // get a single attribute
+    }
 }
 ```
 

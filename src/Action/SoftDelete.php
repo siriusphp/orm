@@ -14,7 +14,7 @@ class SoftDelete extends Delete
 
     protected function execute()
     {
-        $entityId = $this->entity->getPk();
+        $entityId = $this->mapper->getEntityPk($this->entity);
         if (! $entityId) {
             return;
         }

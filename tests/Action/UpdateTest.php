@@ -18,12 +18,12 @@ class UpdateTest extends BaseTestCase
         $mapper->save($product);
 
         // reload after insert
-        $product = $mapper->find($product->getPk());
+        $product = $mapper->find($product->id);
         $product->description = 'Description product 1';
         $mapper->save($product);
 
         // reload after save
-        $product = $mapper->find($product->getPk());
+        $product = $mapper->find($product->id);
         $this->assertEquals('Description product 1', $product->description);
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistenceState());
     }
