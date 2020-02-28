@@ -36,9 +36,6 @@ class RelationTest extends BaseTestCase
         $foreign1 = new GenericEntity(['col_1' => 10, 'col_2' => 10]);
         $foreign2 = new GenericEntity(['col_1' => 10, 'col_2' => 20]);
 
-        $this->assertTrue($relation->entitiesBelongTogether($native1, $foreign1));
-        $this->assertFalse($relation->entitiesBelongTogether($native1, $foreign2));
-
         $tracker = new Tracker([
             $native1->getArrayCopy(),
             $native2->getArrayCopy(),

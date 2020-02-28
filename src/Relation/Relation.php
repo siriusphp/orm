@@ -41,6 +41,7 @@ abstract class Relation
     protected $options = [];
 
     /**
+     * Stores the nativeColumn-foreignColumn pairs to be used on queries
      * @var array
      */
     protected $keyPairs;
@@ -83,33 +84,6 @@ abstract class Relation
     public function getKeyPairs(): array
     {
         return $this->keyPairs;
-    }
-
-    /**
-     * Checks if a native entity belongs and a foreign entity belong together according to this relation
-     * It verifies if the attributes are properly linked
-     *
-     * @param EntityInterface $nativeEntity
-     * @param EntityInterface $foreignEntity
-     *
-     * @return mixed
-     */
-    public function entitiesBelongTogether(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
-    {
-        /**
-         * @todo make this method protected
-         */
-        foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
-            $foreignKeyValue = $this->foreignMapper->getEntityAttribute($foreignEntity, $foreignCol);
-            // if both native and foreign key values are present (not unlinked entities) they must be the same
-            // otherwise we assume that the entities can be linked together
-            if ($nativeKeyValue && $foreignKeyValue && $nativeKeyValue != $foreignKeyValue) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public function isEagerLoad()
