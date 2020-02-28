@@ -49,6 +49,46 @@ class QueryTest extends BaseTestCase
         $this->assertEquals(3, count($result));
     }
 
+    public function test_chunk()
+    {
+        $this->insertRows('content', ['content_type', 'title'], [
+            ['product', 'Product 1'],
+            ['product', 'Product 2'],
+            ['product', 'Product 3'],
+            ['product', 'Product 4'],
+            ['product', 'Product 5'],
+            ['product', 'Product 6'],
+        ]);
+
+        $found = 0;
+        $result = $this->mapper->newQuery()
+                               ->chunk(2, function($entity) use (&$found) {
+                                   $found += 1;
+                               }, 2);
+
+        $this->assertEquals(4, $found);
+    }
+
+    public function test_chunk_no_limit()
+    {
+        $this->insertRows('content', ['content_type', 'title'], [
+            ['product', 'Product 1'],
+            ['product', 'Product 2'],
+            ['product', 'Product 3'],
+            ['product', 'Product 4'],
+            ['product', 'Product 5'],
+            ['product', 'Product 6'],
+        ]);
+
+        $found = 0;
+        $result = $this->mapper->newQuery()
+                               ->chunk(2, function($entity) use (&$found) {
+                                   $found += 1;
+                               });
+
+        $this->assertEquals(6, $found);
+    }
+
     public function test_query_paginate()
     {
         $this->insertRows('content', ['content_type', 'title'], [

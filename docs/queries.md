@@ -173,3 +173,26 @@ $products = $orm->select('products')
                 ->columns('COUNT(images.id) AS images_count')                        
                 ->get();
 ```
+
+## Batch-processing entities
+
+Entities can consume lots of memory so, when you need to process a lot of them, you may need to batch-process them.
+
+For this you have to use the `chunk()` method of the query
+
+```php
+$orm->select('products')
+    ->chunk(100, function($product) {
+        // do something with the product 
+        // this callback is for a single entity, not the chunk itself
+    });
+```
+
+There are times when you want to process a large numbers of entities but you know that, based on your query, there shouldn't be that many chunks to be processed. If that's the case, you can set a limit on the number of chunks to be processed.
+
+ ```php
+ $orm->select('products')
+     ->chunk(100, function($product) {
+         // do something with the product 
+     }, 100 /** no more than 100 chunks */);
+ ```

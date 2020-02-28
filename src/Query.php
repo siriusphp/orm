@@ -10,12 +10,6 @@ use Sirius\Sql\Select;
 
 class Query extends Select
 {
-
-    /**
-     * @var Orm
-     */
-    protected $orm;
-
     /**
      * @var Mapper
      */
@@ -71,10 +65,10 @@ class Query extends Select
     {
         foreach ($relations as $relation) {
             if (is_array($relation)) {
-                $name = key($relation);
+                $name     = key($relation);
                 $callback = current($relation);
             } else {
-                $name = $relation;
+                $name     = $relation;
                 $callback = null;
             }
             $this->load[$name] = $callback;
@@ -136,11 +130,39 @@ class Query extends Select
     }
 
     /**
-     * @todo implement this feature
+     * Executes the query with a limit of $size and applies the callback on each entity
+     * The callback can change the DB in such a way that you can end up in an infinite loop
+     * (depending on the sorting) so we set a limit on the number of chunks that can be processed
+     *
+     * @param int $size
+     * @param callable $callback
+     * @param int $limit
      */
-    /*public function chunk($count, $callback)
+    public function chunk(int $size, callable $callback, int $limit = 100000)
     {
-    }*/
+        if (!$this->orderBy->build()) {
+            $this->orderBy(...(array) $this->mapper->getPrimaryKey());
+        }
+
+        $run = 0;
+        while ($run < $limit) {
+            $query = clone $this;
+            $query->limit($size);
+            $query->offset($run * $size);
+
+            $results = $query->get();
+
+            if (count($results) === 0) {
+                break;
+            }
+
+            foreach ($results as $entity) {
+                $callback($entity);
+            }
+
+            $run++;
+        }
+    }
 
     public function count()
     {
