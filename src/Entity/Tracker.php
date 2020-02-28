@@ -103,9 +103,6 @@ class Tracker
             }
         }
 
-        /**
-         * @todo check if array_unique() performs better
-         */
         return $result;
     }
 
