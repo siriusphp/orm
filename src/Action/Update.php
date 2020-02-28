@@ -8,7 +8,6 @@ use Sirius\Orm\Helpers\Arr;
 
 class Update extends BaseAction
 {
-    protected $entityId;
     protected $entityState;
 
     protected $extraColumns = [];
@@ -38,7 +37,6 @@ class Update extends BaseAction
             return;
         }
 
-        $this->entityId    = $this->entity->getPk();
         $this->entityState = $this->entity->getPersistenceState();
 
         $connection = $this->mapper->getWriteConnection();
