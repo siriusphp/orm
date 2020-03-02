@@ -53,6 +53,9 @@ menu:
                 other:
                     text: Direct queries
                     relativeUrl: direct_queries.html
+                query_scopes:
+                    text: Query scopes
+                    relativeUrl: the_query_scopes.html
                 limits:
                     text: Limitations
                     relativeUrl: limits.html
@@ -113,6 +116,3 @@ menu:
                 casting:
                     text: The casting manager
                     relativeUrl: the_casting_manager.html
-                scopes:
-                    text: Query scopes
-                    relativeUrl: the_query_scopes.html

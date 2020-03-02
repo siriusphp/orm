@@ -26,7 +26,7 @@ use Sirius\Orm\Behaviour\Timestamps;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
-$orm->register('products', MapperConfig::fromArray(
+$orm->register('products', MapperConfig::fromArray([
     MapperConfig::ENTITY_CLASS      => 'App\Entity\Product',
     MapperConfig::TABLE             => 'tbl_products',
     MapperConfig::TABLE_ALIAS       => 'products', // if you have tables with prefixes
@@ -47,7 +47,7 @@ $orm->register('products', MapperConfig::fromArray(
         ]
         // rest of the relations go here       
     ] 
-));
+]));
 ```
 
 One advantage of this solution is that the mapper is constructed only when it is requested the first time. If your app doesn't need the `orders` mapper, it won't be constructed.

@@ -28,6 +28,21 @@ $orm->getCastingManager()
     });
 ```
 
+Since an entity attribute must also be serialized back when persisting you need to define a "cast_for_db" function like so
+```php
+use Carbon\Carbon;
+
+$orm->getCastingManager()
+    ->register('date_for_db', function($value) {
+        if ($value instanceof Carbon) {
+            return $value->format('%Y-%m-%d');
+        }
+        return (string) $value;
+    });
+```
+
+
+
 and if you use the `GenericEntity`-based entities
 
 ```php
