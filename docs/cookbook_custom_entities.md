@@ -149,7 +149,7 @@ class CategoryMapper extends Mapper {
 
 ```php
 $orm->register('categories', function($orm) {
-    return new CategoryMapper($orm, new CategoryFactory());
+    return new CategoryMapper($orm, new CategoryHydrator());
 });
 ```
 
@@ -157,7 +157,7 @@ If your mappers are complex and you are using a DiC you can do this:
 
 ```php
 $orm->register('categories', function($orm) use ($di) {
-    return new CategoryMapper($orm, new CategoryFactory(), $di->get('someService'));
+    return new CategoryMapper($orm, new CategoryHydrator(), $di->get('someService'));
 });
 ```
 

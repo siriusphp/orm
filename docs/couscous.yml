@@ -113,3 +113,6 @@ menu:
                 casting:
                     text: The casting manager
                     relativeUrl: the_casting_manager.html
+                scopes:
+                    text: Query scopes
+                    relativeUrl: the_query_scopes.html
