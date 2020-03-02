@@ -11,7 +11,7 @@ use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Relation\RelationBuilder;
 use Sirius\Orm\Relation\RelationConfig;
 
-class Orm implements MapperLocator
+class Orm
 {
     /**
      * @var array
