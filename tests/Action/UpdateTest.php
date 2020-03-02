@@ -47,4 +47,26 @@ class UpdateTest extends BaseTestCase
         $mapper->save($product);
         $this->assertEquals(StateEnum::CHANGED, $product->getPersistenceState());
     }
+
+    public function test_column_attribute_map()
+    {
+
+        $mapper = Mapper::make($this->orm, MapperConfig::fromArray([
+            MapperConfig::TABLE     => 'content',
+            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
+            MapperConfig::COLUMN_ATTRIBUTE_MAP => ['summary' => 'excerpt'],
+            MapperConfig::GUARDS    => ['content_type' => 'product'],
+        ]));
+
+        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1', 'summary' => 'Excerpt']);
+
+        $product = $mapper->find(1);
+        $this->assertEquals('Excerpt', $product->excerpt);
+
+        $product->excerpt = 'New excerpt';
+
+        $mapper->save($product);
+        $product = $mapper->find(1);
+        $this->assertEquals('New excerpt', $product->excerpt);
+    }
 }

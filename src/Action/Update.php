@@ -42,7 +42,8 @@ class Update extends BaseAction
         $connection = $this->mapper->getWriteConnection();
 
         $columns = $this->mapper->extractFromEntity($this->entity);
-        $columns = Arr::only($columns, array_keys($this->entity->getChanges()));
+        $changes = Arr::renameKeys($this->entity->getChanges(), array_flip($this->mapper->getColumnAttributeMap()));
+        $columns = Arr::only($columns, array_keys($changes));
         $columns = array_merge(
             $columns,
             $this->extraColumns,
