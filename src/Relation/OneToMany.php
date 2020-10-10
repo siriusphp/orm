@@ -16,13 +16,13 @@ class OneToMany extends Relation
 
     protected function applyDefaults(): void
     {
-        $nativeKey = $this->nativeMapper->getPrimaryKey();
-        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
+        $nativeKey = $this->nativeMapper->getConfig()->getPrimaryKey();
+        if ( ! isset($this->options[RelationConfig::NATIVE_KEY])) {
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
-            $prefix                                     = Inflector::singularize($this->nativeMapper->getTable());
+        if ( ! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+            $prefix                                     = Inflector::singularize($this->nativeMapper->getConfig()->getTable());
             $this->options[RelationConfig::FOREIGN_KEY] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
@@ -48,8 +48,8 @@ class OneToMany extends Relation
     public function joinSubselect(Query $query, string $reference)
     {
         $subselect = $query->subSelectForJoinWith()
-                           ->columns($this->foreignMapper->getTable() . '.*')
-                           ->from($this->foreignMapper->getTable())
+                           ->columns($this->foreignMapper->getConfig()->getTable() . '.*')
+                           ->from($this->foreignMapper->getConfig()->getTable())
                            ->as($reference);
 
         $subselect = $this->applyQueryCallback($subselect);
@@ -62,7 +62,7 @@ class OneToMany extends Relation
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
         // no point in linking entities if the native one is deleted
-        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
+        if ($nativeEntity->getState() == StateEnum::DELETED) {
             return;
         }
 
@@ -76,20 +76,20 @@ class OneToMany extends Relation
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $nativeKeyValue  = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
+            $nativeKeyValue = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, $nativeKeyValue);
         }
     }
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $state = $foreignEntity->getPersistenceState();
-        $foreignEntity->setPersistenceState(StateEnum::SYNCHRONIZED);
+        $state = $foreignEntity->getState();
+        $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
         }
         $this->foreignMapper->setEntityAttribute($foreignEntity, $this->name, null);
-        $foreignEntity->setPersistenceState($state);
+        $foreignEntity->setState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -98,7 +98,7 @@ class OneToMany extends Relation
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         // no cascade delete? treat as save so we can process the changes
-        if (! $this->isCascade()) {
+        if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
             // retrieve them again from the DB since the related collection might not have everything
@@ -117,7 +117,7 @@ class OneToMany extends Relation
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if (!$this->relationWasChanged($action->getEntity())) {
+        if ( ! $this->relationWasChanged($action->getEntity())) {
             return;
         }
 
@@ -130,7 +130,7 @@ class OneToMany extends Relation
 
         // save the entities still in the collection
         foreach ($foreignEntities as $foreignEntity) {
-            if (! empty($foreignEntity->getChanges())) {
+            if ( ! empty($foreignEntity->getChanges())) {
                 $saveAction = $this->foreignMapper
                     ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
                 $saveAction->addColumns($this->getExtraColumnsForAction());

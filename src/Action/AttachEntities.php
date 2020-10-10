@@ -74,17 +74,17 @@ class AttachEntities implements ActionInterface
 
     protected function maybeUpdatePivotRow()
     {
-        if (!$this->relation instanceof ManyToMany) {
+        if ( ! $this->relation instanceof ManyToMany) {
             return;
         }
 
-        $conn = $this->relation->getNativeMapper()->getWriteConnection();
+        $conn         = $this->relation->getNativeMapper()->getWriteConnection();
         $throughTable = (string)$this->relation->getOption(RelationConfig::THROUGH_TABLE);
 
-        $throughNativeColumns = (array) $this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
-        $throughForeignColumns = (array) $this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
-        $nativeKey = (array) $this->nativeMapper->getEntityPk($this->nativeEntity);
-        $foreignKey = (array) $this->foreignMapper->getEntityPk($this->foreignEntity);
+        $throughNativeColumns  = (array)$this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
+        $throughForeignColumns = (array)$this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
+        $nativeKey             = (array)$this->nativeMapper->getEntityPk($this->nativeEntity);
+        $foreignKey            = (array)$this->foreignMapper->getEntityPk($this->foreignEntity);
 
         $delete = new \Sirius\Sql\Delete($conn);
         $delete->from($throughTable);
@@ -93,7 +93,7 @@ class AttachEntities implements ActionInterface
             $delete->where($throughForeignColumns[$k], $foreignKey[$k]);
         }
         foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
-            if (!is_int($col)) {
+            if ( ! is_int($col)) {
                 $delete->where($col, $value);
             } else {
                 $delete->where($value);
@@ -103,7 +103,7 @@ class AttachEntities implements ActionInterface
 
         $insertColumns = [];
         foreach ($throughNativeColumns as $k => $col) {
-            $insertColumns[$col] = $nativeKey[$k];
+            $insertColumns[$col]                       = $nativeKey[$k];
             $insertColumns[$throughForeignColumns[$k]] = $foreignKey[$k];
         }
 
@@ -115,7 +115,7 @@ class AttachEntities implements ActionInterface
         }
 
         foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
-            if (!is_int($col)) {
+            if ( ! is_int($col)) {
                 $insertColumns[$col] = $value;
             }
         }

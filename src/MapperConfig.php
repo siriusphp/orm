@@ -3,8 +3,11 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
+use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Entity\HydratorInterface;
+use Sirius\Orm\Helpers\QueryHelper;
+use Sirius\Orm\Relation\Relation;
 
 /**
  * Class MapperConfig
@@ -21,81 +24,93 @@ class MapperConfig
     const COLUMNS = 'columns';
     const COLUMN_ATTRIBUTE_MAP = 'columnAttributeMap';
     const CASTS = 'casts';
-    const DEFAULT_ATTRIBUTES = 'entityDefaultAttributes';
+    const DEFAULT_ATTRIBUTES = 'defaultEntityAttributes';
     const ENTITY_HYDRATOR = 'entityHydrator';
     const BEHAVIOURS = 'behaviours';
     const RELATIONS = 'relations';
-    const SCOPES = 'scopes';
+    const SCOPES = 'queryScopes';
     const GUARDS = 'guards';
-
-    public $entityClass = GenericEntity::class;
-
-    public $primaryKey = 'id';
 
     /**
      * @var string
      */
-    public $table;
+    protected $entityClass = GenericEntity::class;
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var string
+     */
+    protected $table;
 
     /**
      * Used in queries like so: FROM table as tableAlias
      * @var string
      */
-    public $tableAlias;
+    protected $tableAlias;
+
+    /**
+     * @var
+     */
+    protected $tableReference;
 
     /**
      * Table columns
      * @var array
      */
-    public $columns = [];
+    protected $columns = [];
 
     /**
      * Columns casts
      * @var array
      */
-    public $casts = [];
+    protected $casts = [];
 
     /**
      * Column aliases (table column => entity attribute)
      * @var array
      */
-    public $columnAttributeMap = [];
+    protected $columnAttributeMap = [];
 
     /**
-     * @var null|HydratorInterface
+     * @var HydratorInterface
      */
-    public $entityHydrator = null;
+    protected $entityHydrator = null;
 
     /**
      * Default attributes
      * @var array
      */
-    public $entityDefaultAttributes = [];
+    protected $defaultEntityAttributes = [];
 
     /**
      * List of behaviours to be attached to the mapper
      * @var array[BehaviourInterface]
      */
-    public $behaviours = [];
+    protected $behaviours = [];
 
     /**
      * List of relations of the configured mapper
      * (key = name of relation, value = relation instance)
-     * @var array[BaseRelation]
+     * @var array|Relation[]
      */
-    public $relations = [];
+    protected $relations = [];
 
     /**
-     * List of query callbacks that can be called directly from the query
+     * Query scopes are functions that can be called on the mapper queries
+     * Not recommended, but useful for runtime generated mappers
      * @var array
      */
-    public $scopes = [];
+    protected $queryScopes = [];
 
     /**
      * List of column-value pairs that act as global filters
      * @var array
      */
-    public $guards = [];
+    protected $guards = [];
 
     public static function fromArray(array $array)
     {
@@ -105,5 +120,143 @@ class MapperConfig
         }
 
         return $instance;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntityClass(): string
+    {
+        return $this->entityClass;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrimaryKey(): string
+    {
+        return $this->primaryKey;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    /**
+     * @param bool $fallbackToTable
+     *
+     * @return string
+     */
+    public function getTableAlias($fallbackToTable = false)
+    {
+        return ( ! $this->tableAlias && $fallbackToTable) ? $this->table : $this->tableAlias;
+    }
+
+    /**
+     * @return array
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCasts(): array
+    {
+        return $this->casts;
+    }
+
+    /**
+     * @return array
+     */
+    public function getColumnAttributeMap(): array
+    {
+        return $this->columnAttributeMap;
+    }
+
+    /**
+     * @return HydratorInterface|null
+     */
+    public function getEntityHydrator(): ?HydratorInterface
+    {
+        return $this->entityHydrator;
+    }
+
+    /**
+     * @param HydratorInterface $entityHydrator
+     *
+     * @return MapperConfig
+     */
+    public function setEntityHydrator(HydratorInterface $entityHydrator): MapperConfig
+    {
+        $this->entityHydrator = $entityHydrator;
+
+        return $this;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getDefaultEntityAttributes(): array
+    {
+        return $this->defaultEntityAttributes;
+    }
+
+    /**
+     * @return BehaviourInterface[]
+     */
+    public function getBehaviours(): array
+    {
+        return $this->behaviours;
+    }
+
+    /**
+     * @return array|Relation[]
+     */
+    public function getRelations(): array
+    {
+        return $this->relations;
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryScopes(): array
+    {
+        return $this->queryScopes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGuards(): array
+    {
+        return $this->guards;
+    }
+
+    public function getTableReference()
+    {
+        if ( ! $this->tableReference) {
+            $this->tableReference = QueryHelper::reference($this->table, $this->tableAlias);
+        }
+
+        return $this->tableReference;
+    }
+
+    public function getQueryScope($name)
+    {
+        return isset($this->queryScopes[$name]) ? $this->queryScopes[$name] : null;
+    }
+
+    public function addQueryScope($scope, callable $callback)
+    {
+        $this->queryScopes[$scope] = $callback;
     }
 }

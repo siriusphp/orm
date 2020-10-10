@@ -5,7 +5,7 @@ namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\CastingManager;
 use Sirius\Orm\Helpers\Arr;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\MapperConfig;
 
 class GenericEntityHydrator implements HydratorInterface
 {
@@ -15,40 +15,36 @@ class GenericEntityHydrator implements HydratorInterface
     protected $castingManager;
 
     /**
-     * @var Mapper
+     * @var MapperConfig
      */
-    protected $mapper;
+    protected $mapperConfig;
 
-    public function setMapper(Mapper $mapper)
+    public function __construct(MapperConfig $mapperConfig, CastingManager $castingManager)
     {
-        $this->mapper = $mapper;
-    }
-
-    public function setCastingManager(CastingManager $castingManager)
-    {
+        $this->mapperConfig   = $mapperConfig;
         $this->castingManager = $castingManager;
     }
 
     public function hydrate(array $attributes = [])
     {
         $attributes = $this->castingManager
-            ->castArray($attributes, $this->mapper->getCasts());
-        $attributes = Arr::renameKeys($attributes, $this->mapper->getColumnAttributeMap());
-        $class      = $this->mapper->getEntityClass() ?? GenericEntity::class;
+            ->castArray($attributes, $this->mapperConfig->getCasts());
+        $attributes = Arr::renameKeys($attributes, $this->mapperConfig->getColumnAttributeMap());
+        $class      = $this->mapperConfig->getEntityClass() ?? GenericEntity::class;
 
-        return new $class($attributes, $this->castingManager);
+        return new $class($attributes);
     }
 
     public function extract(EntityInterface $entity)
     {
         $data = Arr::renameKeys(
             $entity->getArrayCopy(),
-            array_flip($this->mapper->getColumnAttributeMap())
+            array_flip($this->mapperConfig->getColumnAttributeMap())
         );
         $data = $this->castingManager
-            ->castArrayForDb($data, $this->mapper->getCasts());
+            ->castArrayForDb($data, $this->mapperConfig->getCasts());
 
-        return Arr::only($data, $this->mapper->getColumns());
+        return Arr::only($data, $this->mapperConfig->getColumns());
     }
 
     public function get($entity, $attribute)
@@ -59,5 +55,15 @@ class GenericEntityHydrator implements HydratorInterface
     public function set($entity, $attribute, $value)
     {
         return $entity->{$attribute} = $value;
+    }
+
+    public function getPk($entity)
+    {
+        return $this->get($entity, $this->mapperConfig->getPrimaryKey());
+    }
+
+    public function setPk($entity, $value)
+    {
+        return $this->set($entity, $this->mapperConfig->getPrimaryKey(), $value);
     }
 }

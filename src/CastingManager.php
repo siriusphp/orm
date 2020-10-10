@@ -7,6 +7,20 @@ class CastingManager
 {
     protected $casts = [];
 
+    /**
+     * @var CastingManager
+     */
+    protected static $instance;
+
+    public static function getInstance()
+    {
+        if ( ! static::$instance) {
+            static::$instance = new static;
+        }
+
+        return static::$instance;
+    }
+
     public function register(string $name, callable $func)
     {
         $this->casts[$name] = $func;
@@ -66,6 +80,10 @@ class CastingManager
 
     public function bool($value)
     {
+        if ($value === '0' || $value === '' || floatval($value) === 0) {
+            return false;
+        }
+
         return ! ! $value;
     }
 
@@ -82,7 +100,7 @@ class CastingManager
 
     public function float($value)
     {
-        return $value === null ? null : (float) $value;
+        return $value === null ? null : (float)$value;
     }
 
     public function decimal($value, $digits)
@@ -92,7 +110,7 @@ class CastingManager
 
     public function json($value)
     {
-        if (! $value) {
+        if ( ! $value) {
             return new \ArrayObject();
         }
         if (is_array($value)) {
@@ -110,7 +128,7 @@ class CastingManager
     // phpcs:ignore
     public function json_for_db($value)
     {
-        if (!$value) {
+        if ( ! $value) {
             return null;
         }
         if (is_array($value)) {
@@ -119,6 +137,7 @@ class CastingManager
         if ($value instanceof \ArrayObject) {
             return json_encode($value->getArrayCopy());
         }
+
         return $value;
     }
 }

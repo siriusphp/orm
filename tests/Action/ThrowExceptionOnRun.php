@@ -5,7 +5,7 @@ namespace Sirius\Orm\Tests\Action;
 
 use Sirius\Orm\Action\ActionInterface;
 
-class FakeThrowsException implements ActionInterface
+class ThrowExceptionOnRun implements ActionInterface
 {
     public function run() {
         throw new \Exception();

@@ -14,31 +14,31 @@ class Insert extends Update
 
     protected function execute()
     {
-        $this->entityId    = $this->mapper->getEntityPk($this->entity);
-        $this->entityState = $this->entity->getPersistenceState();
+        $this->entityId    = $this->getEntityHydrator()->getPk($this->entity);
+        $this->entityState = $this->entity->getState();
 
-        $connection = $this->mapper->getWriteConnection();
+        $connection = $this->connection;
 
         $columns = array_merge(
             $this->mapper->extractFromEntity($this->entity),
             $this->extraColumns,
-            $this->mapper->getGuards()
+            $this->mapper->getConfig()->getGuards()
         );
-        $columns = Arr::except($columns, $this->mapper->getPrimaryKey());
+        $columns = Arr::except($columns, $this->mapper->getConfig()->getPrimaryKey());
 
         $insertSql = new \Sirius\Sql\Insert($connection);
-        $insertSql->into($this->mapper->getTable())
+        $insertSql->into($this->mapper->getConfig()->getTable())
                   ->columns($columns);
         $insertSql->perform();
-        $this->mapper->setEntityPk($this->entity, $connection->lastInsertId());
+        $this->getEntityHydrator()->setPk($this->entity, $connection->lastInsertId());
     }
 
     public function revert()
     {
-        if (! $this->hasRun) {
+        if ( ! $this->hasRun) {
             return;
         }
-        $this->mapper->setEntityPk($this->entity, $this->entityId);
-        $this->entity->setPersistenceState($this->entityState);
+        $this->getEntityHydrator()->setPk($this->entity, $this->entityId);
+        $this->entity->setState($this->entityState);
     }
 }

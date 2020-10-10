@@ -4,10 +4,8 @@ declare(strict_types=1);
 namespace Sirius\Orm\Action;
 
 use Sirius\Orm\Entity\EntityInterface;
-use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Relation\ManyToMany;
-use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Relation\RelationConfig;
 
 class DeletePivotRows extends BaseAction
@@ -23,11 +21,11 @@ class DeletePivotRows extends BaseAction
 
     public function __construct(ManyToMany $relation, EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $this->relation = $relation;
+        $this->relation     = $relation;
         $this->nativeMapper = $relation->getNativeMapper();
         $this->nativeEntity = $nativeEntity;
-        $this->mapper = $relation->getForeignMapper();
-        $this->entity = $foreignEntity;
+        $this->mapper       = $relation->getForeignMapper();
+        $this->entity       = $foreignEntity;
     }
 
     protected function execute()
@@ -39,7 +37,7 @@ class DeletePivotRows extends BaseAction
         }
 
         $delete = new \Sirius\Sql\Delete($this->mapper->getWriteConnection());
-        $delete->from((string) $this->relation->getOption(RelationConfig::THROUGH_TABLE));
+        $delete->from((string)$this->relation->getOption(RelationConfig::THROUGH_TABLE));
         $delete->whereAll($conditions, false);
 
         $delete->perform();
@@ -59,7 +57,7 @@ class DeletePivotRows extends BaseAction
     {
         $conditions = [];
 
-        $nativeEntityPk = (array)$this->nativeMapper->getPrimaryKey();
+        $nativeEntityPk    = (array)$this->nativeMapper->getConfig()->getPrimaryKey();
         $nativeThroughCols = (array)$this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
         foreach ($nativeEntityPk as $idx => $col) {
             $val = $this->nativeMapper->getEntityAttribute($this->nativeEntity, $col);
@@ -68,7 +66,7 @@ class DeletePivotRows extends BaseAction
             }
         }
 
-        $entityPk = (array)$this->mapper->getPrimaryKey();
+        $entityPk    = (array)$this->mapper->getConfig()->getPrimaryKey();
         $throughCols = (array)$this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
         foreach ($entityPk as $idx => $col) {
             $val = $this->mapper->getEntityAttribute($this->entity, $col);

@@ -71,14 +71,6 @@ abstract class BaseAction implements ActionInterface
     }
 
     /**
-     * @return Mapper
-     */
-    public function getMapper(): Mapper
-    {
-        return $this->mapper;
-    }
-
-    /**
      * @return EntityInterface
      */
     public function getEntity(): EntityInterface
@@ -102,8 +94,8 @@ abstract class BaseAction implements ActionInterface
             return;
         }
 
-        foreach ($this->getMapper()->getRelations() as $name) {
-            if (! $this->mapper->hasRelation($name)) {
+        foreach ($this->mapper->getRelations() as $name) {
+            if ( ! $this->mapper->hasRelation($name)) {
                 continue;
             }
             $this->mapper->getRelation($name)->addActions($this);
@@ -112,10 +104,10 @@ abstract class BaseAction implements ActionInterface
 
     protected function getConditions()
     {
-        $entityPk = (array)$this->mapper->getPrimaryKey();
+        $entityPk   = (array)$this->mapper->getConfig()->getPrimaryKey();
         $conditions = [];
         foreach ($entityPk as $col) {
-            $val = $this->mapper->getEntityAttribute($this->entity, $col);
+            $val = $this->getEntityHydrator()->get($this->entity, $col);
             if ($val) {
                 $conditions[$col] = $val;
             }
@@ -150,7 +142,7 @@ abstract class BaseAction implements ActionInterface
         } catch (\Exception $e) {
             $this->undo($executed);
             throw new FailedActionException(
-                sprintf("%s failed for mapper %s", get_class($this), $this->mapper->getTableAlias(true)),
+                sprintf("%s failed for mapper %s", get_class($this), $this->mapper->getConfig()->getTableAlias(true)),
                 (int)$e->getCode(),
                 $e
             );
@@ -159,7 +151,7 @@ abstract class BaseAction implements ActionInterface
         /** @var ActionInterface $action */
         foreach ($executed as $action) {
             // if called by another action, that action will call `onSuccess`
-            if (! $calledByAnotherAction || $action !== $this) {
+            if ( ! $calledByAnotherAction || $action !== $this) {
                 $action->onSuccess();
             }
         }
@@ -188,5 +180,10 @@ abstract class BaseAction implements ActionInterface
     protected function execute()
     {
         throw new \BadMethodCallException(sprintf('%s must implement `execute()`', get_class($this)));
+    }
+
+    protected function getEntityHydrator()
+    {
+        return $this->mapper->getConfig()->getEntityHydrator();
     }
 }

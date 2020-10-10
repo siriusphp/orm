@@ -11,7 +11,7 @@ class OneToOne extends OneToMany
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {
         // no point in linking entities if the native one is deleted
-        if ($nativeEntity->getPersistenceState() == StateEnum::DELETED) {
+        if ($nativeEntity->getState() == StateEnum::DELETED) {
             return;
         }
 
@@ -25,11 +25,11 @@ class OneToOne extends OneToMany
     protected function addActionOnDelete(BaseAction $action)
     {
         // no cascade delete? treat it as a save
-        if (! $this->isCascade()) {
+        if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
             $foreignEntity = $this->nativeMapper
-                                  ->getEntityAttribute($action->getEntity(), $this->name);
+                ->getEntityAttribute($action->getEntity(), $this->name);
 
             if ($foreignEntity) {
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
@@ -43,7 +43,7 @@ class OneToOne extends OneToMany
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if (! $this->relationWasChanged($action->getEntity())) {
+        if ( ! $this->relationWasChanged($action->getEntity())) {
             return;
         }
         $foreignEntity = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);

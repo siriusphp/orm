@@ -15,14 +15,14 @@ class SoftDelete extends Delete
     protected function execute()
     {
         $entityId = $this->mapper->getEntityPk($this->entity);
-        if (! $entityId) {
+        if ( ! $entityId) {
             return;
         }
 
         $this->now = time();
 
         $update = new \Sirius\Sql\Update($this->mapper->getWriteConnection());
-        $update->table($this->mapper->getTable())
+        $update->table($this->mapper->getConfig()->getTable())
                ->columns([
                    $this->getOption('deleted_at_column') => $this->now
                ])
@@ -33,8 +33,8 @@ class SoftDelete extends Delete
     public function onSuccess()
     {
         $this->mapper->setEntityAttribute($this->entity, $this->getOption('deleted_at_column'), $this->now);
-        if ($this->entity->getPersistenceState() !== StateEnum::DELETED) {
-            $this->entity->setPersistenceState(StateEnum::DELETED);
+        if ($this->entity->getState() !== StateEnum::DELETED) {
+            $this->entity->setState(StateEnum::DELETED);
         }
     }
 }

@@ -3,10 +3,24 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Action;
 
+use Sirius\Orm\Connection;
+use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
+use Sirius\Orm\Mapper;
 
 class Delete extends BaseAction
 {
+    /**
+     * @var Connection
+     */
+    protected $connection;
+
+    public function __construct(Connection $connection, Mapper $mapper, EntityInterface $entity, array $options = [])
+    {
+        parent::__construct($mapper, $entity, $options);
+        $this->connection = $connection;
+    }
+
     protected function execute()
     {
         $conditions = $this->getConditions();
@@ -15,8 +29,8 @@ class Delete extends BaseAction
             return;
         }
 
-        $delete = new \Sirius\Sql\Delete($this->mapper->getWriteConnection());
-        $delete->from($this->mapper->getTable());
+        $delete = new \Sirius\Sql\Delete($this->connection);
+        $delete->from($this->mapper->getConfig()->getTable());
         $delete->whereAll($conditions, false);
 
         $delete->perform();
@@ -24,9 +38,9 @@ class Delete extends BaseAction
 
     public function onSuccess()
     {
-        if ($this->entity->getPersistenceState() !== StateEnum::DELETED) {
-            $this->mapper->setEntityPk($this->entity, null);
-            $this->entity->setPersistenceState(StateEnum::DELETED);
+        if ($this->entity->getState() !== StateEnum::DELETED) {
+            $this->getEntityHydrator()->setPk($this->entity, null);
+            $this->entity->setState(StateEnum::DELETED);
         }
     }
 }

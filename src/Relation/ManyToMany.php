@@ -22,30 +22,30 @@ class ManyToMany extends Relation
 
         $this->setOptionIfMissing(RelationConfig::THROUGH_COLUMNS_PREFIX, 'pivot_');
 
-        $foreignKey = $this->foreignMapper->getPrimaryKey();
-        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+        $foreignKey = $this->foreignMapper->getConfig()->getPrimaryKey();
+        if ( ! isset($this->options[RelationConfig::FOREIGN_KEY])) {
             $this->options[RelationConfig::FOREIGN_KEY] = $foreignKey;
         }
 
-        $nativeKey = $this->foreignMapper->getPrimaryKey();
-        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
+        $nativeKey = $this->foreignMapper->getConfig()->getPrimaryKey();
+        if ( ! isset($this->options[RelationConfig::NATIVE_KEY])) {
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if (! isset($this->options[RelationConfig::THROUGH_TABLE])) {
-            $tables = [$this->foreignMapper->getTable(), $this->nativeMapper->getTable()];
+        if ( ! isset($this->options[RelationConfig::THROUGH_TABLE])) {
+            $tables = [$this->foreignMapper->getConfig()->getTable(), $this->nativeMapper->getConfig()->getTable()];
             sort($tables);
             $this->options[RelationConfig::THROUGH_TABLE] = implode('_', $tables);
         }
 
-        if (! isset($this->options[RelationConfig::THROUGH_NATIVE_COLUMN])) {
-            $prefix = Inflector::singularize($this->nativeMapper->getTableAlias(true));
+        if ( ! isset($this->options[RelationConfig::THROUGH_NATIVE_COLUMN])) {
+            $prefix = Inflector::singularize($this->nativeMapper->getConfig()->getTableAlias(true));
 
             $this->options[RelationConfig::THROUGH_NATIVE_COLUMN] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
-        if (! isset($this->options[RelationConfig::THROUGH_FOREIGN_COLUMN])) {
-            $prefix = Inflector::singularize($this->foreignMapper->getTableAlias(true));
+        if ( ! isset($this->options[RelationConfig::THROUGH_FOREIGN_COLUMN])) {
+            $prefix = Inflector::singularize($this->foreignMapper->getConfig()->getTableAlias(true));
 
             $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN] = $this->getKeyColumn($prefix, $foreignKey);
         }
@@ -79,7 +79,7 @@ class ManyToMany extends Relation
         $throughName      = $throughAlias ?? $through;
 
         $throughCols      = $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN];
-        $foreignTableName = $this->foreignMapper->getTableAlias(true);
+        $foreignTableName = $this->foreignMapper->getConfig()->getTableAlias(true);
         $foreignKeys      = $this->options[RelationConfig::FOREIGN_KEY];
 
         $joinCondition = QueryHelper::joinCondition($foreignTableName, $foreignKeys, $throughName, $throughCols);
@@ -95,7 +95,7 @@ class ManyToMany extends Relation
         $throughAlias = $this->getOption(RelationConfig::THROUGH_TABLE_ALIAS);
         $throughName  = $throughAlias ?? $through;
 
-        if (! empty($throughColumns)) {
+        if ( ! empty($throughColumns)) {
             $prefix = $this->getOption(RelationConfig::THROUGH_COLUMNS_PREFIX);
             foreach ($throughColumns as $col) {
                 $query->columns("{$throughName}.{$col} AS {$prefix}{$col}");
@@ -112,8 +112,8 @@ class ManyToMany extends Relation
     public function joinSubselect(Query $query, string $reference)
     {
         $subselect = $query->subSelectForJoinWith()
-                           ->from($this->foreignMapper->getTable())
-                           ->columns($this->foreignMapper->getTable() . '.*')
+                           ->from($this->foreignMapper->getConfig()->getTable())
+                           ->columns($this->foreignMapper->getConfig()->getTable() . '.*')
                            ->as($reference);
 
         $subselect = $this->joinWithThroughTable($subselect);
@@ -145,11 +145,11 @@ class ManyToMany extends Relation
 
         $found = $result[$nativeId] ?? [];
 
-        if (!empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
+        if ( ! empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
             /** @var Collection $collection */
             $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
             foreach ($found as $foreignEntity) {
-                if (! $collection->contains($foreignEntity)) {
+                if ( ! $collection->contains($foreignEntity)) {
                     $collection->add($foreignEntity);
                 }
             }
@@ -174,9 +174,9 @@ class ManyToMany extends Relation
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $state = $foreignEntity->getPersistenceState();
+        $state = $foreignEntity->getState();
 
-        $foreignEntity->setPersistenceState(StateEnum::SYNCHRONIZED);
+        $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
         }
@@ -187,7 +187,7 @@ class ManyToMany extends Relation
             $collection->removeElement($foreignEntity);
         }
 
-        $foreignEntity->setPersistenceState($state);
+        $foreignEntity->setState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -196,7 +196,7 @@ class ManyToMany extends Relation
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         // no cascade delete? treat as save so we can process the changes
-        if (! $this->isCascade()) {
+        if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
             // retrieve them again from the DB since the related collection might not have everything
@@ -219,7 +219,7 @@ class ManyToMany extends Relation
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         $foreignEntities = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
-        if (! $foreignEntities) {
+        if ( ! $foreignEntities) {
             return;
         }
 
@@ -227,7 +227,7 @@ class ManyToMany extends Relation
 
         // save the entities still in the collection
         foreach ($foreignEntities as $foreignEntity) {
-            if (! empty($foreignEntity->getChanges())) {
+            if ( ! empty($foreignEntity->getChanges())) {
                 $saveAction = $this->foreignMapper
                     ->newSaveAction($foreignEntity, [
                         'relations' => $remainingRelations

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Entity;
+namespace Sirius\Orm;
 
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Helpers\Str;
@@ -27,6 +27,7 @@ class Behaviours
         foreach ($names as $name) {
             $clone->remove($name);
         }
+
         return $clone;
     }
 

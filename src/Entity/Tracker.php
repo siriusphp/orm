@@ -40,17 +40,15 @@ class Tracker
 
     public function __construct(array $rows = [])
     {
-        $this->rows   = $rows;
+        $this->rows = $rows;
     }
 
-    public function setRelation($name, Relation $relation, $callback, array $nextLoad = [], $overwrite = false)
+    public function setRelation($name, Relation $relation, $callback, array $nextLoad = [])
     {
-        if ($overwrite || ! isset($this->relations[$name])) {
-            $this->relations[$name]        = $relation;
-            $this->relationCallback[$name] = $callback;
-            if (!empty($nextLoad)) {
-                $this->relationNextLoad[$name] = $nextLoad;
-            }
+        $this->relations[$name]        = $relation;
+        $this->relationCallback[$name] = $callback;
+        if ( ! empty($nextLoad)) {
+            $this->relationNextLoad[$name] = $nextLoad;
         }
     }
 
@@ -61,7 +59,7 @@ class Tracker
 
     public function getResultsForRelation($name)
     {
-        if (! isset($this->relations[$name])) {
+        if ( ! isset($this->relations[$name])) {
             return [];
         }
 
@@ -85,9 +83,9 @@ class Tracker
         }
 
         /** @var Query $query */
-        $query         = $aggregate->getQuery($this);
+        $query = $aggregate->getQuery($this);
 
-        $results                      = $query->fetchAll();
+        $results                       = $query->fetchAll();
         $this->aggregateResults[$name] = $results instanceof Collection ? $results->getValues() : $results;
 
         return $this->aggregateResults[$name];
@@ -98,7 +96,7 @@ class Tracker
         $result = [];
         foreach ($this->rows as $row) {
             $value = $this->getColumnsFromRow($row, $columns);
-            if ($value && !in_array($value, $result)) {
+            if ($value && ! in_array($value, $result)) {
                 $result[] = $value;
             }
         }

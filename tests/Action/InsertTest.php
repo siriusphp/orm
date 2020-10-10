@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Action;
 
-use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\Mapper;
-use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\BaseTestCase;
+use Sirius\Orm\Tests\Behaviour\ThrowExceptionBehaviour;
 
 class InsertTest extends BaseTestCase
 {
@@ -26,15 +24,11 @@ class InsertTest extends BaseTestCase
         $this->assertEquals('Product 1', $product->title);
     }
 
-    public function test_entity_is_reverted()
+    public function test_entity_is_reverted_on_exception_thrown()
     {
-
-        $mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE     => 'content',
-            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
-            MapperConfig::GUARDS    => ['content_type' => 'product'],
-            MapperConfig::BEHAVIOURS  => [new \Sirius\Orm\Tests\Behaviour\FakeThrowsException()]
-        ]));
+        // create a clone so the ORM is not affected
+        $mapper = $this->orm->get('products')->without();
+        $mapper->use(new ThrowExceptionBehaviour());
 
         $this->expectException(\Exception::class);
 

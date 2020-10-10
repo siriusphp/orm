@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\Relation\Aggregate;
-use Sirius\Orm\Relation\Relation;
 
 class LazyAggregate implements LazyLoader
 {
@@ -23,8 +22,8 @@ class LazyAggregate implements LazyLoader
 
     public function __construct(EntityInterface $entity, Tracker $tracker, Aggregate $aggregate)
     {
-        $this->entity   = $entity;
-        $this->tracker  = $tracker;
+        $this->entity    = $entity;
+        $this->tracker   = $tracker;
         $this->aggregate = $aggregate;
     }
 

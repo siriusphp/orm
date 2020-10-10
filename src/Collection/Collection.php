@@ -21,12 +21,13 @@ class Collection extends ArrayCollection
         parent::__construct($elements);
         $this->changes['removed'] = new ArrayCollection();
         $this->changes['added']   = new ArrayCollection();
-        $this->castingFunction = $castingFunction;
+        $this->castingFunction    = $castingFunction;
     }
 
     protected function castElement($data)
     {
         $castFunction = $this->castingFunction;
+
         return $castFunction ? call_user_func($castFunction, $data) : $data;
     }
 
@@ -87,6 +88,7 @@ class Collection extends ArrayCollection
                 $result[] = $element;
             }
         }
+
         return $result;
     }
 
@@ -96,7 +98,7 @@ class Collection extends ArrayCollection
             /** @var ArrayCollection $changeCollection */
             $changeCollection = $this->changes[$t];
             if ($t == $type) {
-                if (! $changeCollection->contains($element)) {
+                if ( ! $changeCollection->contains($element)) {
                     $changeCollection->add($element);
                 }
             } else {

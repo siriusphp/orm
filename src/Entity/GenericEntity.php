@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
-use Sirius\Orm\CastingManager;
 use Sirius\Orm\Helpers\Str;
 
 class GenericEntity implements EntityInterface
 {
-    protected $state = StateEnum::CHANGED;
+    protected $state = StateEnum::SYNCHRONIZED;
 
     protected $primaryKey = 'id';
 
@@ -18,19 +17,12 @@ class GenericEntity implements EntityInterface
 
     protected $changed = [];
 
-    protected $casts = [];
-
-    /**
-     * @var CastingManager
-     */
-    protected $castingManager;
-
-    public function __construct(array $attributes, CastingManager $castingManager = null)
+    public function __construct(array $attributes, string $state = null)
     {
-        $this->castingManager = $castingManager;
         foreach ($attributes as $attr => $value) {
             $this->set($attr, $value);
         }
+        $this->setState($state);
     }
 
     public function __get($name)
@@ -60,16 +52,7 @@ class GenericEntity implements EntityInterface
             return $this->$method($value);
         }
 
-        if (!$this->castingManager) {
-            return $value;
-        }
-
-        /**
-         * @todo implement additional attributes
-         */
-        $type = $this->casts[$name] ?? $name;
-
-        return $this->castingManager->cast($type, $value);
+        return $value;
     }
 
     protected function set($attribute, $value = null)
@@ -78,11 +61,12 @@ class GenericEntity implements EntityInterface
 
         if ($value instanceof LazyLoader) {
             $this->lazyLoaders[$attribute] = $value;
+
             return $this;
         }
 
         $value = $this->castAttribute($attribute, $value);
-        if (! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
+        if ( ! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->changed[$attribute] = true;
             $this->state               = StateEnum::CHANGED;
         }
@@ -93,7 +77,7 @@ class GenericEntity implements EntityInterface
 
     protected function get($attribute)
     {
-        if (! $attribute) {
+        if ( ! $attribute) {
             return null;
         }
 
@@ -102,15 +86,12 @@ class GenericEntity implements EntityInterface
         return $this->attributes[$attribute] ?? null;
     }
 
-    public function getPersistenceState()
+    public function getState()
     {
-        if (! empty($this->changed)) {
-        }
-
         return $this->state;
     }
 
-    public function setPersistenceState($state)
+    public function setState($state)
     {
         if ($state == StateEnum::SYNCHRONIZED) {
             $this->changed = [];
@@ -126,6 +107,7 @@ class GenericEntity implements EntityInterface
                 $copy[$k] = $v->getArrayCopy();
             }
         }
+
         return $copy;
     }
 
@@ -134,7 +116,7 @@ class GenericEntity implements EntityInterface
         $changes = $this->changed;
         foreach ($this->attributes as $name => $value) {
             if (is_object($value) && method_exists($value, 'getChanges')) {
-                if (! empty($value->getChanges())) {
+                if ( ! empty($value->getChanges())) {
                     $changes[$name] = true;
                 }
             }

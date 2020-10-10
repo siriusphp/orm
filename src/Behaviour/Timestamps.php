@@ -31,7 +31,7 @@ class Timestamps implements BehaviourInterface
         return 'timestamps';
     }
 
-    public function onSave(/** @scrutinizer ignore-unused */Mapper $mapper, ActionInterface $action)
+    public function onNewSaveAction(/** @scrutinizer ignore-unused */ Mapper $mapper, ActionInterface $action)
     {
         if ($action instanceof Insert) {
             if ($this->createColumn) {
@@ -42,7 +42,7 @@ class Timestamps implements BehaviourInterface
             }
         }
         if ($action instanceof Update && $this->updateColumn) {
-            if (! empty($action->getEntity()->getChanges())) {
+            if ( ! empty($action->getEntity()->getChanges())) {
                 $action->addColumns([$this->updateColumn => time()]);
             }
         }

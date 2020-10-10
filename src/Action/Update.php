@@ -6,7 +6,7 @@ namespace Sirius\Orm\Action;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Helpers\Arr;
 
-class Update extends BaseAction
+class Update extends Save
 {
     protected $entityState;
 
@@ -37,23 +37,23 @@ class Update extends BaseAction
             return;
         }
 
-        $this->entityState = $this->entity->getPersistenceState();
+        $this->entityState = $this->entity->getState();
 
-        $connection = $this->mapper->getWriteConnection();
+        $connection = $this->connection;
 
         $columns = $this->mapper->extractFromEntity($this->entity);
-        $changes = Arr::renameKeys($this->entity->getChanges(), array_flip($this->mapper->getColumnAttributeMap()));
+        $changes = Arr::renameKeys($this->entity->getChanges(), array_flip($this->mapper->getConfig()->getColumnAttributeMap()));
         $columns = Arr::only($columns, array_keys($changes));
         $columns = array_merge(
             $columns,
             $this->extraColumns,
-            $this->mapper->getGuards()
+            $this->mapper->getConfig()->getGuards()
         );
-        $columns = Arr::except($columns, $this->mapper->getPrimaryKey());
+        $columns = Arr::except($columns, $this->mapper->getConfig()->getPrimaryKey());
 
         if (count($columns) > 0) {
             $updateSql = new \Sirius\Sql\Update($connection);
-            $updateSql->table($this->mapper->getTable())
+            $updateSql->table($this->mapper->getConfig()->getTable())
                       ->columns($columns)
                       ->whereAll($conditions, false);
             $updateSql->perform();
@@ -62,10 +62,10 @@ class Update extends BaseAction
 
     public function revert()
     {
-        if (! $this->hasRun) {
+        if ( ! $this->hasRun) {
             return;
         }
-        $this->entity->setPersistenceState($this->entityState);
+        $this->entity->setState($this->entityState);
     }
 
     public function onSuccess()
@@ -73,6 +73,6 @@ class Update extends BaseAction
         foreach ($this->extraColumns as $col => $value) {
             $this->mapper->setEntityAttribute($this->entity, $col, $value);
         }
-        $this->entity->setPersistenceState(StateEnum::SYNCHRONIZED);
+        $this->entity->setState(StateEnum::SYNCHRONIZED);
     }
 }

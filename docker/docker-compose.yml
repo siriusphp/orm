@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+
+  ### PHP ###################################################
+  php:
+    build:
+      context: ./php
+    container_name: siriusorm_php
+    volumes:
+      - ../:/var/www:delegated
+    ports:
+      - "9000:9000"
+    networks:
+      - siriusorm-network
+
+  ### MySQL ################################################
+  mysql:
+    build:
+      context: ./mysql
+    container_name: siriusorm_mysql
+    restart: unless-stopped
+    tty: true
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - TZ=UTC
+    ports:
+      - "3306:3306"
+    networks:
+      - siriusorm-network
+
+#Docker Networks
+networks:
+  siriusorm-network:
+    driver: bridge
+#Volumes
+volumes:
+  siriusorm-local:
+    driver: local

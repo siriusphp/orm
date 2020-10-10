@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Action;
 
-use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\Mapper;
-use Sirius\Orm\MapperConfig;
+use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Tests\BaseTestCase;
+use Sirius\Orm\Tests\Behaviour\ThrowExceptionBehaviour;
 
 class DeleteTest extends BaseTestCase
 {
@@ -23,19 +22,14 @@ class DeleteTest extends BaseTestCase
         $mapper->delete($product);
         $this->assertNull($mapper->find(1));
         $this->assertNull($product->id);
-        $this->assertEquals(StateEnum::DELETED, $product->getPersistenceState());
+        $this->assertEquals(StateEnum::DELETED, $product->getState());
     }
 
-    public function test_entity_is_reverted()
+    public function test_entity_is_reverted_on_exception()
     {
-
-        $mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE     => 'content',
-            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
-            MapperConfig::GUARDS    => ['content_type' => 'product'],
-            MapperConfig::BEHAVIOURS  => [new \Sirius\Orm\Tests\Behaviour\FakeThrowsException()]
-        ]));
-
+        // create a clone so the ORM is not affected
+        $mapper = $this->orm->get('products')->without();
+        $mapper->use(new ThrowExceptionBehaviour());
 
         $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
 
@@ -45,6 +39,6 @@ class DeleteTest extends BaseTestCase
         $this->expectException(FailedActionException::class);
         $mapper->delete($product);
         $this->assertEquals(1, $product->id);
-        $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getPersistenceState());
+        $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getState());
     }
 }

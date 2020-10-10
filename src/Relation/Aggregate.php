@@ -6,7 +6,6 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Entity\EntityInterface;
 use Sirius\Orm\Entity\LazyAggregate;
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 
 class Aggregate
@@ -26,9 +25,9 @@ class Aggregate
 
     public function __construct(string $name, Relation $relation, array $options)
     {
-        $this->name = $name;
+        $this->name     = $name;
         $this->relation = $relation;
-        $this->options = $options;
+        $this->options  = $options;
     }
 
     public function getQuery(Tracker $tracker)
@@ -77,7 +76,7 @@ class Aggregate
 
     public function isLazyLoad()
     {
-        return !isset($this->options[RelationConfig::LOAD_STRATEGY]) ||
+        return ! isset($this->options[RelationConfig::LOAD_STRATEGY]) ||
                $this->options[RelationConfig::LOAD_STRATEGY] == RelationConfig::LOAD_LAZY;
     }
 
@@ -96,8 +95,8 @@ class Aggregate
     {
         $keys = $this->relation->getKeyPairs();
         foreach ($keys as $nativeCol => $foreignCol) {
-            $entityValue  = $this->relation->getNativeMapper()->getEntityAttribute($entity, $nativeCol);
-            $rowValue = $row[$foreignCol];
+            $entityValue = $this->relation->getNativeMapper()->getEntityAttribute($entity, $nativeCol);
+            $rowValue    = $row[$foreignCol];
             // if both native and foreign key values are present (not unlinked entities) they must be the same
             // otherwise we assume that the entities can be linked together
             if ($entityValue && $rowValue && $entityValue != $rowValue) {

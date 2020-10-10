@@ -5,9 +5,9 @@ namespace Sirius\Orm\Entity;
 
 interface EntityInterface
 {
-    public function getPersistenceState();
+    public function getState();
 
-    public function setPersistenceState($state);
+    public function setState($state);
 
     public function getArrayCopy();
 

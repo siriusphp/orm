@@ -3,12 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Relation;
 
-use Sirius\Orm\Collection\Collection;
-use Sirius\Orm\Entity\EntityInterface;
-use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\Query;
-
 trait HasAggregates
 {
     protected $aggregates;
@@ -19,15 +13,16 @@ trait HasAggregates
             return;
         }
 
-        $aggregates = [];
+        $aggregates     = [];
         $aggregatesList = $this->getOption(RelationConfig::AGGREGATES);
-        if (!is_array($aggregatesList) || empty($aggregatesList)) {
+        if ( ! is_array($aggregatesList) || empty($aggregatesList)) {
             $this->aggregates = $aggregates;
+
             return;
         }
 
         foreach ($aggregatesList as $name => $options) {
-            $agg = new Aggregate($name, /** @scrutinizer ignore-type */ $this, $options);
+            $agg               = new Aggregate($name, /** @scrutinizer ignore-type */ $this, $options);
             $aggregates[$name] = $agg;
         }
 

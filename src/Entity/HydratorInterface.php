@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
-use Sirius\Orm\Entity\Tracker;
-
 interface HydratorInterface
 {
     public function hydrate(array $attributes = []);
@@ -14,4 +12,8 @@ interface HydratorInterface
     public function get($entity, $attribute);
 
     public function set($entity, $attribute, $value);
+
+    public function getPk($entity);
+
+    public function setPk($entity, $value);
 }
