@@ -203,7 +203,7 @@ class Query extends Select
 
     protected function injectRelations(EntityInterface $entity, Tracker $tracker, array $eagerLoad = [])
     {
-        foreach (array_keys($this->mapper->getRelations()) as $name) {
+        foreach ($this->mapper->getRelations() as $name) {
             $relation      = $this->mapper->getRelation($name);
             $queryCallback = $eagerLoad[$name] ?? null;
             $nextLoad      = Arr::getChildren($eagerLoad, $name);
@@ -222,7 +222,7 @@ class Query extends Select
 
     protected function injectAggregates(EntityInterface $entity, Tracker $tracker, array $eagerLoad = [])
     {
-        foreach (array_keys($this->mapper->getRelations()) as $name) {
+        foreach ($this->mapper->getRelations() as $name) {
             $relation = $this->mapper->getRelation($name);
             if ( ! method_exists($relation, 'getAggregates')) {
                 continue;

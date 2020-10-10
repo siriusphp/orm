@@ -3,7 +3,7 @@
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
-return MapperConfig::fromArray([
+return [
     MapperConfig::TABLE     => 'tags',
     MapperConfig::COLUMNS   => ['id', 'name'],
 //    MapperConfig::RELATIONS => [
@@ -13,4 +13,4 @@ return MapperConfig::fromArray([
 //            RelationConfig::THROUGH_COLUMNS => ['position'],
 //        ]
 //    ]
-]);
+];

@@ -9,14 +9,5 @@ use Sirius\Orm\Mapper;
 
 class Save extends BaseAction
 {
-    /**
-     * @var Connection
-     */
-    protected $connection;
 
-    public function __construct(Connection $connection, Mapper $mapper, EntityInterface $entity, array $options = [])
-    {
-        parent::__construct($mapper, $entity, $options);
-        $this->connection = $connection;
-    }
 }

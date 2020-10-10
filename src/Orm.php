@@ -118,7 +118,7 @@ class Orm
             }
         }
         $type          = $options[RelationConfig::TYPE];
-        $relationClass = 'Sirius\\Orm\\Relation' . Str::className($type);
+        $relationClass = 'Sirius\\Orm\\Relation\\' . Str::className($type);
 
         if ( ! class_exists($relationClass)) {
             throw new InvalidArgumentException("{$relationClass} does not exist");

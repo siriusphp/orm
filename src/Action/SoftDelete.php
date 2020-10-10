@@ -14,7 +14,7 @@ class SoftDelete extends Delete
 
     protected function execute()
     {
-        $entityId = $this->mapper->getEntityPk($this->entity);
+        $entityId = $this->getEntityHydrator()->getPk($this->entity);
         if ( ! $entityId) {
             return;
         }
@@ -32,7 +32,7 @@ class SoftDelete extends Delete
 
     public function onSuccess()
     {
-        $this->mapper->setEntityAttribute($this->entity, $this->getOption('deleted_at_column'), $this->now);
+        $this->getEntityHydrator()->set($this->entity, $this->getOption('deleted_at_column'), $this->now);
         if ($this->entity->getState() !== StateEnum::DELETED) {
             $this->entity->setState(StateEnum::DELETED);
         }

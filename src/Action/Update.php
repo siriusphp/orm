@@ -39,7 +39,7 @@ class Update extends Save
 
         $this->entityState = $this->entity->getState();
 
-        $connection = $this->connection;
+        $connection = $this->mapper->getWriteConnection();
 
         $columns = $this->mapper->extractFromEntity($this->entity);
         $changes = Arr::renameKeys($this->entity->getChanges(), array_flip($this->mapper->getConfig()->getColumnAttributeMap()));
@@ -71,7 +71,7 @@ class Update extends Save
     public function onSuccess()
     {
         foreach ($this->extraColumns as $col => $value) {
-            $this->mapper->setEntityAttribute($this->entity, $col, $value);
+            $this->getEntityHydrator()->set($this->entity, $col, $value);
         }
         $this->entity->setState(StateEnum::SYNCHRONIZED);
     }

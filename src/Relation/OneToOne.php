@@ -19,7 +19,7 @@ class OneToOne extends OneToMany
 
         $found = $result[$nativeId] ?? [];
 
-        $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, $found[0] ?? null);
+        $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, $found[0] ?? null);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -28,8 +28,7 @@ class OneToOne extends OneToMany
         if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
-            $foreignEntity = $this->nativeMapper
-                ->getEntityAttribute($action->getEntity(), $this->name);
+            $foreignEntity = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
 
             if ($foreignEntity) {
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));

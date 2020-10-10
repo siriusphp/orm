@@ -12,12 +12,9 @@ class SoftDeleteTest extends BaseTestCase
 {
     public function test_behaviour_is_applied()
     {
-        $mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE     => 'content',
-            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
-            MapperConfig::GUARDS    => ['content_type' => 'product'],
-            MapperConfig::BEHAVIOURS  => [new SoftDelete()]
-        ]));
+        // create a clone so the ORM is not affected
+        $mapper = $this->orm->get('products')->without();
+        $mapper->use(new SoftDelete());
 
         $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
 

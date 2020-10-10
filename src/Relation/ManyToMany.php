@@ -154,7 +154,7 @@ class ManyToMany extends Relation
                 }
             }
         } else {
-            $this->nativeMapper->setEntityAttribute($nativeEntity, $this->name, new Collection($found));
+            $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, new Collection($found));
         }
     }
 
@@ -218,7 +218,7 @@ class ManyToMany extends Relation
     {
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
-        $foreignEntities = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
+        $foreignEntities = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
         if ( ! $foreignEntities) {
             return;
         }

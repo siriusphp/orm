@@ -57,7 +57,7 @@ class Aggregate
     public function attachLazyAggregateToEntity(EntityInterface $entity, Tracker $tracker)
     {
         $valueLoader = new LazyAggregate($entity, $tracker, $this);
-        $this->relation->getNativeMapper()->setEntityAttribute($entity, $this->name, $valueLoader);
+        $this->getNativeEntityHydrator()->set($entity, $this->name, $valueLoader);
     }
 
     public function attachAggregateToEntity(EntityInterface $entity, array $results)
@@ -105,5 +105,13 @@ class Aggregate
         }
 
         return true;
+    }
+
+    protected function getNativeEntityHydrator() {
+        return $this->relation->getNativeMapper()->getConfig()->getEntityHydrator();
+    }
+
+    protected function getForeignEntityHydrator() {
+        return $this->relation->getForeignMapper()->getConfig()->getEntityHydrator();
     }
 }

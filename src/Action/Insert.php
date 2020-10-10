@@ -17,7 +17,7 @@ class Insert extends Update
         $this->entityId    = $this->getEntityHydrator()->getPk($this->entity);
         $this->entityState = $this->entity->getState();
 
-        $connection = $this->connection;
+        $connection = $this->mapper->getWriteConnection();
 
         $columns = array_merge(
             $this->mapper->extractFromEntity($this->entity),

@@ -139,7 +139,7 @@ abstract class Relation
     public function attachLazyRelationToEntity(EntityInterface $entity, Tracker $tracker)
     {
         $valueLoader = new LazyRelation($entity, $tracker, $this);
-        $this->nativeMapper->setEntityAttribute($entity, $this->name, $valueLoader);
+        $this->getNativeEntityHydrator()->set($entity, $this->name, $valueLoader);
     }
 
     public function getQuery(Tracker $tracker)
@@ -177,7 +177,7 @@ abstract class Relation
     {
         $entityKeys = [];
         foreach ($keyColumns as $col) {
-            $entityKeys[] = $mapper->getEntityAttribute($entity, $col);
+            $entityKeys[] = $mapper->getConfig()->getEntityHydrator()->get($entity, $col);
         }
 
         return implode('-', $entityKeys);
@@ -315,5 +315,15 @@ abstract class Relation
     public function getForeignMapper(): Mapper
     {
         return $this->foreignMapper;
+    }
+
+    protected function getNativeEntityHydrator()
+    {
+        return $this->nativeMapper->getConfig()->getEntityHydrator();
+    }
+
+    protected function getForeignEntityHydrator()
+    {
+        return $this->nativeMapper->getConfig()->getEntityHydrator();
     }
 }

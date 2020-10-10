@@ -18,19 +18,16 @@ class TimestampsTest extends BaseTestCase
 
     public function test_behaviour_is_applied()
     {
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
-            MapperConfig::TABLE     => 'content',
-            MapperConfig::COLUMNS   => ['id', 'content_type', 'title', 'description', 'summary'],
-            MapperConfig::GUARDS    => ['content_type' => 'product'],
-            MapperConfig::BEHAVIOURS  => [new Timestamps()]
-        ]));
+        // create a clone so the ORM is not affected
+        $mapper = $this->orm->get('products')->without();
+        $mapper->use(new Timestamps());
 
-        $product = $this->mapper->newEntity(['title' => 'Product 1']);
+        $product = $mapper->newEntity(['title' => 'Product 1']);
 
         $this->assertNull($product->created_at);
         $this->assertNull($product->updated_at);
 
-        $this->assertTrue($this->mapper->save($product));
+        $this->assertTrue($mapper->save($product));
 
         $this->assertNotNull($product->created_at);
         $this->assertNotNull($product->updated_at);

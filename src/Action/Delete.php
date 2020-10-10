@@ -10,17 +10,6 @@ use Sirius\Orm\Mapper;
 
 class Delete extends BaseAction
 {
-    /**
-     * @var Connection
-     */
-    protected $connection;
-
-    public function __construct(Connection $connection, Mapper $mapper, EntityInterface $entity, array $options = [])
-    {
-        parent::__construct($mapper, $entity, $options);
-        $this->connection = $connection;
-    }
-
     protected function execute()
     {
         $conditions = $this->getConditions();
@@ -29,7 +18,7 @@ class Delete extends BaseAction
             return;
         }
 
-        $delete = new \Sirius\Sql\Delete($this->connection);
+        $delete = new \Sirius\Sql\Delete($this->mapper->getWriteConnection());
         $delete->from($this->mapper->getConfig()->getTable());
         $delete->whereAll($conditions, false);
 

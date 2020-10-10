@@ -6,6 +6,7 @@ namespace Sirius\Orm\Tests;
 use Sirius\Orm\Connection;
 use PHPUnit\Framework\TestCase;
 use Sirius\Orm\ConnectionLocator;
+use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
 use Sirius\Sql\Insert;
 use Sirius\Sql\Select;
@@ -61,9 +62,14 @@ class BaseTestCase extends TestCase
 
     }
 
-    public function getMapperConfig($name)
+    public function getMapperConfig($name, callable $callback = null)
     {
-        return include(__DIR__ . '/resources/mappers/' . $name . '.php');
+        $arr = include(__DIR__ . '/resources/mappers/' . $name . '.php');
+        if ($callback) {
+            $arr = $callback($arr);
+        }
+
+        return MapperConfig::fromArray($arr);
     }
 
     protected function insertRow($table, $values)

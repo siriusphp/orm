@@ -30,8 +30,9 @@ class OrmTest extends BaseTestCase
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
         ]);
-        $this->orm->register('products', function ($orm) use ($mapperConfig) {
-            return Mapper::make($orm, $mapperConfig);
+        $connectionLocator = $this->connectionLocator;
+        $this->orm->register('products', function () use ($mapperConfig, $connectionLocator) {
+            return Mapper::make($connectionLocator, $mapperConfig);
         });
 
         $this->assertTrue($this->orm->has('products'));
@@ -45,7 +46,7 @@ class OrmTest extends BaseTestCase
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
         ]);
-        $mapper       = Mapper::make($this->orm, $mapperConfig);
+        $mapper       = Mapper::make($this->connectionLocator, $mapperConfig);
         $this->orm->register('products', $mapper);
 
         $this->assertInstanceOf(Mapper::class, $this->orm->get('products'));

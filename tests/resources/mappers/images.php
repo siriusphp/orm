@@ -3,7 +3,7 @@
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
-return MapperConfig::fromArray([
+return [
     MapperConfig::TABLE     => 'images',
     MapperConfig::COLUMNS   => ['id', 'name', 'folder'],
     MapperConfig::CASTS     => [
@@ -17,4 +17,4 @@ return MapperConfig::fromArray([
             RelationConfig::FOREIGN_KEY    => 'featured_image_id'
         ]
     ]
-]);
+];

@@ -37,7 +37,7 @@ class MapperConfig
     protected $entityClass = GenericEntity::class;
 
     /**
-     * @var string
+     * @var string|array
      */
     protected $primaryKey = 'id';
 
@@ -131,9 +131,9 @@ class MapperConfig
     }
 
     /**
-     * @return string
+     * @return string|array
      */
-    public function getPrimaryKey(): string
+    public function getPrimaryKey()
     {
         return $this->primaryKey;
     }

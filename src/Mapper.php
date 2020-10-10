@@ -57,6 +57,8 @@ class Mapper
             $mapper->use(...$mapperConfig->getBehaviours());
         }
 
+        $mapper->relations = $mapperConfig->getRelations();
+
         return $mapper;
     }
 
@@ -241,9 +243,9 @@ class Mapper
     public function newSaveAction(EntityInterface $entity, $options): Update
     {
         if ( ! $this->getConfig()->getEntityHydrator()->getPk($entity)) {
-            $action = new Insert($this->getWriteConnection(), $this, $entity, $options);
+            $action = new Insert($this, $entity, $options);
         } else {
-            $action = new Update($this->getWriteConnection(), $this, $entity, $options);
+            $action = new Update($this, $entity, $options);
         }
 
         return $this->behaviours->apply($this, __FUNCTION__, $action);
@@ -270,7 +272,7 @@ class Mapper
 
     public function newDeleteAction(EntityInterface $entity, $options)
     {
-        $action = new Delete($this->getWriteConnection(), $this, $entity, $options);
+        $action = new Delete($this, $entity, $options);
 
         return $this->behaviours->apply($this, __FUNCTION__, $action);
     }
@@ -288,12 +290,12 @@ class Mapper
         }
     }
 
-    protected function getReadConnection(): Connection
+    public function getReadConnection(): Connection
     {
         return $this->connectionLocator->getRead();
     }
 
-    protected function getWriteConnection(): Connection
+    public function getWriteConnection(): Connection
     {
         return $this->connectionLocator->getWrite();
     }

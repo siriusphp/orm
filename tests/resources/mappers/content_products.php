@@ -4,7 +4,7 @@ use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\RelationConfig;
 
-return MapperConfig::fromArray([
+return [
     MapperConfig::TABLE     => 'content_products',
     MapperConfig::PRIMARY_KEY=> 'content_id',
     MapperConfig::COLUMNS   => ['content_id', 'sku', 'price', 'category_id', 'featured_image_id'],
@@ -24,4 +24,4 @@ return MapperConfig::fromArray([
             RelationConfig::TYPE           => RelationConfig::TYPE_MANY_TO_ONE
         ],
     ]
-]);
+];

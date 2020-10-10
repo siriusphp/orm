@@ -3,7 +3,7 @@
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
-return MapperConfig::fromArray([
+return [
     MapperConfig::TABLE     => 'categories',
     MapperConfig::COLUMNS   => ['id', 'parent_id', 'name'],
     MapperConfig::CASTS     => [
@@ -25,4 +25,4 @@ return MapperConfig::fromArray([
             RelationConfig::FOREIGN_MAPPER => 'categories',
         ]
     ]
-]);
+];

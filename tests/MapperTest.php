@@ -18,7 +18,7 @@ class MapperTest extends BaseTestCase
     {
         parent::setUp();
 
-        $this->mapper = Mapper::make($this->orm, MapperConfig::fromArray([
+        $this->mapper = Mapper::make($this->connectionLocator, MapperConfig::fromArray([
             MapperConfig::TABLE        => 'products',
             MapperConfig::ENTITY_CLASS => ProductEntity::class,
             MapperConfig::TABLE_ALIAS  => 'p',
