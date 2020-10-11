@@ -111,10 +111,11 @@ class ManyToMany extends Relation
 
     public function joinSubselect(Query $query, string $reference)
     {
-        $subselect = $query->subSelectForJoinWith()
-                           ->from($this->foreignMapper->getConfig()->getTable())
-                           ->columns($this->foreignMapper->getConfig()->getTable() . '.*')
+        $subselect = $this->foreignMapper->newQuery();
+        $subselect = $query->subSelectForJoinWith($this->foreignMapper)
                            ->as($reference);
+        #$subselect->resetGuards();
+        #$subselect->setGuards($this->foreignMapper->getConfig()->getGuards());
 
         $subselect = $this->joinWithThroughTable($subselect);
 

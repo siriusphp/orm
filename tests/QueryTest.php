@@ -76,16 +76,17 @@ class QueryTest extends BaseTestCase
             ['product', 'Product 3'],
             ['product', 'Product 4'],
             ['product', 'Product 5'],
-            ['product', 'Product 6'],
+            ['page', 'Page 1'],
         ]);
 
         $found  = 0;
-        $result = $this->mapper->newQuery()
-                               ->chunk(2, function ($entity) use (&$found) {
-                                   $found += 1;
-                               });
 
-        $this->assertEquals(6, $found);
+        $query  = $this->mapper->newQuery();
+        $query->chunk(2, function ($entity) use (&$found) {
+            $found += 1;
+        });
+
+        $this->assertEquals(5, $found);
     }
 
     public function test_query_paginate()

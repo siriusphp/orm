@@ -295,7 +295,7 @@ abstract class Relation
         return $query;
     }
 
-    protected function applyForeignGuards(Select $query)
+    protected function applyForeignGuards(Query $query)
     {
         $guards = $this->getOption(RelationConfig::FOREIGN_GUARDS);
         if ($guards) {

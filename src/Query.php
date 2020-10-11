@@ -26,6 +26,21 @@ class Query extends Select
     protected $mapperConfig;
 
     /**
+     * @var string|array
+     */
+    protected $primaryKey;
+
+    /**
+     * @var string
+     */
+    protected $table;
+
+    /**
+     * @var string
+     */
+    protected $tableReference;
+
+    /**
      * @var Connection
      */
     protected $connection;
@@ -45,20 +60,36 @@ class Query extends Select
      */
     protected $scopes = [];
 
+    /**
+     * List of relation that were joined to prevent from joining them again
+     * Designed for situation where you have conditions on atributes
+     * of related entities
+     *
+     * @example $content->newQuery()->where('tags.name', 'cool')
+     * @var array
+     */
+    protected $joinedWith = [];
+
     public function __construct(Connection $connection, Mapper $mapper, Bindings $bindings = null, string $indent = '')
     {
         parent::__construct($connection, $bindings, $indent);
-        $this->mapper       = $mapper;
-        $this->mapperConfig = $mapper->getConfig();
+        $this->mapper = $mapper;
 
-        $this->from($this->mapperConfig->getTableReference());
+        $mapperConfig         = $mapper->getConfig();
+        $this->primaryKey     = $mapperConfig->getPrimaryKey();
+        $this->tableReference = $mapperConfig->getTableReference();
+        $this->table          = $mapperConfig->getTableAlias(true);
+        $this->scopes         = $mapperConfig->getQueryScopes();
+        $this->guards         = $mapperConfig->getGuards();
+
+        $this->from($this->tableReference);
         $this->resetColumns();
-        $this->columns($this->mapperConfig->getTableAlias(true) . '.*');
+        $this->columns($this->table . '.*');
     }
 
     public function __call(string $method, array $params)
     {
-        $scope = $this->mapperConfig->getQueryScope($method);
+        $scope = $this->scopes[$method] ?? null;
         if ($scope && is_callable($scope)) {
             return $scope($this, ...$params);
         }
@@ -71,8 +102,10 @@ class Query extends Select
         $vars = get_object_vars($this);
         unset($vars['mapper']);
         foreach ($vars as $name => $prop) {
-            if (is_object($prop)) {
+            if (is_object($prop) && method_exists($prop, '__clone')) {
                 $this->$name = clone $prop;
+            } else {
+                $this->$name = $prop;
             }
         }
     }
@@ -96,23 +129,24 @@ class Query extends Select
 
     public function joinWith($name): Query
     {
+        if (in_array($name, $this->joinedWith)) {
+            return $this;
+        }
+
         if ( ! $this->mapper->hasRelation($name)) {
             throw new \InvalidArgumentException(
                 sprintf("Relation %s, not defined for %s", $name, $this->mapper->getConfig()->getTable())
             );
         }
+
         $relation = $this->mapper->getRelation($name);
 
         return $relation->joinSubselect($this, $name);
     }
 
-    public function subSelectForJoinWith(): Query
+    public function subSelectForJoinWith(Mapper $mapper): Query
     {
-        $subselect = new static($this->connection, $this->mapper, $this->bindings, $this->indent . '    ');
-        $subselect->resetFrom();
-        $subselect->resetColumns();
-
-        return $subselect;
+        return new static($this->connection, $mapper, $this->bindings, $this->indent . '    ');
     }
 
     public function first()
@@ -254,12 +288,14 @@ class Query extends Select
             $this->orderBy(...(array)$this->mapper->getConfig()->getPrimaryKey());
         }
 
+        $query = clone $this;
+        $query->applyGuards();
+        $query->resetGuards();
+
         $run = 0;
         while ($run < $limit) {
-            $query = clone $this;
             $query->limit($size);
             $query->offset($run * $size);
-
             $results = $query->get();
 
             if (count($results) === 0) {
@@ -281,6 +317,20 @@ class Query extends Select
         $this->columns('COUNT(*) AS total');
 
         return (int)$this->fetchValue();
+    }
+
+    public function where($column, $value = null, $condition = '=')
+    {
+        if (is_string($column) && ($dotPosition = strpos($column, '.'))) {
+            $relationName = trim(substr($column, 0, $dotPosition), "'`");
+            // the relationName could be a table so we need to make sure
+            // beforehand that this is actually a relation
+            if ($this->mapper->hasRelation($relationName)) {
+                $this->joinWith($relationName);
+            }
+        }
+
+        return parent::where($column, $value, $condition);
     }
 
     public function setGuards(array $guards)
@@ -305,6 +355,7 @@ class Query extends Select
 
     protected function applyGuards()
     {
+
         if (empty($this->guards)) {
             return;
         }
@@ -312,7 +363,7 @@ class Query extends Select
         $this->groupCurrentWhere();
         foreach ($this->guards as $column => $value) {
             if (is_int($column)) {
-                $this->where($value);
+                $this->where($value, null, null);
             } else {
                 $this->where($column, $value);
             }

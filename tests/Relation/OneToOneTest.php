@@ -112,6 +112,7 @@ FROM
     FROM
         content_products
     ) AS fields ON content.id = fields.content_id
+WHERE content_type = :__1__
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());

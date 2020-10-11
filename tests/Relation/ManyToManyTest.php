@@ -53,6 +53,7 @@ FROM
     ORDER BY
         position ASC
     ) AS tags ON content.id = tags.id
+    WHERE content_type = :__1__
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
