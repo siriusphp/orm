@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
+use Doctrine\DBAL\Platforms\MySQL80Platform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use PHPUnit\Framework\TestCase;
 use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
@@ -40,14 +44,21 @@ class BaseTestCase extends TestCase
         $connectionLocator       = ConnectionLocator::new($this->connection);
         $this->connectionLocator = $connectionLocator;
         $this->orm               = new Orm($connectionLocator);
-        $this->createTables(getenv('DB_ENGINE') ? getenv('DB_ENGINE') : 'generic');
+        $this->createTables(getenv('DB_ENGINE') ? getenv('DB_ENGINE') : 'sqlite');
         $this->loadMappers();
         $connectionLocator->logQueries();
     }
 
-    public function createTables($fileName = 'generic')
+    public function createTables($dbEngine = 'generic')
     {
-        foreach (include(__DIR__ . "/resources/tables/{$fileName}.php") as $sql) {
+        $platform = new SqlitePlatform();
+        switch ($dbEngine) {
+            case 'mysql':
+                $platform = new MySQL80Platform();
+        }
+        /** @var Schema $schema */
+        $schema = include(__DIR__ . "/resources/schema.php");
+        foreach($schema->toSql($platform) as $sql) {
             $this->connection->perform($sql);
         }
     }
