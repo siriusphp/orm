@@ -62,9 +62,10 @@ SQL;
         ], $query->getBindValues());
     }
 
-    public function test_join_with() {
+    public function test_join_with()
+    {
         $query = $this->nativeMapper->newQuery()
-            ->joinWith('products');
+                                    ->joinWith('products');
 
         $expectedStatement = <<<SQL
 SELECT
@@ -148,7 +149,7 @@ SQL;
         $category = $this->nativeMapper
             ->newQuery()
             ->first();
-        $product = $category->products[0];
+        $product  = $category->products[0];
 
         $this->assertTrue($this->nativeMapper->delete($category, true));
         $this->assertNull($category->id);
@@ -165,7 +166,7 @@ SQL;
             ->newQuery()
             ->first();
         /** @var Collection $products */
-        $products = $category->products;
+        $products         = $category->products;
         $products[0]->sku = 'sku_1';
         $products->removeElement($products[1]);
 
@@ -181,10 +182,10 @@ SQL;
         $this->populateDb();
 
         $category = $this->nativeMapper->newEntity([
-            'name' => 'New category',
+            'name'     => 'New category',
             'products' => new Collection()
         ]);
-        $product = $this->foreignMapper->newEntity([
+        $product  = $this->foreignMapper->newEntity([
             'sku' => 'New sku'
         ]);
         /** @var Collection $products */
@@ -203,7 +204,7 @@ SQL;
             ->newQuery()
             ->first();
         /** @var Collection $products */
-        $product = $category->products[0];
+        $product      = $category->products[0];
         $product->sku = 'sku_1';
 
         $this->nativeMapper->save($category, ['products']);
@@ -219,7 +220,7 @@ SQL;
             ->newQuery()
             ->first();
         /** @var Collection $products */
-        $products = $category->products;
+        $products         = $category->products;
         $products[0]->sku = 'sku_1';
 
         $this->nativeMapper->save($category, false);

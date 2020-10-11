@@ -125,7 +125,7 @@ class OneToMany extends Relation
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         /** @var Collection $foreignEntities */
-        $foreignEntities = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
+        $foreignEntities = $this->getNativeEntityHydrator()->get($nativeEntity, $this->name);
         $changes         = $foreignEntities->getChanges();
 
         // save the entities still in the collection

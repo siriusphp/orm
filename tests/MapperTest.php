@@ -19,10 +19,10 @@ class MapperTest extends BaseTestCase
         parent::setUp();
 
         $this->mapper = Mapper::make($this->connectionLocator, MapperConfig::fromArray([
-            MapperConfig::TABLE        => 'products',
-            MapperConfig::ENTITY_CLASS => ProductEntity::class,
-            MapperConfig::TABLE_ALIAS  => 'p',
-            MapperConfig::COLUMNS      => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
+            MapperConfig::TABLE                => 'products',
+            MapperConfig::ENTITY_CLASS         => ProductEntity::class,
+            MapperConfig::TABLE_ALIAS          => 'p',
+            MapperConfig::COLUMNS              => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
             MapperConfig::COLUMN_ATTRIBUTE_MAP => ['price' => 'value']
         ]));
     }
@@ -30,10 +30,10 @@ class MapperTest extends BaseTestCase
     public function test_new_entity()
     {
         $product = $this->mapper->newEntity([
-            'category_id' => '10',
+            'category_id'       => '10',
             'featured_image_id' => '20',
-            'sku' => 'sku 1',
-            'price' => '100.343'
+            'sku'               => 'sku 1',
+            'price'             => '100.343'
         ]);
 
         $this->assertEquals(100.34, $product->value);

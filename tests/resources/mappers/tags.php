@@ -1,11 +1,10 @@
 <?php
 
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\Relation\RelationConfig;
 
 return [
-    MapperConfig::TABLE     => 'tags',
-    MapperConfig::COLUMNS   => ['id', 'name'],
+    MapperConfig::TABLE   => 'tags',
+    MapperConfig::COLUMNS => ['id', 'name'],
 //    MapperConfig::RELATIONS => [
 //        'products' => [
 //            RelationConfig::FOREIGN_MAPPER  => 'products',

@@ -119,13 +119,15 @@ abstract class AbstractTestSuite
         return $t * 1000;
     }
 
-    public function assertEquals($expected, $actual, $message = null) {
+    public function assertEquals($expected, $actual, $message = null)
+    {
         if ($expected != $actual) {
             throw new Exception($message ?? sprintf('%s is not the same %s', $expected, $actual));
         }
     }
 
-    public function assertNotNull($actual, $message = null) {
+    public function assertNotNull($actual, $message = null)
+    {
         if (null == $actual) {
             throw new Exception($message ?? sprintf('%s is null', $actual));
         }

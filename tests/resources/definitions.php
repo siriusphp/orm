@@ -90,11 +90,11 @@ $orm->addMapper(
     'category_languages',
     Mapper::make()
         // columns
-        ->addAutoIncrementColumn()
-        ->addColumn('category_id', Column::bigInteger(true)->setIndex(true))
-        ->addColumn('lang', Column::varchar(5)->setIndex(true))
-        ->addColumn('title', Column::string())
-        ->addColumn('description', Column::string()->setNullable(true))
+          ->addAutoIncrementColumn()
+          ->addColumn('category_id', Column::bigInteger(true)->setIndex(true))
+          ->addColumn('lang', Column::varchar(5)->setIndex(true))
+          ->addColumn('title', Column::string())
+          ->addColumn('description', Column::string()->setNullable(true))
 );
 
 return $orm;

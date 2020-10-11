@@ -69,9 +69,8 @@ class Aggregate
                 break;
             }
         }
-        $this->relation
-            ->getNativeMapper()
-            ->setEntityAttribute($entity, $this->name, $found ? $found[$this->name] : null);
+        $this->getNativeEntityHydrator()
+             ->set($entity, $this->name, $found ? $found[$this->name] : null);
     }
 
     public function isLazyLoad()
@@ -95,7 +94,7 @@ class Aggregate
     {
         $keys = $this->relation->getKeyPairs();
         foreach ($keys as $nativeCol => $foreignCol) {
-            $entityValue = $this->relation->getNativeMapper()->getEntityAttribute($entity, $nativeCol);
+            $entityValue = $this->getNativeEntityHydrator()->get($entity, $nativeCol);
             $rowValue    = $row[$foreignCol];
             // if both native and foreign key values are present (not unlinked entities) they must be the same
             // otherwise we assume that the entities can be linked together
@@ -107,11 +106,13 @@ class Aggregate
         return true;
     }
 
-    protected function getNativeEntityHydrator() {
+    protected function getNativeEntityHydrator()
+    {
         return $this->relation->getNativeMapper()->getConfig()->getEntityHydrator();
     }
 
-    protected function getForeignEntityHydrator() {
+    protected function getForeignEntityHydrator()
+    {
         return $this->relation->getForeignMapper()->getConfig()->getEntityHydrator();
     }
 }

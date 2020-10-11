@@ -7,12 +7,16 @@ use Sirius\Orm\Action\ActionInterface;
 
 class ThrowExceptionOnRun implements ActionInterface
 {
-    public function run() {
+    public function run()
+    {
         throw new \Exception();
     }
 
-    public function revert() {
+    public function revert()
+    {
     }
 
-    public function onSuccess() {}
+    public function onSuccess()
+    {
+    }
 }

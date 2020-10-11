@@ -47,6 +47,7 @@ class CastingManagerTest extends TestCase
             'active' => true
         ], $result);
     }
+
     public function test_cast_array_for_db()
     {
 

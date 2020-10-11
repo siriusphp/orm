@@ -34,6 +34,7 @@ class OneToOneTest extends BaseTestCase
         // reconfigure products-featured_image to use CASCADE
         $config             = $this->getMapperConfig('products', function ($arr) {
             $arr[MapperConfig::RELATIONS]['fields'][RelationConfig::CASCADE] = true;
+
             return $arr;
         });
         $this->nativeMapper = $this->orm->register('products', $config)->get('products');

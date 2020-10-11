@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests;
 
 use Sirius\Orm\Mapper;
-use Sirius\Orm\MapperConfig;
 
 class QueryTest extends BaseTestCase
 {
@@ -25,7 +24,7 @@ class QueryTest extends BaseTestCase
     {
         $this->insertRow('content', [
             'content_type' => 'product',
-            'title'   => 'Product 1'
+            'title'        => 'Product 1'
         ]);
         $entity = $this->mapper->find(1);
         $this->assertSame('Product 1', $entity->title);
@@ -60,9 +59,9 @@ class QueryTest extends BaseTestCase
             ['product', 'Product 6'],
         ]);
 
-        $found = 0;
+        $found  = 0;
         $result = $this->mapper->newQuery()
-                               ->chunk(2, function($entity) use (&$found) {
+                               ->chunk(2, function ($entity) use (&$found) {
                                    $found += 1;
                                }, 2);
 
@@ -80,9 +79,9 @@ class QueryTest extends BaseTestCase
             ['product', 'Product 6'],
         ]);
 
-        $found = 0;
+        $found  = 0;
         $result = $this->mapper->newQuery()
-                               ->chunk(2, function($entity) use (&$found) {
+                               ->chunk(2, function ($entity) use (&$found) {
                                    $found += 1;
                                });
 

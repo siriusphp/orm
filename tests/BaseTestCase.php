@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use Sirius\Orm\Connection;
 use PHPUnit\Framework\TestCase;
+use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
@@ -36,10 +36,10 @@ class BaseTestCase extends TestCase
             $connection = Connection::new('sqlite::memory:');
         }
 
-        $this->connection = $connection;
-        $connectionLocator = ConnectionLocator::new($this->connection);
+        $this->connection        = $connection;
+        $connectionLocator       = ConnectionLocator::new($this->connection);
         $this->connectionLocator = $connectionLocator;
-        $this->orm         = new Orm($connectionLocator);
+        $this->orm               = new Orm($connectionLocator);
         $this->createTables(getenv('DB_ENGINE') ? getenv('DB_ENGINE') : 'generic');
         $this->loadMappers();
         $connectionLocator->logQueries();

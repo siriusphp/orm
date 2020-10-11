@@ -5,6 +5,7 @@ namespace Sirius\Orm\Tests\Relation;
 
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
+use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToMany;
 use Sirius\Orm\Relation\RelationConfig;
@@ -31,7 +32,8 @@ class ManyToManyTest extends BaseTestCase
         $this->foreignMapper = $this->orm->get('tags');
     }
 
-    public function test_join_with() {
+    public function test_join_with()
+    {
         $query = $this->nativeMapper->newQuery()
                                     ->joinWith('tags');
 
@@ -59,10 +61,10 @@ SQL;
     public function test_query_callback()
     {
         $relation = new ManyToMany('tags', $this->nativeMapper, $this->foreignMapper, [
-            RelationConfig::THROUGH_TABLE   => 'products_tags',
-            RelationConfig::THROUGH_NATIVE_COLUMN   => 'product_id',
-            RelationConfig::THROUGH_COLUMNS => ['position'],
-            RelationConfig::QUERY_CALLBACK => function (Query $query) {
+            RelationConfig::THROUGH_TABLE         => 'products_tags',
+            RelationConfig::THROUGH_NATIVE_COLUMN => 'product_id',
+            RelationConfig::THROUGH_COLUMNS       => ['position'],
+            RelationConfig::QUERY_CALLBACK        => function (Query $query) {
                 return $query->where('status', 'active');
             }
         ]);
@@ -94,9 +96,9 @@ SQL;
     public function test_query_guards()
     {
         $relation = new ManyToMany('category', $this->nativeMapper, $this->foreignMapper, [
-            RelationConfig::THROUGH_TABLE   => 'products_tags',
-            RelationConfig::THROUGH_NATIVE_COLUMN   => 'product_id',
-            RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
+            RelationConfig::THROUGH_TABLE         => 'products_tags',
+            RelationConfig::THROUGH_NATIVE_COLUMN => 'product_id',
+            RelationConfig::FOREIGN_GUARDS        => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
         $tracker = new Tracker([
@@ -163,10 +165,13 @@ SQL;
     {
         $this->populateDb();
 
-        // don't know why would anybody do this but...
-        $config                                             = $this->getMapperConfig('products');
-        $config->relations['tags'][RelationConfig::CASCADE] = true;
-        $this->nativeMapper                                 = $this->orm->register('products', $config)->get('products');
+        // reconfigure products-featured_image to use CASCADE
+        $config             = $this->getMapperConfig('products', function ($arr) {
+            $arr[MapperConfig::RELATIONS]['tags'][RelationConfig::CASCADE] = true;
+
+            return $arr;
+        });
+        $this->nativeMapper = $this->orm->register('products', $config)->get('products');
 
         $product = $this->nativeMapper
             ->newQuery()
@@ -213,16 +218,16 @@ SQL;
             ->newQuery()
             ->first();
 
-        $tag = $product->tags[0];
-        $tag->name = 'New tag';
+        $tag                 = $product->tags[0];
+        $tag->name           = 'New tag';
         $tag->pivot_position = 3;
 
         $this->nativeMapper->save($product);
 
-        $product = $this->nativeMapper->find($product->id);
+        $product    = $this->nativeMapper->find($product->id);
         $updatedTag = null;
         foreach ($product->tags as $tag) {
-            if (!$updatedTag && $tag->name == 'New tag') {
+            if ( ! $updatedTag && $tag->name == 'New tag') {
                 $updatedTag = $tag;
             }
         }
@@ -240,14 +245,14 @@ SQL;
             ->newQuery()
             ->first();
 
-        $tag = $product->tags[0];
-        $tag->name = 'New tag';
+        $tag                 = $product->tags[0];
+        $tag->name           = 'New tag';
         $tag->pivot_position = 3;
 
         $this->nativeMapper->save($product, false);
 
         $product = $this->nativeMapper->find($product->id);
-        $tag = $product->tags[0];
+        $tag     = $product->tags[0];
 
         $this->assertEquals('tag_1', $tag->name);
         $this->assertEquals(1, $tag->pivot_position);

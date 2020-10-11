@@ -147,7 +147,7 @@ class ManyToMany extends Relation
 
         if ( ! empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
             /** @var Collection $collection */
-            $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
+            $collection = $this->getNativeEntityHydrator()->get($nativeEntity, $this->name);
             foreach ($found as $foreignEntity) {
                 if ( ! $collection->contains($foreignEntity)) {
                     $collection->add($foreignEntity);
@@ -167,8 +167,8 @@ class ManyToMany extends Relation
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $nativeKeyValue = $this->nativeMapper->getEntityAttribute($nativeEntity, $nativeCol);
-            $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, $nativeKeyValue);
+            $nativeKeyValue = $this->getNativeEntityHydrator()->get($nativeEntity, $nativeCol);
+            $this->getForeignEntityHydrator()->set($foreignEntity, $foreignCol, $nativeKeyValue);
         }
     }
 
@@ -178,11 +178,11 @@ class ManyToMany extends Relation
 
         $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $this->foreignMapper->setEntityAttribute($foreignEntity, $foreignCol, null);
+            $this->getForeignEntityHydrator()->set($foreignEntity, $foreignCol, null);
         }
-        $this->foreignMapper->setEntityAttribute($foreignEntity, $this->name, null);
+        $this->getForeignEntityHydrator()->set($foreignEntity, $this->name, null);
 
-        $collection = $this->nativeMapper->getEntityAttribute($nativeEntity, $this->name);
+        $collection = $this->getNativeEntityHydrator()->get($nativeEntity, $this->name);
         if ($collection instanceof Collection) {
             $collection->removeElement($foreignEntity);
         }

@@ -31,9 +31,10 @@ class ManyToOneTest extends BaseTestCase
         $this->foreignMapper = $this->orm->get('categories');
     }
 
-    public function test_join_with() {
+    public function test_join_with()
+    {
         $query = $this->nativeMapper->newQuery()
-            ->joinWith('category');
+                                    ->joinWith('category');
 
         $expectedStatement = <<<SQL
 SELECT
@@ -208,7 +209,7 @@ SQL;
             ->newQuery()
             ->first();
 
-        $category = $product->category;
+        $category       = $product->category;
         $category->name = 'New category';
 
         $this->nativeMapper->save($product);
@@ -224,7 +225,7 @@ SQL;
             ->newQuery()
             ->first();
 
-        $category = $product->category;
+        $category       = $product->category;
         $category->name = 'New category';
 
         $this->nativeMapper->save($product, false);

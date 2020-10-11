@@ -83,8 +83,8 @@ class AttachEntities implements ActionInterface
 
         $throughNativeColumns  = (array)$this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
         $throughForeignColumns = (array)$this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
-        $nativeKey             = (array)$this->nativeMapper->getEntityPk($this->nativeEntity);
-        $foreignKey            = (array)$this->foreignMapper->getEntityPk($this->foreignEntity);
+        $nativeKey             = (array)$this->getNativeEntityHydrator()->getPk($this->nativeEntity);
+        $foreignKey            = (array)$this->getForeignEntityHydrator()->getPk($this->foreignEntity);
 
         $delete = new \Sirius\Sql\Delete($conn);
         $delete->from($throughTable);
@@ -109,9 +109,8 @@ class AttachEntities implements ActionInterface
 
         $throughColumnPrefix = $this->relation->getOption(RelationConfig::THROUGH_COLUMNS_PREFIX);
         foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_COLUMNS) as $col) {
-            $insertColumns[$col] = $this->relation
-                ->getForeignMapper()
-                ->getEntityAttribute($this->foreignEntity, "{$throughColumnPrefix}{$col}");
+            $insertColumns[$col] = $this->getForeignEntityHydrator()
+                                        ->get($this->foreignEntity, "{$throughColumnPrefix}{$col}");
         }
 
         foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
@@ -124,5 +123,15 @@ class AttachEntities implements ActionInterface
         $insert->into($throughTable)
                ->columns($insertColumns)
                ->perform();
+    }
+
+    protected function getNativeEntityHydrator()
+    {
+        return $this->nativeMapper->getConfig()->getEntityHydrator();
+    }
+
+    protected function getForeignEntityHydrator()
+    {
+        return $this->foreignMapper->getConfig()->getEntityHydrator();
     }
 }

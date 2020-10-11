@@ -45,11 +45,11 @@ class OneToOne extends OneToMany
         if ( ! $this->relationWasChanged($action->getEntity())) {
             return;
         }
-        $foreignEntity = $this->nativeMapper->getEntityAttribute($action->getEntity(), $this->name);
+        $foreignEntity = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
         if ($foreignEntity) {
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
-            $saveAction         = $this->foreignMapper
-                ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
+
+            $saveAction = $this->foreignMapper->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
             $saveAction->addColumns($this->getExtraColumnsForAction());
             $action->prepend($saveAction);
             $action->append($this->newSyncAction($action->getEntity(), $foreignEntity, 'save'));

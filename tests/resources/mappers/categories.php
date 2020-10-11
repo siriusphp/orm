@@ -7,7 +7,7 @@ return [
     MapperConfig::TABLE     => 'categories',
     MapperConfig::COLUMNS   => ['id', 'parent_id', 'name'],
     MapperConfig::CASTS     => [
-        'id' => 'int',
+        'id'      => 'int',
         'details' => 'json'
     ],
     MapperConfig::RELATIONS => [
@@ -20,7 +20,7 @@ return [
                 ]
             ]
         ],
-        'parent' => [
+        'parent'   => [
             RelationConfig::TYPE           => RelationConfig::TYPE_MANY_TO_ONE,
             RelationConfig::FOREIGN_MAPPER => 'categories',
         ]

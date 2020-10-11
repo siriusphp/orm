@@ -142,7 +142,7 @@ class SiriusOrmTestSuite extends AbstractTestSuite
         $this->product->name            = 'New product name';
         $this->product->category->name  = 'New category name';
         $this->product->images[0]->path = 'new_path.jpg';
-        $this->product->tags[0]->name = 'New tag name';
+        $this->product->tags[0]->name   = 'New tag name';
         $this->orm->save('products', $this->product);
         $product = $this->orm->find('products', 1, ['category', 'tags', 'images']);
 

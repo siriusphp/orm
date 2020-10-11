@@ -7,7 +7,7 @@ return [
     MapperConfig::TABLE     => 'images',
     MapperConfig::COLUMNS   => ['id', 'name', 'folder'],
     MapperConfig::CASTS     => [
-        'id' => 'int',
+        'id'         => 'int',
         'content_id' => 'int'
     ],
     MapperConfig::RELATIONS => [
