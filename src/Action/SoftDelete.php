@@ -19,7 +19,7 @@ class SoftDelete extends Delete
             return;
         }
 
-        $this->now = time();
+        $this->now = date('Y-m-d H:i:s', time());
 
         $update = new \Sirius\Sql\Update($this->mapper->getWriteConnection());
         $update->table($this->mapper->getConfig()->getTable())

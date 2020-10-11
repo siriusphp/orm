@@ -1,4 +1,4 @@
-<phpunit bootstrap="bootstrap.php"
+<phpunit bootstrap="tests/bootstrap.php"
          backupGlobals="false"
          backupStaticAttributes="false"
          colors="true"
@@ -11,15 +11,18 @@
          stopOnError="false">
     <testsuites>
         <testsuite name="sirius/orm">
-            <directory>./</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">../src</directory>
-        </whitelist>
-    </filter>
     <php>
         <env name="DB_ENGINE" value="mysql"></env>
+        <env name="DB_CONNECTION" value="mysql:host=siriusorm_mysql;dbname=siriusorm"></env>
+        <env name="DB_USER" value="siriusormuser"></env>
+        <env name="DB_PASS" value="rootpass"></env>
     </php>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
 </phpunit>

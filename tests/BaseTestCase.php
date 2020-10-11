@@ -31,7 +31,7 @@ class BaseTestCase extends TestCase
         parent::setUp();
 
         if (getenv('DB_ENGINE') == 'mysql') {
-            $connection = Connection::new('mysql:host=localhost;dbname=sirius_orm', 'root', '');
+            $connection = Connection::new(getenv('DB_CONNECTION'), getenv('DB_USER'), getenv('DB_PASS'));
         } else {
             $connection = Connection::new('sqlite::memory:');
         }

@@ -12,7 +12,7 @@ return [
         `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
         `created_at` DATETIME NULL DEFAULT NULL,
         `updated_at` DATETIME NULL DEFAULT NULL,
-        `deleted_at` DATETIME NULL DEFAULT NULL,
+        `deleted_at` TIMESTAMP NULL DEFAULT NULL,
         `content_type` VARCHAR(50) NULL DEFAULT NULL,
         `title` TEXT NULL,
         `summary` TEXT NULL,
@@ -20,12 +20,12 @@ return [
         PRIMARY KEY (`id`)
     )",
     "CREATE TABLE `content_products` (
-        `content_id` INT(10) UNSIGNED NOT NULL,
+        `content_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
         `category_id` INT(10) UNSIGNED NULL DEFAULT '0',
         `featured_image_id` INT(10) UNSIGNED NULL DEFAULT '0',
         `sku` VARCHAR(50) NULL DEFAULT '0',
         `price` DECIMAL(10,4) NULL DEFAULT '0.0000',
-        PRIMARY KEY (`id`)
+        PRIMARY KEY (`content_id`)
     )",
     "CREATE TABLE `categories` (
         `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -51,7 +51,7 @@ return [
     "CREATE TABLE `products_tags` (
         `product_id` INT(10) UNSIGNED NOT NULL,
         `tag_id` INT(10) UNSIGNED NOT NULL,
-        `created_at` TIMESTAMP NOT NULL,
+        `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `position` SMALLINT UNSIGNED NULL DEFAULT '0',
         PRIMARY KEY (`product_id`, `tag_id`)
     )",

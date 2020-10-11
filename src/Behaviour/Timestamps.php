@@ -33,17 +33,18 @@ class Timestamps implements BehaviourInterface
 
     public function onNewSaveAction(/** @scrutinizer ignore-unused */ Mapper $mapper, ActionInterface $action)
     {
+        $now = date('Y-m-d H:i:s', time());
         if ($action instanceof Insert) {
             if ($this->createColumn) {
-                $action->addColumns([$this->createColumn => time()]);
+                $action->addColumns([$this->createColumn => $now]);
             }
             if ($this->updateColumn) {
-                $action->addColumns([$this->updateColumn => time()]);
+                $action->addColumns([$this->updateColumn => $now]);
             }
         }
         if ($action instanceof Update && $this->updateColumn) {
             if ( ! empty($action->getEntity()->getChanges())) {
-                $action->addColumns([$this->updateColumn => time()]);
+                $action->addColumns([$this->updateColumn => $now]);
             }
         }
 
