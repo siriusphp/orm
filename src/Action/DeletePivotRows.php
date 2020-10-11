@@ -60,7 +60,7 @@ class DeletePivotRows extends BaseAction
         $nativeEntityPk    = (array)$this->nativeMapper->getConfig()->getPrimaryKey();
         $nativeThroughCols = (array)$this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
         foreach ($nativeEntityPk as $idx => $col) {
-            $val = $this->nativeMapper->getEntityAttribute($this->nativeEntity, $col);
+            $val = $this->getNativeEntityHydrator()->get($this->nativeEntity, $col);
             if ($val) {
                 $conditions[$nativeThroughCols[$idx]] = $val;
             }
@@ -69,7 +69,7 @@ class DeletePivotRows extends BaseAction
         $entityPk    = (array)$this->mapper->getConfig()->getPrimaryKey();
         $throughCols = (array)$this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
         foreach ($entityPk as $idx => $col) {
-            $val = $this->mapper->getEntityAttribute($this->entity, $col);
+            $val = $this->getForeignEntityHydrator()->get($this->entity, $col);
             if ($val) {
                 $conditions[$throughCols[$idx]] = $val;
             }
@@ -81,5 +81,15 @@ class DeletePivotRows extends BaseAction
         }
 
         return $conditions;
+    }
+
+    protected function getNativeEntityHydrator()
+    {
+        return $this->nativeMapper->getConfig()->getEntityHydrator();
+    }
+
+    protected function getForeignEntityHydrator()
+    {
+        return $this->mapper->getConfig()->getEntityHydrator();
     }
 }

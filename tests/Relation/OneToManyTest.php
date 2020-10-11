@@ -6,6 +6,7 @@ namespace Sirius\Orm\Tests\Relation;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
+use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\OneToMany;
 use Sirius\Orm\Relation\RelationConfig;
@@ -141,10 +142,14 @@ SQL;
     public function test_delete_with_cascade_true()
     {
         $this->populateDb();
+
         // reconfigure products-featured_image to use CASCADE
-        $config                                                 = $this->getMapperConfig('categories');
-        $config->relations['products'][RelationConfig::CASCADE] = true;
-        $this->nativeMapper                                     = $this->orm->register('categories', $config)->get('categories');
+        $config             = $this->getMapperConfig('categories', function ($arr) {
+            $arr[MapperConfig::RELATIONS]['products'][RelationConfig::CASCADE] = true;
+
+            return $arr;
+        });
+        $this->nativeMapper = $this->orm->register('categories', $config)->get('categories');
 
         $category = $this->nativeMapper
             ->newQuery()

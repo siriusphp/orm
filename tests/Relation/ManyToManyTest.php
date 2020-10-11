@@ -177,7 +177,7 @@ SQL;
             ->newQuery()
             ->first();
 
-        $this->assertTrue($this->nativeMapper->delete($product));
+        $this->assertTrue($this->nativeMapper->delete($product, true));
 
         $tag = $this->foreignMapper->find(1);
         $this->assertNull($tag);

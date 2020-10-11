@@ -27,9 +27,10 @@ class GenericEntityHydrator implements HydratorInterface
 
     public function hydrate(array $attributes = [])
     {
+        $attributes = Arr::renameKeys($attributes, $this->mapperConfig->getColumnAttributeMap());
         $attributes = $this->castingManager
             ->castArray($attributes, $this->mapperConfig->getCasts());
-        $attributes = Arr::renameKeys($attributes, $this->mapperConfig->getColumnAttributeMap());
+
         $class      = $this->mapperConfig->getEntityClass() ?? GenericEntity::class;
 
         return new $class($attributes);

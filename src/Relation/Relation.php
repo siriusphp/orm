@@ -324,6 +324,6 @@ abstract class Relation
 
     protected function getForeignEntityHydrator()
     {
-        return $this->nativeMapper->getConfig()->getEntityHydrator();
+        return $this->foreignMapper->getConfig()->getEntityHydrator();
     }
 }

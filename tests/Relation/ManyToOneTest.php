@@ -5,6 +5,7 @@ namespace Sirius\Orm\Tests\Relation;
 
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
+use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToOne;
 use Sirius\Orm\Relation\RelationConfig;
@@ -154,16 +155,19 @@ SQL;
     {
         $this->populateDb();
 
-        // don't know why would anybody do this but...
-        $config                                                 = $this->getMapperConfig('content_products');
-        $config->relations['category'][RelationConfig::CASCADE] = true;
-        $this->nativeMapper                                     = $this->orm->register('content_products', $config)->get('content_products');
+
+        $config             = $this->getMapperConfig('content_products', function ($arr) {
+            $arr[MapperConfig::RELATIONS]['category'][RelationConfig::CASCADE] = true;
+
+            return $arr;
+        });
+        $this->nativeMapper = $this->orm->register('content_products', $config)->get('content_products');
 
         $product = $this->nativeMapper
             ->newQuery()
             ->first();
 
-        $this->assertTrue($this->nativeMapper->delete($product));
+        $this->assertTrue($this->nativeMapper->delete($product, true));
 
         $category = $this->foreignMapper->find($product->category_id);
         $this->assertNull($category);
