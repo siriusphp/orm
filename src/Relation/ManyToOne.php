@@ -67,14 +67,14 @@ class ManyToOne extends Relation
         $foreignKey = (array)$this->getOption(RelationConfig::FOREIGN_KEY);
 
         foreach ($nativeKey as $k => $col) {
-            $this->getNativeEntityHydrator()->set(
+            $this->nativeEntityHydrator->set(
                 $nativeEntity,
                 $col,
-                $foreignEntity ? $this->getForeignEntityHydrator()->get($foreignEntity, $foreignKey[$k]) : null
+                $foreignEntity ? $this->foreignEntityHydrator->get($foreignEntity, $foreignKey[$k]) : null
             );
         }
 
-        $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, $foreignEntity);
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, $foreignEntity);
     }
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
@@ -90,10 +90,10 @@ class ManyToOne extends Relation
         $nativeKey = (array)$this->getOption(RelationConfig::NATIVE_KEY);
 
         foreach ($nativeKey as $k => $col) {
-            $this->getNativeEntityHydrator()->set($nativeEntity, $col, null);
+            $this->nativeEntityHydrator->set($nativeEntity, $col, null);
         }
 
-        $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, null);
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, null);
         $foreignEntity->setState($state);
     }
 
@@ -103,7 +103,7 @@ class ManyToOne extends Relation
         if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
-            $foreignEntity = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
+            $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
 
             if ($foreignEntity) {
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
@@ -120,7 +120,7 @@ class ManyToOne extends Relation
         if ( ! $this->relationWasChanged($action->getEntity())) {
             return;
         }
-        $foreignEntity = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
+        $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
         if ($foreignEntity) {
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
             $saveAction         = $this->foreignMapper

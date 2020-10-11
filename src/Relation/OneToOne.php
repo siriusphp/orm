@@ -19,7 +19,7 @@ class OneToOne extends OneToMany
 
         $found = $result[$nativeId] ?? [];
 
-        $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, $found[0] ?? null);
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, $found[0] ?? null);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -28,7 +28,7 @@ class OneToOne extends OneToMany
         if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } else {
-            $foreignEntity = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
+            $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
 
             if ($foreignEntity) {
                 $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
@@ -45,7 +45,7 @@ class OneToOne extends OneToMany
         if ( ! $this->relationWasChanged($action->getEntity())) {
             return;
         }
-        $foreignEntity = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
+        $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
         if ($foreignEntity) {
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 

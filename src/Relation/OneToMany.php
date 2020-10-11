@@ -70,14 +70,14 @@ class OneToMany extends Relation
 
         $found = $result[$nativeId] ?? [];
 
-        $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, new Collection($found));
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, new Collection($found));
     }
 
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $nativeKeyValue = $this->getNativeEntityHydrator()->get($nativeEntity, $nativeCol);
-            $this->getForeignEntityHydrator()->set($foreignEntity, $foreignCol, $nativeKeyValue);
+            $nativeKeyValue = $this->nativeEntityHydrator->get($nativeEntity, $nativeCol);
+            $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, $nativeKeyValue);
         }
     }
 
@@ -86,9 +86,9 @@ class OneToMany extends Relation
         $state = $foreignEntity->getState();
         $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $this->getForeignEntityHydrator()->set($foreignEntity, $foreignCol, null);
+            $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
         }
-        $this->getForeignEntityHydrator()->set($foreignEntity, $this->name, null);
+        $this->foreignEntityHydrator->set($foreignEntity, $this->name, null);
         $foreignEntity->setState($state);
     }
 
@@ -125,7 +125,7 @@ class OneToMany extends Relation
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
         /** @var Collection $foreignEntities */
-        $foreignEntities = $this->getNativeEntityHydrator()->get($nativeEntity, $this->name);
+        $foreignEntities = $this->nativeEntityHydrator->get($nativeEntity, $this->name);
         $changes         = $foreignEntities->getChanges();
 
         // save the entities still in the collection

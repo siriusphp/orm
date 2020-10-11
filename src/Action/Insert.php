@@ -14,13 +14,13 @@ class Insert extends Update
 
     protected function execute()
     {
-        $this->entityId    = $this->getEntityHydrator()->getPk($this->entity);
+        $this->entityId    = $this->entityHydrator->getPk($this->entity);
         $this->entityState = $this->entity->getState();
 
         $connection = $this->mapper->getWriteConnection();
 
         $columns = array_merge(
-            $this->mapper->extractFromEntity($this->entity),
+            $this->entityHydrator->extract($this->entity),
             $this->extraColumns,
             $this->mapper->getConfig()->getGuards()
         );
@@ -30,7 +30,7 @@ class Insert extends Update
         $insertSql->into($this->mapper->getConfig()->getTable())
                   ->columns($columns);
         $insertSql->perform();
-        $this->getEntityHydrator()->setPk($this->entity, $connection->lastInsertId());
+        $this->entityHydrator->setPk($this->entity, $connection->lastInsertId());
     }
 
     public function revert()
@@ -38,7 +38,7 @@ class Insert extends Update
         if ( ! $this->hasRun) {
             return;
         }
-        $this->getEntityHydrator()->setPk($this->entity, $this->entityId);
+        $this->entityHydrator->setPk($this->entity, $this->entityId);
         $this->entity->setState($this->entityState);
     }
 }

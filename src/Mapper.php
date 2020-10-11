@@ -146,13 +146,6 @@ class Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $entity);
     }
 
-    public function extractFromEntity(EntityInterface $entity): array
-    {
-        $data = $this->getConfig()->getEntityHydrator()->extract($entity);
-
-        return $this->behaviours->apply($this, __FUNCTION__, $data);
-    }
-
     public function addRelation($name, $relation)
     {
         if (is_array($relation) || $relation instanceof Relation) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Action;
 
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Entity\HydratorInterface;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Relation\Relation;
@@ -14,6 +15,11 @@ abstract class BaseAction implements ActionInterface
      * @var Mapper
      */
     protected $mapper;
+
+    /**
+     * @var EntityInterface
+     */
+    protected $parentEntity;
 
     /**
      * @var EntityInterface
@@ -32,17 +38,20 @@ abstract class BaseAction implements ActionInterface
      */
     protected $after = [];
 
-    protected $hasRun = false;
-
     /**
-     * @var EntityInterface
+     * @var bool
      */
-    protected $parentEntity;
+    protected $hasRun = false;
 
     /**
      * @var Relation
      */
     protected $relation;
+
+    /**
+     * @var HydratorInterface
+     */
+    protected $entityHydrator;
 
     /**
      * Contains additional options for the action:
@@ -60,9 +69,10 @@ abstract class BaseAction implements ActionInterface
         EntityInterface $entity,
         array $options = []
     ) {
-        $this->mapper  = $mapper;
-        $this->entity  = $entity;
-        $this->options = $options;
+        $this->mapper         = $mapper;
+        $this->entity         = $entity;
+        $this->options        = $options;
+        $this->entityHydrator = $mapper->getConfig()->getEntityHydrator();
     }
 
     public function prepend(ActionInterface $action)
@@ -107,7 +117,7 @@ abstract class BaseAction implements ActionInterface
         $entityPk   = (array)$this->mapper->getConfig()->getPrimaryKey();
         $conditions = [];
         foreach ($entityPk as $col) {
-            $val = $this->getEntityHydrator()->get($this->entity, $col);
+            $val = $this->entityHydrator->get($this->entity, $col);
             if ($val) {
                 $conditions[$col] = $val;
             }
@@ -182,8 +192,4 @@ abstract class BaseAction implements ActionInterface
         throw new \BadMethodCallException(sprintf('%s must implement `execute()`', get_class($this)));
     }
 
-    protected function getEntityHydrator()
-    {
-        return $this->mapper->getConfig()->getEntityHydrator();
-    }
 }

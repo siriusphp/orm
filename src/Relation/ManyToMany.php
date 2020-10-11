@@ -147,14 +147,14 @@ class ManyToMany extends Relation
 
         if ( ! empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
             /** @var Collection $collection */
-            $collection = $this->getNativeEntityHydrator()->get($nativeEntity, $this->name);
+            $collection = $this->nativeEntityHydrator->get($nativeEntity, $this->name);
             foreach ($found as $foreignEntity) {
                 if ( ! $collection->contains($foreignEntity)) {
                     $collection->add($foreignEntity);
                 }
             }
         } else {
-            $this->getNativeEntityHydrator()->set($nativeEntity, $this->name, new Collection($found));
+            $this->nativeEntityHydrator->set($nativeEntity, $this->name, new Collection($found));
         }
     }
 
@@ -167,8 +167,8 @@ class ManyToMany extends Relation
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $nativeKeyValue = $this->getNativeEntityHydrator()->get($nativeEntity, $nativeCol);
-            $this->getForeignEntityHydrator()->set($foreignEntity, $foreignCol, $nativeKeyValue);
+            $nativeKeyValue = $this->nativeEntityHydrator->get($nativeEntity, $nativeCol);
+            $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, $nativeKeyValue);
         }
     }
 
@@ -178,11 +178,11 @@ class ManyToMany extends Relation
 
         $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
-            $this->getForeignEntityHydrator()->set($foreignEntity, $foreignCol, null);
+            $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
         }
-        $this->getForeignEntityHydrator()->set($foreignEntity, $this->name, null);
+        $this->foreignEntityHydrator->set($foreignEntity, $this->name, null);
 
-        $collection = $this->getNativeEntityHydrator()->get($nativeEntity, $this->name);
+        $collection = $this->nativeEntityHydrator->get($nativeEntity, $this->name);
         if ($collection instanceof Collection) {
             $collection->removeElement($foreignEntity);
         }
@@ -218,7 +218,7 @@ class ManyToMany extends Relation
     {
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
-        $foreignEntities = $this->getNativeEntityHydrator()->get($action->getEntity(), $this->name);
+        $foreignEntities = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
         if ( ! $foreignEntities) {
             return;
         }

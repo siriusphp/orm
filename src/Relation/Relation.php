@@ -9,6 +9,7 @@ use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\DetachEntities;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Entity\HydratorInterface;
 use Sirius\Orm\Entity\LazyRelation;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
@@ -46,14 +47,27 @@ abstract class Relation
      */
     protected $keyPairs;
 
+    /**
+     * @var HydratorInterface
+     */
+    protected $nativeEntityHydrator;
+
+    /**
+     * @var HydratorInterface
+     */
+    protected $foreignEntityHydrator;
+
     public function __construct($name, Mapper $nativeMapper, Mapper $foreignMapper, array $options = [])
     {
-        $this->name          = $name;
         $this->nativeMapper  = $nativeMapper;
         $this->foreignMapper = $foreignMapper;
+        $this->name          = $name;
         $this->options       = $options;
         $this->applyDefaults();
-        $this->keyPairs = $this->computeKeyPairs();
+        $this->keyPairs              = $this->computeKeyPairs();
+
+        $this->nativeEntityHydrator  = $nativeMapper->getConfig()->getEntityHydrator();
+        $this->foreignEntityHydrator = $foreignMapper->getConfig()->getEntityHydrator();
     }
 
     protected function applyDefaults(): void
@@ -139,7 +153,7 @@ abstract class Relation
     public function attachLazyRelationToEntity(EntityInterface $entity, Tracker $tracker)
     {
         $valueLoader = new LazyRelation($entity, $tracker, $this);
-        $this->getNativeEntityHydrator()->set($entity, $this->name, $valueLoader);
+        $this->nativeEntityHydrator->set($entity, $this->name, $valueLoader);
     }
 
     public function getQuery(Tracker $tracker)
@@ -315,15 +329,5 @@ abstract class Relation
     public function getForeignMapper(): Mapper
     {
         return $this->foreignMapper;
-    }
-
-    protected function getNativeEntityHydrator()
-    {
-        return $this->nativeMapper->getConfig()->getEntityHydrator();
-    }
-
-    protected function getForeignEntityHydrator()
-    {
-        return $this->foreignMapper->getConfig()->getEntityHydrator();
     }
 }
