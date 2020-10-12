@@ -5,7 +5,7 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\DeletePivotRows;
 use Sirius\Orm\Collection\Collection;
-use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
@@ -161,8 +161,8 @@ class ManyToMany extends Relation
 
     protected function entityHasRelationLoaded(EntityInterface $entity)
     {
-        // lazy loaded relations are not included in `getArrayCopy()`
-        return array_key_exists($this->name, $entity->getArrayCopy());
+        // lazy loaded relations are not included in `toArray()`
+        return array_key_exists($this->name, $entity->toArray());
     }
 
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
@@ -202,7 +202,7 @@ class ManyToMany extends Relation
         } else {
             // retrieve them again from the DB since the related collection might not have everything
             // for example due to a relation query callback
-            $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->getArrayCopy()]))
+            $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->toArray()]))
                                     ->get();
 
             foreach ($foreignEntities as $entity) {

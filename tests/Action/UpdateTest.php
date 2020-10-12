@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\Action;
 
 use Sirius\Orm\CastingManager;
-use Sirius\Orm\Entity\GenericEntityHydrator;
+use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -55,7 +55,9 @@ class UpdateTest extends BaseTestCase
             MapperConfig::COLUMN_ATTRIBUTE_MAP => ['summary' => 'excerpt'],
             MapperConfig::GUARDS               => ['content_type' => 'product']
         ]));
-        $mapper->getConfig()->setEntityHydrator(new GenericEntityHydrator($mapper->getConfig(), CastingManager::getInstance()));
+        $hydrator = new GenericHydrator($mapper->getConfig());
+        $hydrator->setCastingManager(CastingManager::getInstance());
+        $mapper->getConfig()->setEntityHydrator($hydrator);
 
         $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1', 'summary' => 'Excerpt']);
 

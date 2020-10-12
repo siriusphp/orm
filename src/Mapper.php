@@ -7,7 +7,7 @@ use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviour\BehaviourInterface;
-use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Relation\Relation;
 

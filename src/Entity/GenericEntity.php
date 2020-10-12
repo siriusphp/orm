@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
+use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Helpers\Str;
 
 class GenericEntity implements EntityInterface
 {
     protected $state = StateEnum::SYNCHRONIZED;
-
-    protected $primaryKey = 'id';
 
     protected $attributes = [];
 
@@ -43,6 +42,45 @@ class GenericEntity implements EntityInterface
     public function __unset($name)
     {
         return $this->set($name, null);
+    }
+
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    public function setState($state)
+    {
+        if ($state == StateEnum::SYNCHRONIZED) {
+            $this->changed = [];
+        }
+        $this->state = $state;
+    }
+
+    public function toArray()
+    {
+        $copy = $this->attributes;
+        foreach ($copy as $k => $v) {
+            if (is_object($v) && method_exists($v, 'toArray')) {
+                $copy[$k] = $v->toArray();
+            }
+        }
+
+        return $copy;
+    }
+
+    public function getChanges()
+    {
+        $changes = $this->changed;
+        foreach ($this->attributes as $name => $value) {
+            if (is_object($value) && method_exists($value, 'getChanges')) {
+                if ( ! empty($value->getChanges())) {
+                    $changes[$name] = true;
+                }
+            }
+        }
+
+        return $changes;
     }
 
     protected function castAttribute($name, $value)
@@ -84,45 +122,6 @@ class GenericEntity implements EntityInterface
         $this->maybeLazyLoad($attribute);
 
         return $this->attributes[$attribute] ?? null;
-    }
-
-    public function getState()
-    {
-        return $this->state;
-    }
-
-    public function setState($state)
-    {
-        if ($state == StateEnum::SYNCHRONIZED) {
-            $this->changed = [];
-        }
-        $this->state = $state;
-    }
-
-    public function getArrayCopy()
-    {
-        $copy = $this->attributes;
-        foreach ($copy as $k => $v) {
-            if (is_object($v) && method_exists($v, 'getArrayCopy')) {
-                $copy[$k] = $v->getArrayCopy();
-            }
-        }
-
-        return $copy;
-    }
-
-    public function getChanges()
-    {
-        $changes = $this->changed;
-        foreach ($this->attributes as $name => $value) {
-            if (is_object($value) && method_exists($value, 'getChanges')) {
-                if ( ! empty($value->getChanges())) {
-                    $changes[$name] = true;
-                }
-            }
-        }
-
-        return $changes;
     }
 
     protected function preventChangesIfDeleted()

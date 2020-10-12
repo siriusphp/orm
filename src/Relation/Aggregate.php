@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Relation;
 
-use Sirius\Orm\Entity\EntityInterface;
-use Sirius\Orm\Entity\HydratorInterface;
+use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\LazyAggregate;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Query;

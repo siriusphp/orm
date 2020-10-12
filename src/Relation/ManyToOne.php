@@ -3,7 +3,7 @@
 namespace Sirius\Orm\Relation;
 
 use Sirius\Orm\Action\BaseAction;
-use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Query;
 

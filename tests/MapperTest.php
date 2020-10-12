@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests;
 
 use Sirius\Orm\CastingManager;
-use Sirius\Orm\Entity\GenericEntityHydrator;
+use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\Entity\ProductEntity;
@@ -28,7 +28,9 @@ class MapperTest extends BaseTestCase
             MapperConfig::COLUMN_ATTRIBUTE_MAP => ['price' => 'value'],
             MapperConfig::CASTS                => ['value' => 'decimal:2']
         ]);
-        $mapperConfig->setEntityHydrator(new GenericEntityHydrator($mapperConfig, CastingManager::getInstance()));
+        $hydrator = new GenericHydrator($mapperConfig);
+        $hydrator->setCastingManager(CastingManager::getInstance());
+        $mapperConfig->setEntityHydrator($hydrator);
         $this->mapper = Mapper::make($this->connectionLocator, $mapperConfig);
 
     }

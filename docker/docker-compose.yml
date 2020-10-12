@@ -9,8 +9,8 @@ services:
     container_name: siriusorm_php
     volumes:
       - ../:/var/www:delegated
-    ports:
-      - "9000:9000"
+    #ports:
+    #  - "9000:9000"
     networks:
       - siriusorm-network
 
@@ -27,8 +27,8 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
       - TZ=UTC
-    ports:
-      - "3306:3306"
+    #ports:
+    #  - "3306:3306"
     networks:
       - siriusorm-network
 

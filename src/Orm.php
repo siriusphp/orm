@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm;
 
 use InvalidArgumentException;
-use Sirius\Orm\Entity\GenericEntityHydrator;
+use Sirius\Orm\Contract\CastingManagerAwareInterface;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Relation\RelationConfig;
@@ -141,9 +141,9 @@ class Orm
         }
 
         if ($mapperConfigOrFactory instanceof MapperConfig) {
-            if ( ! $mapperConfigOrFactory->getEntityHydrator()) {
-                $entityHydrator = new GenericEntityHydrator($mapperConfigOrFactory, $this->castingManager);
-                $mapperConfigOrFactory->setEntityHydrator($entityHydrator);
+            $entityHydrator = $mapperConfigOrFactory->getEntityHydrator();
+            if ($entityHydrator instanceof CastingManagerAwareInterface) {
+                $entityHydrator->setCastingManager($this->castingManager);
             }
 
             return Mapper::make($this->connectionLocator, $mapperConfigOrFactory);

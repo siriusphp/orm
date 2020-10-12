@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
+use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Relation\Relation;
 
 class LazyRelation implements LazyLoader

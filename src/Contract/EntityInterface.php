@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Entity;
+namespace Sirius\Orm\Contract;
 
 interface EntityInterface
 {
@@ -9,7 +9,7 @@ interface EntityInterface
 
     public function setState($state);
 
-    public function getArrayCopy();
+    public function toArray();
 
     public function getChanges();
 }

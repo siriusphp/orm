@@ -78,12 +78,12 @@ class Collection extends ArrayCollection
         return $changes;
     }
 
-    public function getArrayCopy()
+    public function toArray()
     {
         $result = [];
         foreach ($this as $element) {
-            if (is_object($element) && method_exists($element, 'getArrayCopy')) {
-                $result[] = $element->getArrayCopy();
+            if (is_object($element) && method_exists($element, 'toArray')) {
+                $result[] = $element->toArray();
             } else {
                 $result[] = $element;
             }

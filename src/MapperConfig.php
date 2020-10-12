@@ -5,7 +5,8 @@ namespace Sirius\Orm;
 
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Entity\GenericEntity;
-use Sirius\Orm\Entity\HydratorInterface;
+use Sirius\Orm\Contract\HydratorInterface;
+use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Helpers\QueryHelper;
 use Sirius\Orm\Relation\Relation;
 
@@ -185,6 +186,9 @@ class MapperConfig
      */
     public function getEntityHydrator(): ?HydratorInterface
     {
+        if (!$this->entityHydrator) {
+            $this->entityHydrator = new GenericHydrator($this);
+        }
         return $this->entityHydrator;
     }
 

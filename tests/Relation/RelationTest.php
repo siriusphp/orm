@@ -37,8 +37,8 @@ class RelationTest extends BaseTestCase
         $foreign2 = new GenericEntity(['col_1' => 10, 'col_2' => 20]);
 
         $tracker = new Tracker([
-            $native1->getArrayCopy(),
-            $native2->getArrayCopy(),
+            $native1->toArray(),
+            $native2->toArray(),
         ]);
 
         $expectedStatement = <<<SQL

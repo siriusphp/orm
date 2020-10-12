@@ -5,7 +5,7 @@ namespace Sirius\Orm;
 
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
-use Sirius\Orm\Entity\EntityInterface;
+use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
@@ -146,7 +146,7 @@ class Query extends Select
 
     public function subSelectForJoinWith(Mapper $mapper): Query
     {
-        return new static($this->connection, $mapper, $this->bindings, $this->indent . '    ');
+        return new Query($this->connection, $mapper, $this->bindings, $this->indent . '    ');
     }
 
     public function first()
