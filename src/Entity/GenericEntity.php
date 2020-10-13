@@ -16,7 +16,7 @@ class GenericEntity implements EntityInterface
 
     protected $changed = [];
 
-    public function __construct(array $attributes, string $state = null)
+    public function __construct(array $attributes = [], string $state = null)
     {
         foreach ($attributes as $attr => $value) {
             $this->set($attr, $value);
@@ -26,11 +26,21 @@ class GenericEntity implements EntityInterface
 
     public function __get($name)
     {
+        $method = Str::methodName($name . ' attribute', 'get');
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+
         return $this->get($name);
     }
 
     public function __set($name, $value)
     {
+        $method = Str::methodName($name . ' attribute', 'set');
+        if (method_exists($this, $method)) {
+            return $this->$method($value);
+        }
+
         return $this->set($name, $value);
     }
 
@@ -41,7 +51,7 @@ class GenericEntity implements EntityInterface
 
     public function __unset($name)
     {
-        return $this->set($name, null);
+        unset($this->attributes[$name]);
     }
 
     public function getState()

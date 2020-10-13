@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Definition;
 
+use DateTime;
+use Nette\PhpGenerator\ClassType;
+use Sirius\Orm\Helpers\Str;
+
 class Column extends Base
 {
     use MapperAwareTrait;
@@ -53,7 +57,8 @@ class Column extends Base
 
     protected $nullable = false;
 
-    public static function make(string $name = null) {
+    public static function make(string $name = null)
+    {
         return (new static)->setName($name);
     }
 
@@ -510,11 +515,71 @@ class Column extends Base
             static::TYPE_SMALL_INTEGER => 'int',
             static::TYPE_TINY_INTEGER  => 'int',
             static::TYPE_FLOAT         => 'float',
-            static::TYPE_DATE          => \DateTime::class,
-            static::TYPE_DATETIME      => \DateTime::class,
-            static::TYPE_TIMESTAMP     => \DateTime::class,
+            static::TYPE_DECIMAL       => 'float',
+            static::TYPE_DATE          => DateTime::class,
+            static::TYPE_DATETIME      => DateTime::class,
+            static::TYPE_TIMESTAMP     => DateTime::class,
         ];
     }
 
+    public function observeBaseEntityClass(ClassType $class): ClassType
+    {
+        $name = $this->getAttributeName() ?: $this->getName();
+        $type = $this->getAttributeTypeForEntityClass();
+
+        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            if (class_exists($type)) {
+                $class->getNamespace()->addUse($type);
+                $type = basename($type);
+            }
+            $class->addComment(sprintf('@property %s $%s', $type, $name));
+
+            if (($body = $this->getCastMethodBody($type))) {
+                $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'cast'));
+                $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
+                $cast->addParameter('value');
+                $cast->addBody($body);
+            }
+        } else {
+            /**
+             * @todo add getters and setters
+             */
+        }
+
+        return parent::observeBaseEntityClass($class);
+    }
+
+    private function getAttributeTypeForEntityClass()
+    {
+        if ($this->getAttributeType()) {
+            return $this->getAttributeType();
+        }
+        $map = $this->getColumnTypeCastMap();
+
+        return $map[$this->getType()] ?: 'mixed';
+    }
+
+    private function getCastMethodBody(string $type)
+    {
+        switch ($this->getType()) {
+            case static::TYPE_FLOAT:
+                return 'return floatval($value);';
+
+            case static::TYPE_INTEGER:
+            case static::TYPE_BIG_INTEGER:
+            case static::TYPE_SMALL_INTEGER:
+            case static::TYPE_TINY_INTEGER:
+                return 'return intval($value);';
+
+            case static::TYPE_DECIMAL:
+                return 'return round((float)$value, ' . $this->getDigits() . ');';
+
+            case static::TYPE_DATETIME:
+                return 'return ($value instanceof DateTime) ? $value : new DateTime($value);';
+
+            default:
+                return null;
+        }
+    }
 
 }

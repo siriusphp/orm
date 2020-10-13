@@ -37,8 +37,6 @@ abstract class TagMapperBase extends Mapper
     public function newQuery(): TagQuery
     {
         $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
-
-
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

@@ -30,14 +30,14 @@ abstract class ProductMapperBase extends Mapper
             'primaryKey' => 'id',
             'table' => 'tbl_products',
             'tableAlias' => null,
-            'columns' => ['id', 'name', 'slug', 'description', 'price', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
-            'columnAttributeMap' => [],
+            'columns' => ['id', 'name', 'slug', 'description', 'value', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
+            'columnAttributeMap' => ['value' => 'price'],
             'casts' => [
                 'id' => 'int',
                 'name' => 'string',
                 'slug' => 'string',
                 'description' => 'string',
-                'price' => 'decimal:2',
+                'value' => 'decimal:2',
                 'attributes' => 'array',
                 'created_on' => 'DateTime',
                 'updated_on' => 'DateTime',
@@ -54,8 +54,6 @@ abstract class ProductMapperBase extends Mapper
     public function newQuery(): ProductQuery
     {
         $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
-
-
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

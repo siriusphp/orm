@@ -5,6 +5,7 @@ use Sirius\Orm\CodeGenerator\ClassGenerator;
 use Sirius\Orm\Definition\Behaviour\SoftDelete;
 use Sirius\Orm\Definition\Behaviour\Timestamps;
 use Sirius\Orm\Definition\Column;
+use Sirius\Orm\Definition\ComputedProperty;
 use Sirius\Orm\Definition\Mapper;
 use Sirius\Orm\Definition\Orm;
 use Sirius\Orm\Definition\Relation\ManyToMany;
@@ -23,16 +24,19 @@ $orm->addMapper(
           ->setTable('tbl_products')
         // columns
           ->addAutoIncrementColumn()
-          #->addColumn(Column::datetime('created_on')->setNullable(true))
-          #->addColumn(Column::datetime('updated_on')->setNullable(true))
-          #->addColumn(Column::datetime('deleted_on')->setNullable(true))
           ->addColumn(Column::varchar('name'))
           ->addColumn(Column::varchar('slug')->setUnique(true))
           ->addColumn(Column::string('description')->setNullable(true))
-          ->addColumn(Column::decimal('price', 14, 2)
+          ->addColumn(Column::decimal('value', 14, 2)
+                            ->setAttributeName('price')
                             ->setDefault(0)
                             ->setPreviousName('cost'))
           ->addColumn(Column::json('attributes'))
+        // computed property
+          ->addComputedProperty(ComputedProperty::make('discounted_price')
+                                                ->setType('float')
+                                                ->setGetterBody('return round($this->price * 0.9, 2);')
+                                                ->setSetterBody('$this->price = $value / 0.9;'))
         // relations
           ->addRelation('languages', OneToMany::make('languages')
                                               ->setForeignKey('content_id')

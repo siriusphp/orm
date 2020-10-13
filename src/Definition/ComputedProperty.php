@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Definition;
 
+use Nette\PhpGenerator\ClassType;
+use Sirius\Orm\Helpers\Str;
+
 class ComputedProperty extends Base
 {
     use MapperAwareTrait;
@@ -14,6 +17,11 @@ class ComputedProperty extends Base
     protected $setterBody;
 
     protected $getterBody;
+
+    static function make($name = '')
+    {
+        return (new static)->setName($name);
+    }
 
     /**
      * @return mixed
@@ -34,8 +42,6 @@ class ComputedProperty extends Base
 
         return $this;
     }
-
-
 
     /**
      * @return mixed
@@ -75,6 +81,59 @@ class ComputedProperty extends Base
         $this->getterBody = $getterBody;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param mixed $type
+     *
+     * @return ComputedProperty
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function observeBaseEntityClass(ClassType $class): ClassType
+    {
+        $name = $this->getName();
+        $type = $this->getType();
+
+        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            if ($type && class_exists($type)) {
+                $class->getNamespace()->addUse($type);
+                $type = basename($type);
+            }
+            $class->addComment(sprintf('@property %s $%s', $type ?: 'mixed', $name));
+
+            if (($body = $this->getSetterBody())) {
+                $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
+                $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
+                $cast->addParameter('value');
+                $cast->addBody($body);
+            }
+
+            if (($body = $this->getGetterBody())) {
+                $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
+                $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
+                $cast->addBody($body);
+            }
+        } else {
+            /**
+             * @todo add getters and setters
+             */
+        }
+
+        return parent::observeBaseEntityClass($class);
     }
 
 }

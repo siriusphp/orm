@@ -37,8 +37,6 @@ abstract class CategoryMapperBase extends Mapper
     public function newQuery(): CategoryQuery
     {
         $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
-
-
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

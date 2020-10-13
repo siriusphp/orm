@@ -12,6 +12,7 @@ use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
+use Sirius\Orm\Tests\Generated\Entity\Product;
 use Sirius\Sql\Insert;
 use Sirius\Sql\Select;
 
@@ -61,6 +62,8 @@ class BaseTestCase extends TestCase
         foreach($schema->toSql($platform) as $sql) {
             $this->connection->perform($sql);
         }
+
+        $product = new Product([]);
     }
 
     public function loadMappers()

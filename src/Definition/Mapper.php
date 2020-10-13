@@ -401,13 +401,10 @@ class Mapper extends Base
         return $this;
     }
 
-    public function addComputedProperty($name, ComputedProperty $property)
+    public function addComputedProperty(ComputedProperty $property)
     {
         $property->setMapper($this);
-        if ( ! $property->getName()) {
-            $property->setName($name);
-        }
-        $this->computedProperties[$name] = $property;
+        $this->computedProperties[$property->getName()] = $property;
 
         return $this;
     }
@@ -456,6 +453,7 @@ class Mapper extends Base
         foreach ($this->relations as $relation) {
             $config = $relation->observeMapperConfig($config);
         }
+
         return parent::observeMapperConfig($config);
     }
 
@@ -469,6 +467,7 @@ class Mapper extends Base
         foreach ($this->relations as $relation) {
             $class = $relation->observeBaseMapperClass($class);
         }
+
         return parent::observeBaseMapperClass($class);
     }
 
@@ -482,7 +481,30 @@ class Mapper extends Base
         foreach ($this->relations as $relation) {
             $class = $relation->observeBaseQueryClass($class);
         }
+
         return parent::observeBaseMapperClass($class);
+    }
+
+    public function observeBaseEntityClass(ClassType $class): ClassType
+    {
+        /** @var Column $column */
+        foreach ($this->getColumns() as $column) {
+            $class = $column->observeBaseEntityClass($class);
+        }
+        /** @var ComputedProperty $column */
+        foreach ($this->computedProperties as $property) {
+            $class = $property->observeBaseEntityClass($class);
+        }
+        /** @var Behaviour $behaviour */
+        foreach ($this->behaviours as $behaviour) {
+            $class = $behaviour->observeBaseEntityClass($class);
+        }
+        /** @var Relation $relation */
+        foreach ($this->relations as $relation) {
+            $class = $relation->observeBaseEntityClass($class);
+        }
+
+        return parent::observeBaseEntityClass($class);
     }
 
     public function getQueryClass()

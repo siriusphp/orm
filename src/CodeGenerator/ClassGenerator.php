@@ -9,7 +9,6 @@ use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use Sirius\Orm\Definition\Mapper;
 use Sirius\Orm\Definition\Orm;
-use Sirius\Orm\Query;
 
 class ClassGenerator
 {
@@ -34,8 +33,8 @@ class ClassGenerator
             $files["{$name}_mapper"]      = $this->generateMapperClass($mapper);
             $files["{$name}_base_query"]  = $this->generateBaseQueryClass($mapper);
             $files["{$name}_query"]       = $this->generateQueryClass($mapper);
-            //$files["{$name}_base_entity"]  = $this->generateBaseEntityClass($mapper);
-            $files["{$name}_entity"]       = $this->generateEntityClass($mapper);
+            $files["{$name}_base_entity"] = $this->generateBaseEntityClass($mapper);
+            $files["{$name}_entity"]      = $this->generateEntityClass($mapper);
         }
 
         return $files;
@@ -126,31 +125,48 @@ class ClassGenerator
 
     private function generateBaseEntityClass(Mapper $mapper)
     {
+        if ($mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            $class = (new EntityBaseGeneratorUsingObjectProperties($mapper))->getClass();
+        } else {
+            $class = (new QueryBaseGenerator($mapper))->getClass();
+        }
+
+        $file = new PhpFile();
+        $file->setStrictTypes(true);
+
+        return [
+            'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
+            'contents' => $this->classPrinter->printFile($file)
+                          . PHP_EOL
+                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . $this->classPrinter->printClass($class)
+        ];
+
         $class = new ClassType(
             $mapper->getClassName() . 'Base',
             new PhpNamespace($mapper->getNamespace())
         );
-
-        $class->setExtends(\Sirius\Orm\Mapper::class);
-
-        return [
-            'path'     => $mapper->getDestination() . $class->getName() . '.php',
-            'contents' => $this->classPrinter->printClass($class)
-        ];
     }
 
     private function generateEntityClass(Mapper $mapper)
     {
-        $class = new ClassType(
-            $mapper->getEntityClass(),
+        $file = new PhpFile();
+        $file->setStrictTypes(true);
+
+        $entityClass = $mapper->getEntityClass();
+        $class       = new ClassType(
+            $entityClass,
             new PhpNamespace($mapper->getEntityNamespace())
         );
 
-        $class->setExtends($mapper->getEntityClass() . 'Base');
+        $class->setExtends($entityClass . 'Base');
 
         return [
             'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
-            'contents' => $this->classPrinter->printClass($class)
+            'contents' => $this->classPrinter->printFile($file)
+                          . PHP_EOL
+                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . $this->classPrinter->printClass($class)
         ];
 
     }
