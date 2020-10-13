@@ -28,7 +28,7 @@ class ManyToMany extends Relation
 
     public function setMapper(Mapper $mapper): Relation
     {
-        $this->nativeKey = $mapper->getConfig()->getPrimaryKey();
+        $this->nativeKey = $mapper->getPrimaryKey();
         $this->maybeSetAdditionalProperties();
 
         return parent::setMapper($mapper);
@@ -40,11 +40,11 @@ class ManyToMany extends Relation
             return;
         }
 
-        $tablePrefix = $this->mapper->getConfig()->getTableAlias() ?
-            str_replace($this->mapper->getConfig()->getTable(), '', $this->mapper->getConfig()->getTableAlias())
+        $tablePrefix = $this->mapper->getTableAlias() ?
+            str_replace($this->mapper->getTable(), '', $this->mapper->getTableAlias())
             : '';
 
-        $tables = [$this->mapper->getConfig()->getTableAlias() ?: $this->mapper->getConfig()->getTable(), $this->foreignMapper];
+        $tables = [$this->mapper->getTableAlias() ?: $this->mapper->getTable(), $this->foreignMapper];
         sort($tables);
 
         $this->throughTable = $tablePrefix . implode('_', $tables);

@@ -14,12 +14,12 @@ class OneToOne extends Relation
 
     public function setMapper(Mapper $mapper): Relation
     {
-        if ( ! $this->foreignKey) {
+        if ($mapper && ! $this->foreignKey) {
             $this->foreignKey = Inflector::singularize($mapper->getName()) . '_id';
         }
 
-        if ( ! $this->nativeKey) {
-            $this->nativeKey = $mapper->getConfig()->getPrimaryKey();
+        if ($mapper && ! $this->nativeKey) {
+            $this->nativeKey = $mapper->getPrimaryKey();
         }
 
         return parent::setMapper($mapper);

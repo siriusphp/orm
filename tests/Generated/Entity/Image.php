@@ -1,0 +1,3 @@
+class Image extends ImageBase
+{
+}

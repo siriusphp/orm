@@ -1,0 +1,3 @@
+class EbayProduct extends EbayProductBase
+{
+}

@@ -3,11 +3,15 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Definition;
 
+use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\Str;
 
 class Mapper extends Base
 {
+    const ENTITY_STYLE_PROPERTIES = 'properties';
+    const ENTITY_STYLE_METHODS = 'methods';
+
     /**
      * @var Orm
      */
@@ -27,6 +31,8 @@ class Mapper extends Base
 
     protected $entityDestination;
 
+    protected $entityStyle = self::ENTITY_STYLE_PROPERTIES;
+
     protected $primaryKey = 'id';
 
     protected $table;
@@ -45,6 +51,10 @@ class Mapper extends Base
 
     protected $queryScopes = [];
 
+    public static function make(string $name = null)
+    {
+        return (new static)->setName($name);
+    }
 
     public function getErrors(): array
     {
@@ -228,6 +238,26 @@ class Mapper extends Base
     /**
      * @return string
      */
+    public function getEntityStyle(): string
+    {
+        return $this->entityStyle;
+    }
+
+    /**
+     * @param string $entityStyle
+     *
+     * @return Mapper
+     */
+    public function setEntityStyle(string $entityStyle): Mapper
+    {
+        $this->entityStyle = $entityStyle;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getPrimaryKey(): string
     {
         return $this->primaryKey;
@@ -328,24 +358,23 @@ class Mapper extends Base
     public function addAutoIncrementColumn($name = 'id')
     {
         return $this->addColumn(
-            'id',
-            Column::integer(true)
+            Column::integer('id', true)
                   ->setAutoIncrement(true)
         );
     }
 
-    public function addColumn($name, Column $column): Mapper
+    public function addColumn(Column $column): Mapper
     {
-        $column->setName($name);
         $column->setMapper($this);
-        $this->columns[$name] = $column;
+        $this->columns[$column->getName()] = $column;
 
         return $this;
     }
 
-    public function addBehaviour($name, $behaviour)
+    public function addBehaviour(Behaviour $behaviour)
     {
-        $this->behaviours[$name] = $behaviour;
+        $behaviour->setMapper($this);
+        $this->behaviours[$behaviour->getName()] = $behaviour;
 
         return $this;
     }
@@ -353,6 +382,9 @@ class Mapper extends Base
     public function addRelation($name, Relation $relation)
     {
         $relation->setMapper($this);
+        if ( ! $relation->getForeignMapper()) {
+            $relation->setForeignMapper(Inflector::pluralize($name));
+        }
         $this->relations[$name] = $relation;
 
         return $this;
@@ -361,7 +393,7 @@ class Mapper extends Base
     public function addQueryScope($name, QueryScope $queryScope)
     {
         $queryScope->setMapper($this);
-        if (!$queryScope->getName()) {
+        if ( ! $queryScope->getName()) {
             $queryScope->setName($name);
         }
         $this->queryScopes[$name] = $queryScope;
@@ -372,7 +404,7 @@ class Mapper extends Base
     public function addComputedProperty($name, ComputedProperty $property)
     {
         $property->setMapper($this);
-        if (!$property->getName()) {
+        if ( ! $property->getName()) {
             $property->setName($name);
         }
         $this->computedProperties[$name] = $property;
@@ -400,7 +432,7 @@ class Mapper extends Base
         }
 
         if ( ! $this->className) {
-            $this->setClassName(Str::className($singular . 'Mapper'));
+            $this->setClassName(Str::className($singular) . 'Mapper');
         }
 
         if ( ! $this->entityClass) {
@@ -410,4 +442,51 @@ class Mapper extends Base
         return $this;
     }
 
+    public function observeMapperConfig(array $config): array
+    {
+        /** @var Column $column */
+        foreach ($this->getColumns() as $column) {
+            $config = $column->observeMapperConfig($config);
+        }
+        /** @var Behaviour $behaviour */
+        foreach ($this->behaviours as $behaviour) {
+            $config = $behaviour->observeMapperConfig($config);
+        }
+        /** @var Relation $relation */
+        foreach ($this->relations as $relation) {
+            $config = $relation->observeMapperConfig($config);
+        }
+        return parent::observeMapperConfig($config);
+    }
+
+    public function observeBaseMapperClass(ClassType $class): ClassType
+    {
+        /** @var Behaviour $behaviour */
+        foreach ($this->behaviours as $behaviour) {
+            $class = $behaviour->observeBaseMapperClass($class);
+        }
+        /** @var Relation $relation */
+        foreach ($this->relations as $relation) {
+            $class = $relation->observeBaseMapperClass($class);
+        }
+        return parent::observeBaseMapperClass($class);
+    }
+
+    public function observeBaseQueryClass(ClassType $class): ClassType
+    {
+        /** @var Behaviour $behaviour */
+        foreach ($this->behaviours as $behaviour) {
+            $class = $behaviour->observeBaseQueryClass($class);
+        }
+        /** @var Relation $relation */
+        foreach ($this->relations as $relation) {
+            $class = $relation->observeBaseQueryClass($class);
+        }
+        return parent::observeBaseMapperClass($class);
+    }
+
+    public function getQueryClass()
+    {
+        return str_replace('Mapper', 'Query', $this->getClassName());
+    }
 }

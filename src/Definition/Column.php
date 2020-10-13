@@ -19,6 +19,7 @@ class Column extends Base
     const TYPE_TIMESTAMP = 'timestamp';
     const TYPE_TEXT = 'text';
     const TYPE_JSON = 'json';
+    const TYPE_BOOLEAN = 'bool';
 
     protected $name;
 
@@ -52,80 +53,90 @@ class Column extends Base
 
     protected $nullable = false;
 
-    public static function varchar($length = 255)
+    public static function make(string $name = null) {
+        return (new static)->setName($name);
+    }
+
+    public static function varchar(string $name, $length = 255)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_VARCHAR)
                      ->setLength($length);
     }
 
-    public static function string()
+    public static function bool(string $name)
     {
-        return static::make()
+        return static::make($name)
+                     ->setType(static::TYPE_BOOLEAN);
+    }
+
+    public static function string(string $name)
+    {
+        return static::make($name)
                      ->setType(static::TYPE_TEXT);
     }
 
-    public static function datetime()
+    public static function datetime(string $name)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_DATETIME);
     }
 
-    public static function date()
+    public static function date(string $name)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_DATE);
     }
 
-    public static function timestamp()
+    public static function timestamp(string $name)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_TIMESTAMP);
     }
 
-    public static function json()
+    public static function json(string $name)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_JSON);
     }
 
-    public static function float()
+    public static function float(string $name)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_FLOAT);
     }
 
-    public static function integer($unsigned = false)
+    public static function integer(string $name, $unsigned = false)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_INTEGER)
                      ->setUnsigned($unsigned);
     }
 
-    public static function tinyInteger($unsigned = false)
+    public static function tinyInteger(string $name, $unsigned = false)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_TINY_INTEGER)
                      ->setUnsigned($unsigned);
     }
 
-    public static function smallInteger($unsigned = false)
+    public static function smallInteger(string $name, $unsigned = false)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_SMALL_INTEGER)
                      ->setUnsigned($unsigned);
     }
 
-    public static function bigInteger($unsigned = false)
+    public static function bigInteger(string $name, $unsigned = false)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_BIG_INTEGER)
                      ->setUnsigned($unsigned);
     }
 
-    public static function decimal(int $digits, int $precision)
+    public static function decimal(string $name, int $digits, int $precision)
     {
-        return static::make()
+        return static::make($name)
                      ->setType(static::TYPE_DECIMAL)
                      ->setDigits($digits)
                      ->setPrecision($precision);
@@ -214,7 +225,13 @@ class Column extends Base
      */
     public function getAttributeCast()
     {
-        return $this->attributeCast;
+        if ($this->attributeCast) {
+            return $this->attributeCast;
+        }
+
+        $casts = $this->getColumnTypeCastMap();
+
+        return $casts[$this->getType()] ?: null;
     }
 
     /**
@@ -425,6 +442,7 @@ class Column extends Base
     public function setPrecision(int $precision): Column
     {
         $this->precision = $precision;
+        $this->setAttributeCast('decimal:' . $precision);
 
         return $this;
     }
@@ -467,6 +485,35 @@ class Column extends Base
         $this->nullable = $nullable;
 
         return $this;
+    }
+
+    public function observeMapperConfig(array $config): array
+    {
+        $config['columns'][]          = $this->getName();
+        $config['casts'][$this->name] = $this->getAttributeCast();
+        if ($this->getAttributeName() && $this->getAttributeName() != $this->getName()) {
+            $config['columnAttributeMap'][$this->getName()] = $this->getAttributeName();
+        }
+
+        return parent::observeMapperConfig($config);
+    }
+
+    private function getColumnTypeCastMap()
+    {
+        return [
+            static::TYPE_BOOLEAN       => 'bool',
+            static::TYPE_VARCHAR       => 'string',
+            static::TYPE_TEXT          => 'string',
+            static::TYPE_JSON          => 'array',
+            static::TYPE_INTEGER       => 'int',
+            static::TYPE_BIG_INTEGER   => 'int',
+            static::TYPE_SMALL_INTEGER => 'int',
+            static::TYPE_TINY_INTEGER  => 'int',
+            static::TYPE_FLOAT         => 'float',
+            static::TYPE_DATE          => \DateTime::class,
+            static::TYPE_DATETIME      => \DateTime::class,
+            static::TYPE_TIMESTAMP     => \DateTime::class,
+        ];
     }
 
 

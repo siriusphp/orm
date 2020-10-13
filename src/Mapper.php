@@ -13,7 +13,6 @@ use Sirius\Orm\Relation\Relation;
 
 /**
  * @method Query where($column, $value, $condition)
- * @method Query columns(string $expr, string ...$exprs)
  * @method Query orderBy(string $expr, string ...$exprs)
  */
 class Mapper

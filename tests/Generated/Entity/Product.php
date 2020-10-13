@@ -1,0 +1,3 @@
+class Product extends ProductBase
+{
+}

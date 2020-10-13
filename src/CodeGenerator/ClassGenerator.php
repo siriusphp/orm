@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\CodeGenerator;
 
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use Sirius\Orm\Definition\Mapper;
@@ -33,8 +34,8 @@ class ClassGenerator
             $files["{$name}_mapper"]      = $this->generateMapperClass($mapper);
             $files["{$name}_base_query"]  = $this->generateBaseQueryClass($mapper);
             $files["{$name}_query"]       = $this->generateQueryClass($mapper);
-            $files["{$name}_base_query"]  = $this->generateBaseEntityClass($mapper);
-            $files["{$name}_query"]       = $this->generateEntityClass($mapper);
+            //$files["{$name}_base_entity"]  = $this->generateBaseEntityClass($mapper);
+            $files["{$name}_entity"]       = $this->generateEntityClass($mapper);
         }
 
         return $files;
@@ -43,7 +44,7 @@ class ClassGenerator
     public function writeFiles()
     {
         foreach ($this->getGeneratedClasses() as $class) {
-
+            file_put_contents($class['path'], $class['contents']);
         }
     }
 
@@ -51,14 +52,23 @@ class ClassGenerator
     {
         $class = (new MapperBaseGenerator($mapper))->getClass();
 
+        $file = new PhpFile();
+        $file->setStrictTypes(true);
+
         return [
-            'path'     => $mapper->getDestination(),
-            'contents' => $this->classPrinter->printClass($class)
+            'path'     => $mapper->getDestination() . $class->getName() . '.php',
+            'contents' => $this->classPrinter->printFile($file)
+                          . PHP_EOL
+                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . $this->classPrinter->printClass($class)
         ];
     }
 
     private function generateMapperClass(Mapper $mapper)
     {
+        $file = new PhpFile();
+        $file->setStrictTypes(true);
+
         $class = new ClassType(
             $mapper->getClassName(),
             new PhpNamespace($mapper->getNamespace())
@@ -67,30 +77,37 @@ class ClassGenerator
         $class->setExtends($mapper->getClassName() . 'Base');
 
         return [
-            'path'     => $mapper->getDestination(),
-            'contents' => $this->classPrinter->printClass($class)
+            'path'     => $mapper->getDestination() . $class->getName() . '.php',
+            'contents' => $this->classPrinter->printFile($file)
+                          . PHP_EOL
+                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . $this->classPrinter->printClass($class)
         ];
 
     }
 
     private function generateBaseQueryClass(Mapper $mapper)
     {
-        $class = new ClassType(
-            $mapper->getClassName() . 'QueryBase',
-            new PhpNamespace($mapper->getNamespace())
-        );
+        $class = (new QueryBaseGenerator($mapper))->getClass();
 
-        $class->setExtends(Query::class);
+        $file = new PhpFile();
+        $file->setStrictTypes(true);
 
         return [
-            'path'     => $mapper->getDestination(),
-            'contents' => $this->classPrinter->printClass($class)
+            'path'     => $mapper->getDestination() . $class->getName() . '.php',
+            'contents' => $this->classPrinter->printFile($file)
+                          . PHP_EOL
+                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . $this->classPrinter->printClass($class)
         ];
     }
 
     private function generateQueryClass(Mapper $mapper)
     {
-        $queryClass = $mapper->getClassName() . 'Query';
+        $file = new PhpFile();
+        $file->setStrictTypes(true);
+
+        $queryClass = $mapper->getQueryClass();
         $class      = new ClassType(
             $queryClass,
             new PhpNamespace($mapper->getNamespace())
@@ -99,8 +116,11 @@ class ClassGenerator
         $class->setExtends($queryClass . 'Base');
 
         return [
-            'path'     => $mapper->getDestination(),
-            'contents' => $this->classPrinter->printClass($class)
+            'path'     => $mapper->getDestination() . $class->getName() . '.php',
+            'contents' => $this->classPrinter->printFile($file)
+                          . PHP_EOL
+                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . $this->classPrinter->printClass($class)
         ];
     }
 
@@ -114,7 +134,7 @@ class ClassGenerator
         $class->setExtends(\Sirius\Orm\Mapper::class);
 
         return [
-            'path'     => $mapper->getDestination(),
+            'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printClass($class)
         ];
     }
@@ -129,7 +149,7 @@ class ClassGenerator
         $class->setExtends($mapper->getEntityClass() . 'Base');
 
         return [
-            'path'     => $mapper->getEntityDestination(),
+            'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printClass($class)
         ];
 

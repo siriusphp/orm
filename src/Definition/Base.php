@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Definition;
 
+use Nette\PhpGenerator\ClassType;
+
 abstract class Base
 {
 
@@ -32,6 +34,22 @@ abstract class Base
     {
         $constants = array_reverse($this->getClassConstants());
         return $constants[$val] ?? null;
+    }
+
+    public function observeMapperConfig(array $config):array {
+        return $config;
+    }
+
+    public function observeBaseMapperClass(ClassType $class): ClassType {
+        return $class;
+    }
+
+    public function observeBaseEntityClass(ClassType $class): ClassType {
+        return $class;
+    }
+
+    public function observeBaseQueryClass(ClassType $class): ClassType {
+        return $class;
     }
 }
 

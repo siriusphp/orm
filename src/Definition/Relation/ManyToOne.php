@@ -16,7 +16,7 @@ class ManyToOne extends Relation
 
     public function setForeignMapper($foreignMapper)
     {
-        if ( ! $this->nativeKey) {
+        if ($foreignMapper && ! $this->nativeKey) {
             $this->nativeKey = Inflector::singularize($foreignMapper) . '_id';
         }
 
@@ -25,7 +25,7 @@ class ManyToOne extends Relation
 
     public function setMapper(Mapper $mapper): Relation
     {
-        $this->nativeKey = $mapper->getConfig()->getPrimaryKey();
+        $this->nativeKey = $mapper->getPrimaryKey();
 
         return parent::setMapper($mapper);
     }

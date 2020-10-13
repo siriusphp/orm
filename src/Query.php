@@ -164,7 +164,7 @@ class Query extends Select
         );
     }
 
-    public function paginate($perPage, $page): PaginatedCollection
+    public function paginate(int $perPage, int $page = 1): PaginatedCollection
     {
         /** @var Query $countQuery */
         $countQuery = clone $this;
