@@ -223,7 +223,7 @@ SQL;
         $tag->name           = 'New tag';
         $tag->pivot_position = 3;
 
-        $this->nativeMapper->save($product);
+        $this->nativeMapper->save($product, true);
 
         $product    = $this->nativeMapper->find($product->id);
         $updatedTag = null;

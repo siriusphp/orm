@@ -72,7 +72,7 @@ class OneToOneTest extends BaseTestCase
         $product->title                     = 'Product 2';
         $product->fields->featured_image_id = 3;
 
-        $this->assertTrue($this->nativeMapper->save($product));
+        $this->assertTrue($this->nativeMapper->save($product, true));
 
         $product = $this->nativeMapper->find(1);
         $this->assertEquals('Product 2', $product->title);

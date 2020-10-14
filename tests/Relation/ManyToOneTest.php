@@ -216,7 +216,7 @@ SQL;
         $category       = $product->category;
         $category->name = 'New category';
 
-        $this->nativeMapper->save($product);
+        $this->nativeMapper->save($product, true);
         $category = $this->foreignMapper->find($category->id);
         $this->assertEquals('New category', $category->name);
     }

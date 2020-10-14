@@ -202,7 +202,10 @@ class Mapper
         return array_keys($this->relations);
     }
 
-    public function newQuery(): Query
+    /**
+     * @return Query
+     */
+    public function newQuery()
     {
         $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
 
@@ -213,7 +216,7 @@ class Mapper
      * @param mixed $pk Value of the primary key
      * @param array $load Eager load relations
      *
-     * @return EntityInterface|null
+     * @return null|EntityInterface
      */
     public function find($pk, array $load = [])
     {
@@ -230,7 +233,7 @@ class Mapper
      * @return bool
      * @throws FailedActionException
      */
-    public function save(EntityInterface $entity, $withRelations = true)
+    public function save(EntityInterface $entity, $withRelations = false)
     {
         $this->assertCanPersistEntity($entity);
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
@@ -250,7 +253,13 @@ class Mapper
         }
     }
 
-    public function newSaveAction(EntityInterface $entity, $options): Update
+    /**
+     * @param EntityInterface $entity
+     * @param $options
+     *
+     * @return Update
+     */
+    public function newSaveAction(EntityInterface $entity, $options)
     {
         if ( ! $this->getHydrator()->getPk($entity)) {
             $action = new Insert($this, $entity, $options);
@@ -261,6 +270,13 @@ class Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $action);
     }
 
+    /**
+     * @param EntityInterface $entity
+     * @param false $withRelations
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function delete(EntityInterface $entity, $withRelations = false)
     {
         $this->assertCanPersistEntity($entity);
@@ -280,6 +296,12 @@ class Mapper
         }
     }
 
+    /**
+     * @param EntityInterface $entity
+     * @param $options
+     *
+     * @return Action\
+     */
     public function newDeleteAction(EntityInterface $entity, $options)
     {
         $action = new Delete($this, $entity, $options);

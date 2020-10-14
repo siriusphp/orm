@@ -197,7 +197,7 @@ SQL;
         $products = $category->products;
         $products->add($product);
 
-        $this->nativeMapper->save($category);
+        $this->nativeMapper->save($category, true);
         $this->assertEquals($category->id, $product->category_id);
     }
 
