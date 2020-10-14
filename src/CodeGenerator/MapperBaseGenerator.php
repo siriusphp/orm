@@ -6,9 +6,13 @@ namespace Sirius\Orm\CodeGenerator;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Dumper;
 use Nette\PhpGenerator\PhpNamespace;
+use Sirius\Orm\Behaviours;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Definition\Mapper;
+use Sirius\Orm\Entity\ClassMethodsHydrator;
+use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\MapperConfig;
+use Sirius\Orm\QueryBuilder;
 
 class MapperBaseGenerator
 {
@@ -68,11 +72,17 @@ class MapperBaseGenerator
     {
         $this->namespace->addUse(ConnectionLocator::class);
         $this->namespace->addUse(MapperConfig::class);
+        $this->namespace->addUse(QueryBuilder::class);
+        $this->namespace->addUse(Behaviours::class);
+
         $method = $this->class->addMethod('__constructor');
         $method->addParameter('connectionLocator')->setType('ConnectionLocator');
 
-        $body = 'parent::__construct($connectionLocator);' . PHP_EOL;
-        $body .= '$this->mapperConfig = MapperConfig::fromArray(';
+        $body = '$this->connectionLocator = $connectionLocator;' . PHP_EOL;
+        $body .= '$this->queryBuilder      = QueryBuilder::getInstance();' . PHP_EOL;
+        $body .= '$this->behaviours        = new Behaviours();' . PHP_EOL;
+
+        $body .= '$this->mapperConfig      = MapperConfig::fromArray(';
 
         $config = [
             'entityClass'        => $this->mapper->getNamespace() . '\\' . $this->mapper->getEntityClass(),
@@ -90,15 +100,25 @@ class MapperBaseGenerator
 
         $body .= ');' . PHP_EOL;
 
+        if ($this->mapper->getEntityStyle() == Mapper::ENTITY_STYLE_PROPERTIES) {
+            $this->namespace->addUse(GenericHydrator::class);
+            $body .= '$this->hydrator      = new GenericHydrator;' . PHP_EOL;
+        } else {
+            $this->namespace->addUse(ClassMethodsHydrator::class);
+            $body .= '$this->hydrator      = new ClassMethodsHydrator;' . PHP_EOL;
+        }
+
         $method->setBody($body);
+
+        return $method;
     }
 
     protected function addFindMethod()
     {
         $this->namespace->addUse($this->mapper->getEntityNamespace() . '\\' . $this->mapper->getEntityClass());
         $method = $this->class->addMethod('find')
-                            ->setReturnNullable(true)
-                            ->setReturnType($this->mapper->getEntityClass());
+                              ->setReturnNullable(true)
+                              ->setReturnType($this->mapper->getEntityClass());
         $method->addParameter('pk');
         $method->addParameter('load', [])->setType('array');
         $method->setBody('return parent::find($pk, $load);');
@@ -107,7 +127,7 @@ class MapperBaseGenerator
     protected function addNewQueryMethod()
     {
         $method = $this->class->addMethod('newQuery')
-                            ->setReturnType($this->mapper->getQueryClass());
+                              ->setReturnType($this->mapper->getQueryClass());
         $method->addBody('$query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);');
         $method->addBody('return $this->behaviours->apply($this, __FUNCTION__, $query);');
 
@@ -117,9 +137,9 @@ class MapperBaseGenerator
     protected function addSaveMethod()
     {
         $method = $this->class->addMethod('save')
-                            ->setReturnType('bool');
+                              ->setReturnType('bool');
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
-        $method->addParameter('withRelations', false)->setType('bool');
+        $method->addParameter('withRelations', false);
         $method->setBody('return parent::save($entity, $withRelations);');
     }
 }

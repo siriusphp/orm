@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
+use Sirius\Orm\Behaviours;
 use Sirius\Orm\ConnectionLocator;
+use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
+use Sirius\Orm\QueryBuilder;
 use Sirius\Orm\Tests\Generated\Entity\Language;
 
 /**
@@ -17,8 +20,10 @@ abstract class LanguageMapperBase extends Mapper
 {
     public function __constructor(ConnectionLocator $connectionLocator)
     {
-        parent::__construct($connectionLocator);
-        $this->mapperConfig = MapperConfig::fromArray([
+        $this->connectionLocator = $connectionLocator;
+        $this->queryBuilder      = QueryBuilder::getInstance();
+        $this->behaviours        = new Behaviours();
+        $this->mapperConfig      = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Mapper\Language',
             'primaryKey' => 'id',
             'table' => 'tbl_languages',
@@ -34,6 +39,7 @@ abstract class LanguageMapperBase extends Mapper
                 'description' => 'string',
             ],
         ]);
+        $this->hydrator      = new GenericHydrator;
     }
 
     public function find($pk, array $load = []): ?Language
@@ -47,7 +53,7 @@ abstract class LanguageMapperBase extends Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 
-    public function save(Language $entity, bool $withRelations = false): bool
+    public function save(Language $entity, $withRelations = false): bool
     {
         return parent::save($entity, $withRelations);
     }
