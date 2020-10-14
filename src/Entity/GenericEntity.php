@@ -151,7 +151,7 @@ class GenericEntity implements EntityInterface
             $state = $this->state;
             /** @var LazyLoader $lazyLoader */
             $lazyLoader = $this->lazyLoaders[$attribute];
-            $lazyLoader->load();
+            $lazyLoader->load($this);
             unset($this->changed[$attribute]);
             unset($this->lazyLoaders[$attribute]);
             $this->state = $state;

@@ -9,10 +9,6 @@ use Sirius\Orm\Relation\Aggregate;
 class LazyAggregate implements LazyLoader
 {
     /**
-     * @var EntityInterface
-     */
-    protected $entity;
-    /**
      * @var Tracker
      */
     protected $tracker;
@@ -21,16 +17,15 @@ class LazyAggregate implements LazyLoader
      */
     protected $aggregate;
 
-    public function __construct(EntityInterface $entity, Tracker $tracker, Aggregate $aggregate)
+    public function __construct(Tracker $tracker, Aggregate $aggregate)
     {
-        $this->entity    = $entity;
         $this->tracker   = $tracker;
         $this->aggregate = $aggregate;
     }
 
-    public function load()
+    public function load($entity)
     {
         $results = $this->tracker->getAggregateResults($this->aggregate);
-        $this->aggregate->attachAggregateToEntity($this->entity, $results);
+        $this->aggregate->attachAggregateToEntity($entity, $results);
     }
 }

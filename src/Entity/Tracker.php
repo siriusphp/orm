@@ -38,6 +38,16 @@ class Tracker
      */
     protected $relationResults = [];
 
+    /**
+     * @var array
+     */
+    protected $lazyAggregates = [];
+
+    /**
+     * @var array
+     */
+    protected $lazyRelations = [];
+
     public function __construct(array $rows = [])
     {
         $this->rows = $rows;
@@ -122,6 +132,26 @@ class Tracker
         $column = is_array($columns) ? $columns[0] : $columns;
 
         return $row instanceof GenericEntity ? $row->{$column} : ($row[$column] ?? null);
+    }
+
+    public function getLazyAggregate(Aggregate $aggregate)
+    {
+        $name = $aggregate->getName();
+        if ( ! isset($this->lazyAggregates[$name])) {
+            $this->lazyAggregates[$name] = new LazyAggregate($this, $aggregate);
+        }
+
+        return $this->lazyAggregates[$name];
+    }
+
+    public function getLazyRelation(Relation $relation)
+    {
+        $name = $relation->getOption('name');
+        if ( ! isset($this->lazyRelations[$name])) {
+            $this->lazyRelations[$name] = new LazyRelation($this, $relation);
+        }
+
+        return $this->lazyRelations[$name];
     }
 
     /**

@@ -5,5 +5,5 @@ namespace Sirius\Orm\Entity;
 
 interface LazyLoader
 {
-    public function load();
+    public function load($entity);
 }

@@ -70,7 +70,7 @@ class Aggregate
 
     public function attachLazyAggregateToEntity(EntityInterface $entity, Tracker $tracker)
     {
-        $valueLoader = new LazyAggregate($entity, $tracker, $this);
+        $valueLoader = $tracker->getLazyAggregate($this);
         $this->entityHydrator->set($entity, $this->name, $valueLoader);
     }
 

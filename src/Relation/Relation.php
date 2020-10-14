@@ -152,7 +152,7 @@ abstract class Relation
 
     public function attachLazyRelationToEntity(EntityInterface $entity, Tracker $tracker)
     {
-        $valueLoader = new LazyRelation($entity, $tracker, $this);
+        $valueLoader = $tracker->getLazyRelation($this);
         $this->nativeEntityHydrator->set($entity, $this->name, $valueLoader);
     }
 
