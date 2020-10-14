@@ -36,10 +36,10 @@ class Orm
      *
      * @param ConnectionLocator $connectionLocator
      */
-    public function __construct(ConnectionLocator $connectionLocator)
+    public function __construct(ConnectionLocator $connectionLocator = null, CastingManager $castingManager = null)
     {
         $this->connectionLocator = $connectionLocator;
-        $this->castingManager    = CastingManager::getInstance();
+        $this->castingManager    = $castingManager ?: new CastingManager();
     }
 
     /**
@@ -101,6 +101,14 @@ class Orm
     }
 
     /**
+     * @return CastingManager
+     */
+    public function getCastingManager(): CastingManager
+    {
+        return $this->castingManager;
+    }
+
+    /**
      * Create a relation instance for a mapper based on t
      *
      * @param Mapper $mapper
@@ -141,11 +149,6 @@ class Orm
         }
 
         if ($mapperConfigOrFactory instanceof MapperConfig) {
-            $entityHydrator = $mapperConfigOrFactory->getEntityHydrator();
-            if ($entityHydrator instanceof CastingManagerAwareInterface) {
-                $entityHydrator->setCastingManager($this->castingManager);
-            }
-
             return Mapper::make($this->connectionLocator, $mapperConfigOrFactory);
         }
 

@@ -24,7 +24,7 @@ class ClassMethodsEntity implements EntityInterface
         $this->setState($state);
     }
 
-    public function __call($method, ...$args)
+    public function __call($method, $args)
     {
         if (substr($method, 0, 3) === 'get') {
             return $this->get(Str::underscore(substr($method, 3)));

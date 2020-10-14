@@ -22,17 +22,12 @@ class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
      */
     protected $mapperConfig;
 
-    public function __construct(MapperConfig $mapperConfig)
-    {
-        $this->mapperConfig = $mapperConfig;
-    }
-
     /**
-     * @param CastingManager $castingManager
+     * @param ?CastingManager $castingManager
      *
      * @return GenericHydrator
      */
-    public function setCastingManager(CastingManager $castingManager): GenericHydrator
+    public function setCastingManager(CastingManager $castingManager = null): GenericHydrator
     {
         $this->castingManager = $castingManager;
 

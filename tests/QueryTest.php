@@ -79,9 +79,9 @@ class QueryTest extends BaseTestCase
             ['page', 'Page 1'],
         ]);
 
-        $found  = 0;
+        $found = 0;
 
-        $query  = $this->mapper->newQuery();
+        $query = $this->mapper->newQuery();
         $query->chunk(2, function ($entity) use (&$found) {
             $found += 1;
         });

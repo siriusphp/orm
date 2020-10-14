@@ -72,7 +72,7 @@ abstract class BaseAction implements ActionInterface
         $this->mapper         = $mapper;
         $this->entity         = $entity;
         $this->options        = $options;
-        $this->entityHydrator = $mapper->getConfig()->getEntityHydrator();
+        $this->entityHydrator = $mapper->getHydrator();
     }
 
     public function prepend(ActionInterface $action)

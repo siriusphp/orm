@@ -8,6 +8,8 @@ use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\HydratorInterface;
+use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Relation\Relation;
 
@@ -31,6 +33,11 @@ class Mapper
      * @var MapperConfig
      */
     protected $mapperConfig;
+
+    /**
+     * @var HydratorInterface
+     */
+    protected $hydrator;
 
     /**
      * @var QueryBuilder
@@ -58,6 +65,8 @@ class Mapper
 
         $mapper->relations = $mapperConfig->getRelations();
 
+        $mapper->hydrator->setMapperConfig($mapperConfig);
+
         return $mapper;
     }
 
@@ -66,11 +75,7 @@ class Mapper
         $this->connectionLocator = $connectionLocator;
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
-    }
-
-    public function setOrm(Orm $orm)
-    {
-        $this->orm = $orm;
+        $this->hydrator          = new GenericHydrator();
     }
 
     public function __call(string $method, array $params)
@@ -87,12 +92,26 @@ class Mapper
         throw new \BadMethodCallException("Unknown method {$method} for class " . get_class($this));
     }
 
+    public function setOrm(Orm $orm)
+    {
+        $this->orm = $orm;
+        $this->hydrator->setCastingManager($this->orm->getCastingManager());
+    }
+
     /**
      * @return MapperConfig
      */
     public function getConfig(): MapperConfig
     {
         return $this->mapperConfig;
+    }
+
+    /**
+     * @return HydratorInterface
+     */
+    public function getHydrator(): HydratorInterface
+    {
+        return $this->hydrator;
     }
 
     /**
@@ -135,8 +154,7 @@ class Mapper
      */
     public function newEntity(array $data): EntityInterface
     {
-        $entity = $this->getConfig()
-                       ->getEntityHydrator()
+        $entity = $this->getHydrator()
                        ->hydrate(array_merge(
                            $this->getConfig()->getDefaultEntityAttributes(),
                            $data
@@ -234,7 +252,7 @@ class Mapper
 
     public function newSaveAction(EntityInterface $entity, $options): Update
     {
-        if ( ! $this->getConfig()->getEntityHydrator()->getPk($entity)) {
+        if ( ! $this->getHydrator()->getPk($entity)) {
             $action = new Insert($this, $entity, $options);
         } else {
             $action = new Update($this, $entity, $options);

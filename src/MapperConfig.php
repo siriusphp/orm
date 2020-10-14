@@ -77,11 +77,6 @@ class MapperConfig
     protected $columnAttributeMap = [];
 
     /**
-     * @var HydratorInterface
-     */
-    protected $entityHydrator = null;
-
-    /**
      * Default attributes
      * @var array
      */
@@ -179,30 +174,6 @@ class MapperConfig
     public function getColumnAttributeMap(): array
     {
         return $this->columnAttributeMap;
-    }
-
-    /**
-     * @return HydratorInterface
-     */
-    public function getEntityHydrator(): HydratorInterface
-    {
-        if ( ! $this->entityHydrator) {
-            $this->entityHydrator = new GenericHydrator($this);
-        }
-
-        return $this->entityHydrator;
-    }
-
-    /**
-     * @param HydratorInterface $entityHydrator
-     *
-     * @return MapperConfig
-     */
-    public function setEntityHydrator(HydratorInterface $entityHydrator): MapperConfig
-    {
-        $this->entityHydrator = $entityHydrator;
-
-        return $this;
     }
 
 

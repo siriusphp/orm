@@ -41,7 +41,7 @@ class Aggregate
         $this->name           = $name;
         $this->relation       = $relation;
         $this->options        = $options;
-        $this->entityHydrator = $relation->getNativeMapper()->getConfig()->getEntityHydrator();
+        $this->entityHydrator = $relation->getNativeMapper()->getHydrator();
     }
 
     public function getQuery(Tracker $tracker)

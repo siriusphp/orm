@@ -28,15 +28,14 @@ class MapperTest extends BaseTestCase
             MapperConfig::COLUMN_ATTRIBUTE_MAP => ['price' => 'value'],
             MapperConfig::CASTS                => ['value' => 'decimal:2']
         ]);
-        $hydrator = new GenericHydrator($mapperConfig);
-        $hydrator->setCastingManager(CastingManager::getInstance());
-        $mapperConfig->setEntityHydrator($hydrator);
         $this->mapper = Mapper::make($this->connectionLocator, $mapperConfig);
+        $this->mapper->getHydrator()->setCastingManager(CastingManager::getInstance());
 
     }
 
     public function test_new_entity()
     {
+        $this->mapper->setOrm($this->orm);
         $product = $this->mapper->newEntity([
             'category_id'       => '10',
             'featured_image_id' => '20',

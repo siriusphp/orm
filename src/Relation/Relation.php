@@ -66,8 +66,8 @@ abstract class Relation
         $this->applyDefaults();
         $this->keyPairs              = $this->computeKeyPairs();
 
-        $this->nativeEntityHydrator  = $nativeMapper->getConfig()->getEntityHydrator();
-        $this->foreignEntityHydrator = $foreignMapper->getConfig()->getEntityHydrator();
+        $this->nativeEntityHydrator  = $nativeMapper->getHydrator();
+        $this->foreignEntityHydrator = $foreignMapper->getHydrator();
     }
 
     protected function applyDefaults(): void
@@ -191,7 +191,7 @@ abstract class Relation
     {
         $entityKeys = [];
         foreach ($keyColumns as $col) {
-            $entityKeys[] = $mapper->getConfig()->getEntityHydrator()->get($entity, $col);
+            $entityKeys[] = $mapper->getHydrator()->get($entity, $col);
         }
 
         return implode('-', $entityKeys);

@@ -32,11 +32,11 @@ class DeletePivotRows extends BaseAction
 
         $this->nativeMapper         = $relation->getNativeMapper();
         $this->nativeEntity         = $nativeEntity;
-        $this->nativeEntityHydrator = $this->nativeMapper->getConfig()->getEntityHydrator();
+        $this->nativeEntityHydrator = $this->nativeMapper->getHydrator();
 
         $this->mapper         = $relation->getForeignMapper();
         $this->entity         = $foreignEntity;
-        $this->entityHydrator = $this->mapper->getConfig()->getEntityHydrator();
+        $this->entityHydrator = $this->mapper->getHydrator();
     }
 
     protected function execute()

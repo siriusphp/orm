@@ -6,7 +6,6 @@ namespace Sirius\Orm\Tests;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Schema\Table;
 use PHPUnit\Framework\TestCase;
 use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
@@ -59,7 +58,7 @@ class BaseTestCase extends TestCase
         }
         /** @var Schema $schema */
         $schema = include(__DIR__ . "/resources/schema.php");
-        foreach($schema->toSql($platform) as $sql) {
+        foreach ($schema->toSql($platform) as $sql) {
             $this->connection->perform($sql);
         }
 

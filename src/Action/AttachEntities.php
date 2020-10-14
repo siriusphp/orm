@@ -127,11 +127,11 @@ class AttachEntities implements ActionInterface
 
     protected function getNativeEntityHydrator()
     {
-        return $this->nativeMapper->getConfig()->getEntityHydrator();
+        return $this->nativeMapper->getHydrator();
     }
 
     protected function getForeignEntityHydrator()
     {
-        return $this->foreignMapper->getConfig()->getEntityHydrator();
+        return $this->foreignMapper->getHydrator();
     }
 }

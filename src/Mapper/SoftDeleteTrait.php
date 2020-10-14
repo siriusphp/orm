@@ -49,7 +49,7 @@ trait SoftDeleteTrait
             return false;
         }
 
-        $this->getConfig()->getEntityHydrator()->set($entity, $this->deletedAtColumn, null);
+        $this->getHydrator()->set($entity, $this->deletedAtColumn, null);
         $action = new Update($this, $entity);
 
         $this->connectionLocator->lockToWrite(true);

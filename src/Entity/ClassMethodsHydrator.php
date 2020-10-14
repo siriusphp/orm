@@ -10,7 +10,7 @@ use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\MapperConfig;
 
-class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
+class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInterface
 {
     /**
      * @var CastingManager
