@@ -572,7 +572,7 @@ class Column extends Base
                 return 'return intval($value);';
 
             case static::TYPE_DECIMAL:
-                return 'return round((float)$value, ' . $this->getDigits() . ');';
+                return 'return round((float)$value, ' . $this->getPrecision() . ');';
 
             case static::TYPE_DATETIME:
                 return 'return ($value instanceof DateTime) ? $value : new DateTime($value);';
