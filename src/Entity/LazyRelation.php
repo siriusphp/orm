@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
-use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\LazyLoader;
 use Sirius\Orm\Relation\Relation;
 
 class LazyRelation implements LazyLoader
@@ -23,7 +23,7 @@ class LazyRelation implements LazyLoader
         $this->relation = $relation;
     }
 
-    public function load($entity)
+    public function getForEntity($entity)
     {
         $results = $this->tracker->getResultsForRelation($this->relation->getOption('name'));
         $this->relation->attachMatchesToEntity($entity, $results);

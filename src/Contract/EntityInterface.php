@@ -9,7 +9,9 @@ interface EntityInterface
 
     public function setState($state);
 
-    public function toArray();
+    public function setLazy($attribute, LazyLoader $lazyLoader);
 
     public function getChanges();
+
+    public function toArray();
 }

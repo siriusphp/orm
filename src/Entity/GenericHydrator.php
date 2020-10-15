@@ -7,6 +7,7 @@ use Sirius\Orm\CastingManager;
 use Sirius\Orm\Contract\CastingManagerAwareInterface;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
+use Sirius\Orm\Contract\LazyLoader;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\MapperConfig;
 
@@ -100,6 +101,11 @@ class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
     public function set(EntityInterface $entity, $attribute, $value)
     {
         return $entity->{$attribute} = $value;
+    }
+
+    public function setLazy(EntityInterface $entity, $attribute, LazyLoader $lazyLoader)
+    {
+        $entity->setLazy($attribute, $lazyLoader);
     }
 
     /**

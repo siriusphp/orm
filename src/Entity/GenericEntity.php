@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\LazyLoader;
 use Sirius\Orm\Helpers\Str;
 
 class GenericEntity implements EntityInterface
@@ -107,20 +108,12 @@ class GenericEntity implements EntityInterface
     {
         $this->preventChangesIfDeleted();
 
-        if ($value instanceof LazyLoader) {
-            $this->lazyLoaders[$attribute] = $value;
-
-            return $this;
-        }
-
         $value = $this->castAttribute($attribute, $value);
         if ( ! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->changed[$attribute] = true;
             $this->state               = StateEnum::CHANGED;
         }
         $this->attributes[$attribute] = $value;
-
-        return $this;
     }
 
     protected function get($attribute)
@@ -132,6 +125,13 @@ class GenericEntity implements EntityInterface
         $this->maybeLazyLoad($attribute);
 
         return $this->attributes[$attribute] ?? null;
+    }
+
+    public function setLazy($attribute, LazyLoader $lazyLoader)
+    {
+        $this->lazyLoaders[$attribute] = $lazyLoader;
+
+        return $this;
     }
 
     protected function preventChangesIfDeleted()
@@ -151,7 +151,7 @@ class GenericEntity implements EntityInterface
             $state = $this->state;
             /** @var LazyLoader $lazyLoader */
             $lazyLoader = $this->lazyLoaders[$attribute];
-            $lazyLoader->load($this);
+            $lazyLoader->getForEntity($this);
             unset($this->changed[$attribute]);
             unset($this->lazyLoaders[$attribute]);
             $this->state = $state;

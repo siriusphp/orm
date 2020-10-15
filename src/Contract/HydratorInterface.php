@@ -20,6 +20,8 @@ interface HydratorInterface
 
     public function set(EntityInterface $entity, $attribute, $value);
 
+    public function setLazy(EntityInterface $entity, $attribute, LazyLoader $lazyLoader);
+
     public function getPk(EntityInterface $entity);
 
     public function setPk(EntityInterface $entity, $value);
