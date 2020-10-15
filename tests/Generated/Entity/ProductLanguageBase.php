@@ -15,7 +15,7 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property string $slug
  * @property string $description
  */
-abstract class LanguageBase extends GenericEntity
+abstract class ProductLanguageBase extends GenericEntity
 {
     protected function castIdAttribute($value)
     {

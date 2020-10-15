@@ -18,9 +18,8 @@ use Sirius\Orm\Tests\Generated\Entity\Category;
  */
 abstract class CategoryMapperBase extends Mapper
 {
-    public function __constructor(ConnectionLocator $connectionLocator)
+    protected function init()
     {
-        $this->connectionLocator = $connectionLocator;
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
@@ -28,6 +27,7 @@ abstract class CategoryMapperBase extends Mapper
             'primaryKey' => 'id',
             'table' => 'categories',
             'tableAlias' => null,
+            'guards' => [],
             'columns' => ['id', 'parent_id', 'position', 'name'],
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'parent_id' => 'int', 'position' => 'int', 'name' => 'string'],

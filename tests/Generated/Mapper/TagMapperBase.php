@@ -18,9 +18,8 @@ use Sirius\Orm\Tests\Generated\Entity\Tag;
  */
 abstract class TagMapperBase extends Mapper
 {
-    public function __constructor(ConnectionLocator $connectionLocator)
+    protected function init()
     {
-        $this->connectionLocator = $connectionLocator;
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
@@ -28,6 +27,7 @@ abstract class TagMapperBase extends Mapper
             'primaryKey' => 'id',
             'table' => 'tags',
             'tableAlias' => null,
+            'guards' => [],
             'columns' => ['id', 'name'],
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'name' => 'string'],

@@ -25,9 +25,8 @@ abstract class ProductMapperBase extends Mapper
     protected $updatedAtColumn = 'updated_on';
     protected $deletedAtColumn = 'deleted_on';
 
-    public function __constructor(ConnectionLocator $connectionLocator)
+    protected function init()
     {
-        $this->connectionLocator = $connectionLocator;
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
@@ -35,13 +34,12 @@ abstract class ProductMapperBase extends Mapper
             'primaryKey' => 'id',
             'table' => 'tbl_products',
             'tableAlias' => null,
-            'columns' => ['id', 'name', 'slug', 'description', 'value', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
+            'guards' => [],
+            'columns' => ['id', 'sku', 'value', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
             'columnAttributeMap' => ['value' => 'price'],
             'casts' => [
                 'id' => 'int',
-                'name' => 'string',
-                'slug' => 'string',
-                'description' => 'string',
+                'sku' => 'string',
                 'value' => 'decimal:2',
                 'attributes' => 'array',
                 'created_on' => 'DateTime',

@@ -60,26 +60,28 @@ class MapperBaseGenerator
         $this->class->addComment(sprintf('@method %s where($column, $value, $condition)', $this->mapper->getQueryClass()));
         $this->class->addComment(sprintf('@method %s orderBy(string $expr, string ...$exprs)', $this->mapper->getQueryClass()));
 
-        $this->addConstructor();
+        $this->addInitMethod();
         $this->addFindMethod();
         $this->addNewQueryMethod();
         $this->addSaveMethod();
 
+        foreach ($this->mapper->getTraits() as $trait) {
+            $this->class->addTrait($trait);
+        }
+
         $this->class = $this->mapper->observeBaseMapperClass($this->class);
     }
 
-    protected function addConstructor()
+    protected function addInitMethod()
     {
         $this->namespace->addUse(ConnectionLocator::class);
         $this->namespace->addUse(MapperConfig::class);
         $this->namespace->addUse(QueryBuilder::class);
         $this->namespace->addUse(Behaviours::class);
 
-        $method = $this->class->addMethod('__constructor');
-        $method->addParameter('connectionLocator')->setType('ConnectionLocator');
+        $method = $this->class->addMethod('init')->setVisibility(ClassType::VISIBILITY_PROTECTED);
 
-        $body = '$this->connectionLocator = $connectionLocator;' . PHP_EOL;
-        $body .= '$this->queryBuilder      = QueryBuilder::getInstance();' . PHP_EOL;
+        $body = '$this->queryBuilder      = QueryBuilder::getInstance();' . PHP_EOL;
         $body .= '$this->behaviours        = new Behaviours();' . PHP_EOL;
 
         $body .= '$this->mapperConfig      = MapperConfig::fromArray(';
@@ -89,6 +91,7 @@ class MapperBaseGenerator
             'primaryKey'         => $this->mapper->getPrimaryKey(),
             'table'              => $this->mapper->getTable(),
             'tableAlias'         => $this->mapper->getTableAlias(),
+            'guards'             => $this->mapper->getGuards(),
             'columns'            => [],
             'columnAttributeMap' => [],
             'casts'              => []

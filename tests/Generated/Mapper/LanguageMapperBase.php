@@ -18,9 +18,8 @@ use Sirius\Orm\Tests\Generated\Entity\Language;
  */
 abstract class LanguageMapperBase extends Mapper
 {
-    public function __constructor(ConnectionLocator $connectionLocator)
+    protected function init()
     {
-        $this->connectionLocator = $connectionLocator;
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
@@ -28,7 +27,8 @@ abstract class LanguageMapperBase extends Mapper
             'primaryKey' => 'id',
             'table' => 'tbl_languages',
             'tableAlias' => null,
-            'columns' => ['id', 'content_type', 'content_id', 'lang', 'title', 'description'],
+            'guards' => [],
+            'columns' => ['id', 'content_type', 'content_id', 'lang', 'title', 'slug', 'description'],
             'columnAttributeMap' => [],
             'casts' => [
                 'id' => 'int',
@@ -36,6 +36,7 @@ abstract class LanguageMapperBase extends Mapper
                 'content_id' => 'int',
                 'lang' => 'string',
                 'title' => 'string',
+                'slug' => 'string',
                 'description' => 'string',
             ],
         ]);

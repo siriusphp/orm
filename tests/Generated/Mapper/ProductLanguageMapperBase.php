@@ -10,50 +10,51 @@ use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\QueryBuilder;
-use Sirius\Orm\Tests\Generated\Entity\Image;
+use Sirius\Orm\Tests\Generated\Entity\ProductLanguage;
 
 /**
- * @method ImageQuery where($column, $value, $condition)
- * @method ImageQuery orderBy(string $expr, string ...$exprs)
+ * @method ProductLanguageQuery where($column, $value, $condition)
+ * @method ProductLanguageQuery orderBy(string $expr, string ...$exprs)
  */
-abstract class ImageMapperBase extends Mapper
+abstract class ProductLanguageMapperBase extends Mapper
 {
     protected function init()
     {
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
-            'entityClass' => 'Sirius\Orm\Tests\Generated\Mapper\Image',
+            'entityClass' => 'Sirius\Orm\Tests\Generated\Mapper\ProductLanguage',
             'primaryKey' => 'id',
-            'table' => 'tbl_images',
+            'table' => 'tbl_languages',
             'tableAlias' => null,
-            'guards' => [],
-            'columns' => ['id', 'imageable_type', 'imageable_id', 'path', 'title', 'description'],
+            'guards' => ['content_type' => 'products'],
+            'columns' => ['id', 'content_type', 'content_id', 'lang', 'title', 'slug', 'description'],
             'columnAttributeMap' => [],
             'casts' => [
                 'id' => 'int',
-                'imageable_type' => 'string',
-                'imageable_id' => 'int',
-                'path' => 'string',
-                'title' => 'array',
-                'description' => 'array',
+                'content_type' => 'string',
+                'content_id' => 'int',
+                'lang' => 'string',
+                'title' => 'string',
+                'slug' => 'string',
+                'description' => 'string',
             ],
         ]);
         $this->hydrator      = new GenericHydrator;
     }
 
-    public function find($pk, array $load = []): ?Image
+    public function find($pk, array $load = []): ?ProductLanguage
     {
         return parent::find($pk, $load);
     }
 
-    public function newQuery(): ImageQuery
+    public function newQuery(): ProductLanguageQuery
     {
         $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 
-    public function save(Image $entity, $withRelations = false): bool
+    public function save(ProductLanguage $entity, $withRelations = false): bool
     {
         return parent::save($entity, $withRelations);
     }

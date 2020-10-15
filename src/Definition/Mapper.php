@@ -47,6 +47,10 @@ class Mapper extends Base
 
     protected $relations = [];
 
+    protected $guards = [];
+
+    protected $traits = [];
+
     protected $computedProperties = [];
 
     protected $queryScopes = [];
@@ -361,6 +365,38 @@ class Mapper extends Base
             Column::integer('id', true)
                   ->setAutoIncrement(true)
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function getGuards(): array
+    {
+        return $this->guards;
+    }
+
+    /**
+     * @param array $guards
+     *
+     * @return Mapper
+     */
+    public function setGuards(array $guards): Mapper
+    {
+        $this->guards = $guards;
+
+        return $this;
+    }
+
+    public function addTrait(string $traitClassName): Mapper
+    {
+        $this->traits[] = $traitClassName;
+
+        return $this;
+    }
+
+    public function getTraits(): array
+    {
+        return $this->traits;
     }
 
     public function addColumn(Column $column): Mapper

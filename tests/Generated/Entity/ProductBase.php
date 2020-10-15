@@ -9,9 +9,7 @@ use Sirius\Orm\Entity\GenericEntity;
 
 /**
  * @property int $id
- * @property string $name
- * @property string $slug
- * @property string $description
+ * @property string $sku
  * @property float $price
  * @property array $attributes
  * @property DateTime $created_on

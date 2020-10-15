@@ -239,7 +239,8 @@ SQL;
 
         $category = $this->nativeMapper
             ->newQuery()
-            ->first();
+            ->get()
+            ->get(0);
 
         $this->assertEquals(3, $category->products_count);
         $this->assertEquals(3, $category->products_count);

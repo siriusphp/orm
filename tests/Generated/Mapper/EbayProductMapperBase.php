@@ -18,9 +18,8 @@ use Sirius\Orm\Tests\Generated\Entity\EbayProduct;
  */
 abstract class EbayProductMapperBase extends Mapper
 {
-    public function __constructor(ConnectionLocator $connectionLocator)
+    protected function init()
     {
-        $this->connectionLocator = $connectionLocator;
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
@@ -28,6 +27,7 @@ abstract class EbayProductMapperBase extends Mapper
             'primaryKey' => 'id',
             'table' => 'tbl_ebay_products',
             'tableAlias' => null,
+            'guards' => [],
             'columns' => ['id', 'product_id', 'price', 'is_active'],
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'product_id' => 'int', 'price' => 'decimal:2', 'is_active' => 'bool'],

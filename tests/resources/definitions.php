@@ -20,17 +20,28 @@ $orm = Orm::make()
           ->setEntityDestination(__DIR__ . '/../Generated/Entity/');
 
 $orm->addMapper(
+    Mapper::make('languages')
+          ->setTable('tbl_languages')
+        // columns
+          ->addAutoIncrementColumn()
+          ->addColumn(Column::varchar('content_type', 100)->setIndex(true))
+          ->addColumn(Column::bigInteger('content_id', true)->setIndex(true))
+          ->addColumn(Column::varchar('lang', 5)->setIndex(true))
+          ->addColumn(Column::string('title'))
+          ->addColumn(Column::string('slug'))
+          ->addColumn(Column::string('description')->setNullable(true))
+);
+
+$orm->addMapper(
     Mapper::make('products')
           ->setTable('tbl_products')
         // columns
           ->addAutoIncrementColumn()
-          ->addColumn(Column::varchar('name'))
-          ->addColumn(Column::varchar('slug')->setUnique(true))
-          ->addColumn(Column::string('description')->setNullable(true))
+          ->addColumn(Column::varchar('sku')->setUnique(true))
           ->addColumn(Column::decimal('value', 14, 2)
                             ->setAttributeName('price')
                             ->setDefault(0)
-                            ->setPreviousName('cost'))
+                            ->setPreviousName('cost')) // @testing: migration column rename
           ->addColumn(Column::json('attributes'))
         // computed property
           ->addComputedProperty(ComputedProperty::make('discounted_price')
@@ -38,20 +49,19 @@ $orm->addMapper(
                                                 ->setGetterBody('return round($this->price * 0.9, 2);')
                                                 ->setSetterBody('$this->price = $value / 0.9;'))
         // relations
-          ->addRelation('languages', OneToMany::make('languages')
-                                              ->setForeignKey('content_id')
-                                              ->setForeignGuards(['content_type' => 'products']))
+          ->addRelation('languages', OneToMany::make('product_languages')
+                                              ->setForeignKey('content_id'))
           ->addRelation('images', OneToMany::make()
                                            ->setCascade(true)
                                            ->setForeignKey('imageable_id')
-                                           ->setForeignGuards(['imageable_type' => 'products']))
-          ->addRelation('tags', ManyToMany::make('tags')
+                                           ->setForeignGuards(['imageable_type' => 'products'])) // @testing: one to many | relation guards
+          ->addRelation('tags', ManyToMany::make('tags')// @testing: many to many
                                           ->setThroughTable('tbl_links_to_tags')
                                           ->setThroughTableAlias('products_to_tags')
                                           ->setThroughGuards(['tagable_type' => 'products'])
                                           ->setThroughColumns(['position' => 'position_in_product']))
-          ->addRelation('category', ManyToOne::make())
-          ->addRelation('ebay', OneToOne::make('ebay_products'))
+          ->addRelation('category', ManyToOne::make()) // @testing: many to one
+          ->addRelation('ebay', OneToOne::make('ebay_products'))// @testing: one to one
         // behaviours
           ->addBehaviour(Timestamps::make('created_on', 'updated_on'))
           ->addBehaviour(SoftDelete::make('deleted_on'))
@@ -67,15 +77,20 @@ $orm->addMapper(
           ->addColumn(Column::bool('is_active')->setIndex(true))
 );
 
+/**
+ * @todo implement a simpler way to do this as 'languages' is alreayd defined
+ */
 $orm->addMapper(
-    Mapper::make('languages')
+    Mapper::make('product_languages')
           ->setTable('tbl_languages')
+          ->setGuards(['content_type' => 'products']) // @testing: mapper guards
         // columns
           ->addAutoIncrementColumn()
           ->addColumn(Column::varchar('content_type', 100)->setIndex(true))
           ->addColumn(Column::bigInteger('content_id', true)->setIndex(true))
           ->addColumn(Column::varchar('lang', 5)->setIndex(true))
           ->addColumn(Column::string('title'))
+          ->addColumn(Column::string('slug'))
           ->addColumn(Column::string('description')->setNullable(true))
 );
 
@@ -105,11 +120,11 @@ $orm->addMapper(
           ->addColumn(Column::integer('position', true)->setDefault(0))
           ->addColumn(Column::string('name')->setUnique(true))
         // relations
-          ->addRelation('parent', ManyToOne::make('categories'))
-          ->addRelation('children', OneToMany::make('categories'))
-          ->addRelation('languages', OneToMany::make('languages')
+          ->addRelation('parent', ManyToOne::make('categories')) // @testing: many to one
+          ->addRelation('children', OneToMany::make('categories'))  // @testing: one to many
+          ->addRelation('languages', OneToMany::make('languages')  // @testing: one to many | relation guards
                                               ->setForeignKey('content_id')
-                                              ->setForeignGuards(['content_type' => 'products']))
+                                              ->setForeignGuards(['content_type' => 'categories']))
 );
 
 $generator = new ClassGenerator($orm);

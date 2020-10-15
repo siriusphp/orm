@@ -73,6 +73,10 @@ class Mapper
     public function __construct(ConnectionLocator $connectionLocator)
     {
         $this->connectionLocator = $connectionLocator;
+        $this->init();
+    }
+
+    protected function init() {
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->hydrator          = new GenericHydrator();
