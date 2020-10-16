@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Action;
 
-use Sirius\Orm\Action\ActionInterface;
+use Sirius\Orm\Contract\ActionInterface;
 
 class ThrowExceptionOnRun implements ActionInterface
 {

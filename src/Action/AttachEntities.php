@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Action;
 
+use Sirius\Orm\Contract\ActionInterface;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Relation\ManyToMany;
@@ -86,6 +87,7 @@ class AttachEntities implements ActionInterface
         $nativeKey             = (array)$this->getNativeEntityHydrator()->getPk($this->nativeEntity);
         $foreignKey            = (array)$this->getForeignEntityHydrator()->getPk($this->foreignEntity);
 
+        // first delete existing pivot row
         $delete = new \Sirius\Sql\Delete($conn);
         $delete->from($throughTable);
         foreach ($throughNativeColumns as $k => $col) {

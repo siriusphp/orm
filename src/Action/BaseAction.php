@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Action;
 
+use Sirius\Orm\Contract\ActionInterface;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Exception\FailedActionException;
@@ -75,9 +76,24 @@ abstract class BaseAction implements ActionInterface
         $this->entityHydrator = $mapper->getHydrator();
     }
 
+    /**
+     * Adds an action to be ran/executed BEFORE this action's execute()
+     *
+     * @param ActionInterface $action
+     */
     public function prepend(ActionInterface $action)
     {
         $this->before[] = $action;
+    }
+
+    /**
+     * Adds an action to be ran/executed AFTER this action's execute()
+     *
+     * @param ActionInterface $action
+     */
+    public function append(ActionInterface $action)
+    {
+        $this->after[] = $action;
     }
 
     /**
@@ -88,30 +104,40 @@ abstract class BaseAction implements ActionInterface
         return $this->entity;
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed|null
+     */
     public function getOption($name)
     {
         return $this->options[$name] ?? null;
     }
 
-    public function append(ActionInterface $action)
-    {
-        $this->after[] = $action;
-    }
-
+    /**
+     * Calls the relations and checks if they have to attach other actions
+     * Usually used for deep save/delete
+     */
     protected function addActionsForRelatedEntities()
     {
         if ($this->getOption('relations') === false || ! $this->mapper) {
             return;
         }
 
+        /**
+         * @todo check if the relations should be added or not depending on the `relations` option
+         */
         foreach ($this->mapper->getRelations() as $name) {
-            if ( ! $this->mapper->hasRelation($name)) {
-                continue;
-            }
             $this->mapper->getRelation($name)->addActions($this);
         }
     }
 
+    /**
+     * Returns the conditions for the query to be executed
+     * Usually used by UPDATE/DELETE queries
+     *
+     * @return array
+     */
     protected function getConditions()
     {
         $entityPk   = (array)$this->mapper->getConfig()->getPrimaryKey();
@@ -131,6 +157,14 @@ abstract class BaseAction implements ActionInterface
         return $conditions;
     }
 
+    /**
+     * Performs the action.
+     * Runs the prepended actions, executes the main logic, runs the appended actions.
+     *
+     * @param false $calledByAnotherAction
+     *
+     * @return bool|mixed
+     */
     public function run($calledByAnotherAction = false)
     {
         $executed = [];
@@ -158,22 +192,34 @@ abstract class BaseAction implements ActionInterface
             );
         }
 
+        // if called by another action, that action will call `onSuccess`
+        if ($calledByAnotherAction) {
+            return true;
+        }
+
         /** @var ActionInterface $action */
         foreach ($executed as $action) {
-            // if called by another action, that action will call `onSuccess`
-            if ( ! $calledByAnotherAction || $action !== $this) {
-                $action->onSuccess();
-            }
+            $action->onSuccess();
         }
 
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function revert()
     {
-        return; // each action implements it's own logic if necessary
+        return;
     }
 
+    /**
+     * Executes the `revert()` method on all actions that were successful
+     *
+     * @param array $executed
+     *
+     * @see BaseAction::run() The catch exception block
+     */
     protected function undo(array $executed)
     {
         foreach ($executed as $action) {
@@ -181,12 +227,18 @@ abstract class BaseAction implements ActionInterface
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onSuccess()
     {
         return;
     }
 
-
+    /**
+     * Contains the code for the main purpose of the action
+     * Eg: inserting/deleting a row, updating some fields etc
+     */
     protected function execute()
     {
         throw new \BadMethodCallException(sprintf('%s must implement `execute()`', get_class($this)));

@@ -28,7 +28,7 @@ class DeletePivotRows extends BaseAction
 
     public function __construct(ManyToMany $relation, EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $this->relation             = $relation;
+        $this->relation = $relation;
 
         $this->nativeMapper         = $relation->getNativeMapper();
         $this->nativeEntity         = $nativeEntity;
@@ -56,7 +56,8 @@ class DeletePivotRows extends BaseAction
 
     public function revert()
     {
-        return; // no change to the entity has actually been performed
+        // no change to the entity has to be performed
+        return;
     }
 
     public function onSuccess()
@@ -64,6 +65,11 @@ class DeletePivotRows extends BaseAction
         return;
     }
 
+    /**
+     * Computes the conditions for the DELETE statement that will
+     * remove the linked rows from the PIVOT table for a many-to-many relation
+     * @return array
+     */
     protected function getConditions()
     {
         $conditions = [];

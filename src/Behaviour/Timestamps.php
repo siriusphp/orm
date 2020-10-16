@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Behaviour;
 
-use Sirius\Orm\Action\ActionInterface;
+use Sirius\Orm\Contract\ActionInterface;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Mapper;

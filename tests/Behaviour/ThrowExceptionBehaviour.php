@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Behaviour;
 
-use Sirius\Orm\Action\ActionInterface;
+use Sirius\Orm\Contract\ActionInterface;
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Tests\Action\ThrowExceptionOnRun;

@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Action;
 
-use Sirius\Orm\Connection;
-use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\Mapper;
 
 class Delete extends BaseAction
 {
@@ -25,10 +22,14 @@ class Delete extends BaseAction
         $delete->perform();
     }
 
+    /**
+     * Unsets the entity's PK and sets its state to `deleted`
+     * @return mixed|void
+     */
     public function onSuccess()
     {
+        $this->entityHydrator->setPk($this->entity, null);
         if ($this->entity->getState() !== StateEnum::DELETED) {
-            $this->entityHydrator->setPk($this->entity, null);
             $this->entity->setState(StateEnum::DELETED);
         }
     }
