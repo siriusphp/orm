@@ -9,13 +9,12 @@ use Sirius\Orm\Helpers\Str;
 
 class GenericEntity implements EntityInterface
 {
-    protected $state = StateEnum::SYNCHRONIZED;
+    use BaseEntityTrait;
 
     protected $attributes = [];
 
     protected $lazyLoaders = [];
 
-    protected $changed = [];
 
     public function __construct(array $attributes = [], string $state = null)
     {
@@ -55,44 +54,6 @@ class GenericEntity implements EntityInterface
         unset($this->attributes[$name]);
     }
 
-    public function getState()
-    {
-        return $this->state;
-    }
-
-    public function setState($state)
-    {
-        if ($state == StateEnum::SYNCHRONIZED) {
-            $this->changed = [];
-        }
-        $this->state = $state;
-    }
-
-    public function toArray()
-    {
-        $copy = $this->attributes;
-        foreach ($copy as $k => $v) {
-            if (is_object($v) && method_exists($v, 'toArray')) {
-                $copy[$k] = $v->toArray();
-            }
-        }
-
-        return $copy;
-    }
-
-    public function getChanges()
-    {
-        $changes = $this->changed;
-        foreach ($this->attributes as $name => $value) {
-            if (is_object($value) && method_exists($value, 'getChanges')) {
-                if ( ! empty($value->getChanges())) {
-                    $changes[$name] = true;
-                }
-            }
-        }
-
-        return $changes;
-    }
 
     protected function castAttribute($name, $value)
     {
@@ -110,7 +71,7 @@ class GenericEntity implements EntityInterface
 
         $value = $this->castAttribute($attribute, $value);
         if ( ! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
-            $this->changed[$attribute] = true;
+            $this->markChanged($attribute);
             $this->state               = StateEnum::CHANGED;
         }
         $this->attributes[$attribute] = $value;

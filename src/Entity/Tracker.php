@@ -39,6 +39,11 @@ class Tracker
     protected $relationResults = [];
 
     /**
+     * @var array 
+     */
+    protected $aggregateResults = [];
+
+    /**
      * @var array
      */
     protected $lazyAggregates = [];
