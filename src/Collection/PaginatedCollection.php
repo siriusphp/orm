@@ -11,9 +11,9 @@ class PaginatedCollection extends Collection
     protected $perPage;
     protected $currentPage;
 
-    public function __construct(array $elements, int $totalCount, int $perPage, int $currentPage, HydratorInterface $hydrator, $primaryKey)
+    public function __construct(array $elements, int $totalCount, int $perPage, int $currentPage, HydratorInterface $hydrator)
     {
-        parent::__construct($elements, $hydrator, $primaryKey);
+        parent::__construct($elements, $hydrator);
         $this->totalCount  = $totalCount;
         $this->perPage     = $perPage;
         $this->currentPage = $currentPage;

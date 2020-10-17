@@ -19,13 +19,10 @@ class Collection extends ArrayCollection
      */
     protected $hydrator;
 
-    protected $primaryKey;
-
-    public function __construct(array $elements = [], HydratorInterface $hydrator, $primaryKey)
+    public function __construct(array $elements = [], HydratorInterface $hydrator)
     {
         parent::__construct($elements);
         $this->hydrator           = $hydrator;
-        $this->primaryKey         = $primaryKey;
         $this->changes['removed'] = new ArrayCollection();
         $this->changes['added']   = new ArrayCollection();
     }
@@ -91,6 +88,27 @@ class Collection extends ArrayCollection
         }
 
         return $removed;
+    }
+
+    public function pluck($names)
+    {
+        return $this->map(function ($item) use ($names) {
+            if ( ! is_array($names)) {
+                return $this->hydrator->get($item, $names);
+            }
+
+            $result = [];
+            foreach ($names as $name) {
+                $result[$name] = $this->hydrator->get($item, $name);
+            }
+
+            return $result;
+        })->getValues();
+    }
+
+    public function reduce(\Closure $callback, $accumulator)
+    {
+        return array_reduce($this->getValues(), $callback, $accumulator);
     }
 
     public function getChanges(): array
