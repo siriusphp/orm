@@ -55,8 +55,10 @@ class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
     public function hydrate(array $attributes = [])
     {
         $attributes = Arr::renameKeys($attributes, $this->mapperConfig->getColumnAttributeMap());
-        $attributes = $this->castingManager
-            ->castArray($attributes, $this->mapperConfig->getCasts());
+        if ($this->castingManager) {
+            $attributes = $this->castingManager
+                ->castArray($attributes, $this->mapperConfig->getCasts());
+        }
 
         $class = $this->mapperConfig->getEntityClass() ?? GenericEntity::class;
 
@@ -74,8 +76,10 @@ class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
             $entity->toArray(),
             array_flip($this->mapperConfig->getColumnAttributeMap())
         );
-        $data = $this->castingManager
-            ->castArrayForDb($data, $this->mapperConfig->getCasts());
+        if ($this->castingManager) {
+            $data = $this->castingManager
+                ->castArrayForDb($data, $this->mapperConfig->getCasts());
+        }
 
         return Arr::only($data, $this->mapperConfig->getColumns());
     }

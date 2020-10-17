@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Tests\Action;
+namespace Sirius\Orm\Tests\DbTests\Base\Action;
 
 use Sirius\Orm\Contract\ActionInterface;
 

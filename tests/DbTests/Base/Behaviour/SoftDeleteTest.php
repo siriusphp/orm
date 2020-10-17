@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Tests\Behaviour;
+namespace Sirius\Orm\Tests\DbTests\Base\Behaviour;
 
 use Sirius\Orm\Behaviour\SoftDelete;
 use Sirius\Orm\Tests\BaseTestCase;

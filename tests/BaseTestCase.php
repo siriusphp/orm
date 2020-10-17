@@ -17,14 +17,18 @@ use Sirius\Sql\Select;
 
 class BaseTestCase extends TestCase
 {
+    protected $dbEngine = 'sqlite';
+
     /**
      * @var Orm
      */
     protected $orm;
+
     /**
      * @var Connection
      */
     protected $connection;
+
     /**
      * @var \Atlas\Pdo\ConnectionLocator|ConnectionLocator
      */
@@ -34,8 +38,8 @@ class BaseTestCase extends TestCase
     {
         parent::setUp();
 
-        if (getenv('DB_ENGINE') == 'mysql') {
-            $connection = Connection::new(getenv('DB_CONNECTION'), getenv('DB_USER'), getenv('DB_PASS'));
+        if ($this->dbEngine == 'mysql') {
+            $connection = Connection::new(getenv('MYSQL_CONNECTION'), getenv('MYSQL_USER'), getenv('MYSQL_PASS'));
         } else {
             $connection = Connection::new('sqlite::memory:');
         }
@@ -44,7 +48,7 @@ class BaseTestCase extends TestCase
         $connectionLocator       = ConnectionLocator::new($this->connection);
         $this->connectionLocator = $connectionLocator;
         $this->orm               = new Orm($connectionLocator);
-        $this->createTables(getenv('DB_ENGINE') ? getenv('DB_ENGINE') : 'sqlite');
+        $this->createTables($this->dbEngine);
         $this->loadMappers();
         $connectionLocator->logQueries();
     }
@@ -58,7 +62,10 @@ class BaseTestCase extends TestCase
         }
         /** @var Schema $schema */
         $schema = include(__DIR__ . "/resources/schema.php");
-        foreach ($schema->toSql($platform) as $sql) {
+        foreach ($schema->getTables() as $table) {
+            $this->connection->perform('DROP TABLE IF EXISTS ' . $table->getName());
+        }
+        foreach ($schema->toSql($platform) as $table => $sql) {
             $this->connection->perform($sql);
         }
 

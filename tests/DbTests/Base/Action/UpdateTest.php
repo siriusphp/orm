@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Tests\Action;
+namespace Sirius\Orm\Tests\DbTests\Base\Action;
 
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\BaseTestCase;
-use Sirius\Orm\Tests\Behaviour\ThrowExceptionBehaviour;
+use Sirius\Orm\Tests\DbTests\Base\Behaviour\ThrowExceptionBehaviour;
 
 class UpdateTest extends BaseTestCase
 {

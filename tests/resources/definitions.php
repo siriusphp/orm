@@ -60,7 +60,7 @@ $orm->addMapper(
                                           ->setThroughTableAlias('products_to_tags')
                                           ->setThroughGuards(['tagable_type' => 'products'])
                                           ->setThroughColumns(['position' => 'position_in_product']))
-          ->addRelation('category', ManyToOne::make()) // @testing: many to one
+          ->addRelation('category', ManyToOne::make('categories')) // @testing: many to one
           ->addRelation('ebay', OneToOne::make('ebay_products'))// @testing: one to one
         // behaviours
           ->addBehaviour(Timestamps::make('created_on', 'updated_on'))

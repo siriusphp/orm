@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Tests\Relation;
+namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;

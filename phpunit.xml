@@ -18,6 +18,11 @@
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <env name="MYSQL_CONNECTION" value="mysql:host=siriusorm_mysql;dbname=siriusorm"></env>
+        <env name="MYSQL_USER" value="root"></env>
+        <env name="MYSQL_PASS" value="rootpass"></env>
+    </php>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./src</directory>

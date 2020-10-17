@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Tests\Action;
+namespace Sirius\Orm\Tests\DbTests\Base\Action;
 
 use Sirius\Orm\Tests\BaseTestCase;
-use Sirius\Orm\Tests\Behaviour\ThrowExceptionBehaviour;
 
 class InsertTest extends BaseTestCase
 {
@@ -28,7 +27,7 @@ class InsertTest extends BaseTestCase
     {
         // create a clone so the ORM is not affected
         $mapper = $this->orm->get('products')->without();
-        $mapper->use(new ThrowExceptionBehaviour());
+        $mapper->use(new \Sirius\Orm\Tests\DbTests\Base\Behaviour\ThrowExceptionBehaviour());
 
         $this->expectException(\Exception::class);
 

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Tests\Action;
+namespace Sirius\Orm\Tests\DbTests\Base\Action;
 
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Tests\BaseTestCase;
-use Sirius\Orm\Tests\Behaviour\ThrowExceptionBehaviour;
+use Sirius\Orm\Tests\DbTests\Base\Behaviour\ThrowExceptionBehaviour;
 
 class DeleteTest extends BaseTestCase
 {

@@ -7,6 +7,7 @@ use Sirius\Orm\CastingManager;
 use Sirius\Orm\Contract\CastingManagerAwareInterface;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
+use Sirius\Orm\Contract\LazyLoader;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\MapperConfig;
 
@@ -32,7 +33,7 @@ class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInte
      *
      * @return GenericHydrator
      */
-    public function setCastingManager(CastingManager $castingManager): GenericHydrator
+    public function setCastingManager(CastingManager $castingManager = null): GenericHydrator
     {
         $this->castingManager = $castingManager;
 
@@ -59,8 +60,10 @@ class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInte
     public function hydrate(array $attributes = [])
     {
         $attributes = Arr::renameKeys($attributes, $this->mapperConfig->getColumnAttributeMap());
-        $attributes = $this->castingManager
-            ->castArray($attributes, $this->mapperConfig->getCasts());
+        if ($this->castingManager) {
+            $attributes = $this->castingManager
+                ->castArray($attributes, $this->mapperConfig->getCasts());
+        }
 
         $class = $this->mapperConfig->getEntityClass() ?? GenericEntity::class;
 
@@ -78,8 +81,10 @@ class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInte
             $entity->toArray(),
             array_flip($this->mapperConfig->getColumnAttributeMap())
         );
-        $data = $this->castingManager
-            ->castArrayForDb($data, $this->mapperConfig->getCasts());
+        if ($this->castingManager) {
+            $data = $this->castingManager
+                ->castArrayForDb($data, $this->mapperConfig->getCasts());
+        }
 
         return Arr::only($data, $this->mapperConfig->getColumns());
     }
@@ -105,6 +110,11 @@ class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInte
     public function set(EntityInterface $entity, $attribute, $value)
     {
         return $entity->{$attribute} = $value;
+    }
+
+    public function setLazy(EntityInterface $entity, $attribute, LazyLoader $lazyLoader)
+    {
+        $entity->setLazy($attribute, $lazyLoader);
     }
 
     /**
