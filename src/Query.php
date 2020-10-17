@@ -214,7 +214,7 @@ class Query extends Select
         }
         $tracker->replaceRows($entities);
 
-        return new Collection($entities);
+        return new Collection($entities, $this->mapper->getHydrator(), $this->primaryKey);
     }
 
     protected function newPaginatedCollectionFromRows(
@@ -232,7 +232,14 @@ class Query extends Select
         }
         $tracker->replaceRows($entities);
 
-        return new PaginatedCollection($entities, $totalCount, $perPage, $currentPage);
+        return new PaginatedCollection(
+            $entities,
+            $totalCount,
+            $perPage,
+            $currentPage,
+            $this->mapper->getHydrator(),
+            $this->primaryKey
+        );
     }
 
     protected function injectRelations(EntityInterface $entity, Tracker $tracker, array $eagerLoad = [])

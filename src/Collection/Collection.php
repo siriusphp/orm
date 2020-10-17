@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sirius\Orm\Collection;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\HydratorInterface;
 
 class Collection extends ArrayCollection
 {
@@ -11,38 +13,60 @@ class Collection extends ArrayCollection
         'removed' => [],
         'added'   => []
     ];
-    /**
-     * @var callable
-     */
-    protected $castingFunction;
 
-    public function __construct(array $elements = [], callable $castingFunction = null)
+    /**
+     * @var HydratorInterface
+     */
+    protected $hydrator;
+
+    protected $primaryKey;
+
+    public function __construct(array $elements = [], HydratorInterface $hydrator, $primaryKey)
     {
         parent::__construct($elements);
+        $this->hydrator           = $hydrator;
+        $this->primaryKey         = $primaryKey;
         $this->changes['removed'] = new ArrayCollection();
         $this->changes['added']   = new ArrayCollection();
-        $this->castingFunction    = $castingFunction;
     }
 
-    protected function castElement($data)
+    protected function ensureHydratedElement($element)
     {
-        $castFunction = $this->castingFunction;
+        if ( ! $element instanceof EntityInterface) {
+            return $this->hydrator->hydrate((array)$element);
+        }
 
-        return $castFunction ? call_user_func($castFunction, $data) : $data;
+        return $element;
+    }
+
+    protected function getElementPK($element)
+    {
+        return $this->hydrator->getPk($element);
+    }
+
+    public function contains($element)
+    {
+        $pk = $this->getElementPK($this->ensureHydratedElement($element));
+        if ($pk === null || $pk === []) {
+            return false;
+        }
+        foreach ($this as $element) {
+            if ($pk == $this->getElementPK($element)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function add($element)
     {
-        $element = $this->castElement($element);
-        $this->change('added', $element);
+        $element = $this->ensureHydratedElement($element);
+        if ( ! $this->contains($element)) {
+            $this->change('added', $element);
 
-        return parent::add($element);
-    }
-
-    public function set($key, $value)
-    {
-        $value = $this->castElement($value);
-        parent::set($key, $value);
+            return parent::add($element);
+        }
     }
 
     public function remove($key)
@@ -57,7 +81,10 @@ class Collection extends ArrayCollection
 
     public function removeElement($element)
     {
-        $element = $this->castElement($element);
+        $element = $this->ensureHydratedElement($element);
+        if ( ! $this->contains($element)) {
+            return true;
+        }
         $removed = parent::removeElement($element);
         if ($removed) {
             $this->change('removed', $element);

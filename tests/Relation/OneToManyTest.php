@@ -188,7 +188,7 @@ SQL;
 
         $category = $this->nativeMapper->newEntity([
             'name'     => 'New category',
-            'products' => new Collection()
+            'products' => new Collection([], $this->nativeMapper->getHydrator(), $this->nativeMapper->getConfig()->getPrimaryKey())
         ]);
         $product  = $this->foreignMapper->newEntity([
             'sku' => 'New sku'
