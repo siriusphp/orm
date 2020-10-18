@@ -426,6 +426,10 @@ class Mapper extends Base
         return $this;
     }
 
+    public function getRelations() {
+        return $this->relations;
+    }
+
     public function addQueryScope($name, QueryScope $queryScope)
     {
         $queryScope->setMapper($this);

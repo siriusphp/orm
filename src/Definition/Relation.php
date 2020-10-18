@@ -184,4 +184,22 @@ abstract class Relation extends Base
         return $this;
     }
 
+    public function toArray() {
+        $result = [];
+        foreach(get_object_vars($this) as $prop => $value) {
+            if (in_array($prop, ['mapper'])) {
+                continue;
+            }
+
+            if ($value !== null &&
+                $value !== 0 &&
+                $value !== '' &&
+                $value !== [] &&
+                !is_object($value)) {
+                $result[$prop] = $value;
+            }
+        }
+
+        return $result;
+    }
 }

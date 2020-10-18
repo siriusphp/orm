@@ -41,6 +41,12 @@ abstract class ProductLanguageMapperBase extends Mapper
             ],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
     }
 
     public function find($pk, array $load = []): ?ProductLanguage

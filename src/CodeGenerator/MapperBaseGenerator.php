@@ -9,6 +9,7 @@ use Nette\PhpGenerator\PhpNamespace;
 use Sirius\Orm\Behaviours;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Definition\Mapper;
+use Sirius\Orm\Definition\Relation;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\MapperConfig;
@@ -61,6 +62,7 @@ class MapperBaseGenerator
         $this->class->addComment(sprintf('@method %s orderBy(string $expr, string ...$exprs)', $this->mapper->getQueryClass()));
 
         $this->addInitMethod();
+        $this->addInitRelationsMethod();
         $this->addFindMethod();
         $this->addNewQueryMethod();
         $this->addSaveMethod();
@@ -109,6 +111,27 @@ class MapperBaseGenerator
         } else {
             $this->namespace->addUse(ClassMethodsHydrator::class);
             $body .= '$this->hydrator      = new ClassMethodsHydrator;' . PHP_EOL;
+        }
+
+        $body .= PHP_EOL;
+
+        $body .= '$this->initRelations();';
+
+        $method->setBody($body);
+
+        return $method;
+    }
+
+    protected function addInitRelationsMethod()
+    {
+        $method = $this->class->addMethod('initRelations')->setVisibility(ClassType::VISIBILITY_PROTECTED);
+
+        $body = '';
+
+        /** @var Relation $relation */
+        foreach ($this->mapper->getRelations() as $name => $relation) {
+            $body .= '$this->addRelation(\'' . $name . '\', ' . $this->dumper->dump($relation->toArray(), 4) . ');' . PHP_EOL;
+            $body .= PHP_EOL;
         }
 
         $method->setBody($body);

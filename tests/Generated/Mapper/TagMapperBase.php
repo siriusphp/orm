@@ -33,6 +33,12 @@ abstract class TagMapperBase extends Mapper
             'casts' => ['id' => 'int', 'name' => 'string'],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
     }
 
     public function find($pk, array $load = []): ?Tag

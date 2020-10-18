@@ -21,8 +21,6 @@ abstract class ProductMapperBase extends Mapper
 {
     use SoftDeleteTrait;
 
-    protected $createdAtColumn = 'created_on';
-    protected $updatedAtColumn = 'updated_on';
     protected $deletedAtColumn = 'deleted_on';
 
     protected function init()
@@ -48,6 +46,60 @@ abstract class ProductMapperBase extends Mapper
             ],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
+        $this->addRelation('languages', [
+            'type' => 'one_to_many',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'product_languages',
+            'foreignKey' => 'content_id',
+            'loadStrategy' => 'lazy',
+        ]);
+
+        $this->addRelation('images', [
+            'type' => 'one_to_many',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'imagess',
+            'foreignKey' => 'imageable_id',
+            'foreignGuards' => ['imageable_type' => 'products'],
+            'loadStrategy' => 'lazy',
+            'cascade' => true,
+        ]);
+
+        $this->addRelation('tags', [
+            'type' => 'many_to_many',
+            'foreignKey' => 'id',
+            'throughTable' => 'tags_tbl_products',
+            'throughTableAlias' => 'products_to_tags',
+            'throughGuards' => ['tagable_type' => 'products'],
+            'throughColumns' => ['position' => 'position_in_product'],
+            'throughNativeColumn' => 'product_id',
+            'throughForeignColumn' => 'tag_id',
+            'aggregates' => ['tags_count' => ['function' => 'count(tags.id)']],
+            'nativeKey' => 'id',
+            'foreignMapper' => 'tags',
+            'loadStrategy' => 'lazy',
+        ]);
+
+        $this->addRelation('category', [
+            'type' => 'many_to_one',
+            'foreignKey' => 'id',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'categories',
+            'loadStrategy' => 'lazy',
+        ]);
+
+        $this->addRelation('ebay', [
+            'type' => 'one_to_one',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'ebay_products',
+            'foreignKey' => 'product_id',
+            'loadStrategy' => 'lazy',
+        ]);
     }
 
     public function find($pk, array $load = []): ?Product

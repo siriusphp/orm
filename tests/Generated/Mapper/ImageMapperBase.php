@@ -40,6 +40,12 @@ abstract class ImageMapperBase extends Mapper
             ],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
     }
 
     public function find($pk, array $load = []): ?Image

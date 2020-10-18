@@ -33,6 +33,12 @@ abstract class EbayProductMapperBase extends Mapper
             'casts' => ['id' => 'int', 'product_id' => 'int', 'price' => 'decimal:2', 'is_active' => 'bool'],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
     }
 
     public function find($pk, array $load = []): ?EbayProduct

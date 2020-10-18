@@ -12,6 +12,7 @@ use Sirius\Orm\Definition\Relation\ManyToMany;
 use Sirius\Orm\Definition\Relation\ManyToOne;
 use Sirius\Orm\Definition\Relation\OneToMany;
 use Sirius\Orm\Definition\Relation\OneToOne;
+use Sirius\Orm\Relation\RelationConfig;
 
 $orm = Orm::make()
           ->setMapperNamespace('Sirius\\Orm\\Tests\\Generated\\Mapper')
@@ -59,7 +60,8 @@ $orm->addMapper(
                                           ->setThroughTable('tbl_links_to_tags')
                                           ->setThroughTableAlias('products_to_tags')
                                           ->setThroughGuards(['tagable_type' => 'products'])
-                                          ->setThroughColumns(['position' => 'position_in_product']))
+                                          ->setThroughColumns(['position' => 'position_in_product'])
+                                          ->addAggregate('tags_count', [RelationConfig::AGG_FUNCTION => 'count(tags.id)']))
           ->addRelation('category', ManyToOne::make('categories')) // @testing: many to one
           ->addRelation('ebay', OneToOne::make('ebay_products'))// @testing: one to one
         // behaviours
@@ -125,6 +127,9 @@ $orm->addMapper(
           ->addRelation('languages', OneToMany::make('languages')  // @testing: one to many | relation guards
                                               ->setForeignKey('content_id')
                                               ->setForeignGuards(['content_type' => 'categories']))
+          ->addRelation('products', OneToMany::make('products')
+                                             ->addAggregate('lowest_price', [RelationConfig::AGG_FUNCTION => 'min(products.price)'])
+                                             ->addAggregate('highest_price', [RelationConfig::AGG_FUNCTION => 'max(products.price)']))
 );
 
 $generator = new ClassGenerator($orm);

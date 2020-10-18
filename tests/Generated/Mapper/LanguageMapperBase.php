@@ -41,6 +41,12 @@ abstract class LanguageMapperBase extends Mapper
             ],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
     }
 
     public function find($pk, array $load = []): ?Language

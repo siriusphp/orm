@@ -33,6 +33,48 @@ abstract class CategoryMapperBase extends Mapper
             'casts' => ['id' => 'int', 'parent_id' => 'int', 'position' => 'int', 'name' => 'string'],
         ]);
         $this->hydrator      = new GenericHydrator;
+
+        $this->initRelations();
+    }
+
+    protected function initRelations()
+    {
+        $this->addRelation('parent', [
+            'type' => 'many_to_one',
+            'foreignKey' => 'id',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'categories',
+            'loadStrategy' => 'lazy',
+        ]);
+
+        $this->addRelation('children', [
+            'type' => 'one_to_many',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'categories',
+            'foreignKey' => 'category_id',
+            'loadStrategy' => 'lazy',
+        ]);
+
+        $this->addRelation('languages', [
+            'type' => 'one_to_many',
+            'nativeKey' => 'id',
+            'foreignMapper' => 'languages',
+            'foreignKey' => 'content_id',
+            'foreignGuards' => ['content_type' => 'categories'],
+            'loadStrategy' => 'lazy',
+        ]);
+
+        $this->addRelation('products', [
+            'type' => 'one_to_many',
+            'aggregates' => [
+                'lowest_price' => ['function' => 'min(products.price)'],
+                'highest_price' => ['function' => 'max(products.price)'],
+            ],
+            'nativeKey' => 'id',
+            'foreignMapper' => 'products',
+            'foreignKey' => 'category_id',
+            'loadStrategy' => 'lazy',
+        ]);
     }
 
     public function find($pk, array $load = []): ?Category

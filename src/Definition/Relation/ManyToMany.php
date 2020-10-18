@@ -26,12 +26,23 @@ class ManyToMany extends Relation
 
     protected $throughForeignColumn = '';
 
+    protected $aggregates = [];
+
     public function setMapper(Mapper $mapper): Relation
     {
         $this->nativeKey = $mapper->getPrimaryKey();
+        parent::setMapper($mapper);
         $this->maybeSetAdditionalProperties();
 
-        return parent::setMapper($mapper);
+        return $this;
+    }
+
+    public function setForeignMapper($foreignMapper)
+    {
+        parent::setForeignMapper($foreignMapper);
+        $this->maybeSetAdditionalProperties();
+
+        return $this;
     }
 
     protected function maybeSetAdditionalProperties()
@@ -60,6 +71,13 @@ class ManyToMany extends Relation
         if ( ! $this->throughForeignColumn) {
             $this->throughForeignColumn = Inflector::singularize($this->foreignMapper) . '_id';
         }
+    }
+
+    public function addAggregate($name, $aggregate)
+    {
+        $this->aggregates[$name] = $aggregate;
+
+        return $this;
     }
 
     /**
