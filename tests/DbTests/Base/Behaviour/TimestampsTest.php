@@ -18,16 +18,16 @@ class TimestampsTest extends BaseTestCase
     {
         // create a clone so the ORM is not affected
         $mapper = $this->orm->get('products')->without();
-        $mapper->use(new Timestamps());
+        $mapper->use(new Timestamps('created_on', 'updated_on'));
 
-        $product = $mapper->newEntity(['title' => 'Product 1']);
+        $product = $mapper->newEntity(['sku' => 'sku_1']);
 
-        $this->assertNull($product->created_at);
-        $this->assertNull($product->updated_at);
+        $this->assertNull($product->created_on);
+        $this->assertNull($product->updated_on);
 
         $this->assertTrue($mapper->save($product));
 
-        $this->assertNotNull($product->created_at);
-        $this->assertNotNull($product->updated_at);
+        $this->assertNotNull($product->created_on);
+        $this->assertNotNull($product->updated_on);
     }
 }

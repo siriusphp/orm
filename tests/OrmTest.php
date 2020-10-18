@@ -6,6 +6,7 @@ namespace Sirius\Orm\Tests;
 
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
+use Sirius\Orm\Relation\RelationConfig;
 
 class OrmTest extends BaseTestCase
 {
@@ -50,6 +51,15 @@ class OrmTest extends BaseTestCase
         $this->orm->register('products', $mapper);
 
         $this->assertInstanceOf(Mapper::class, $this->orm->get('products'));
+    }
+
+    public function test_exception_thrown_on_invalid_relation_type()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->orm->createRelation($this->orm->get('products'), 'unknown', [
+            RelationConfig::FOREIGN_MAPPER => 'categories',
+            RelationConfig::TYPE           => 'unknown'
+        ]);
     }
 
     public function test_exception_thrown_on_invalid_mapper_instance()

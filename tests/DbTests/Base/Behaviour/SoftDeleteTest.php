@@ -12,12 +12,12 @@ class SoftDeleteTest extends BaseTestCase
     {
         // create a clone so the ORM is not affected
         $mapper = $this->orm->get('products')->without();
-        $mapper->use(new SoftDelete());
+        $mapper->use(new SoftDelete('deleted_on'));
 
-        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1']);
 
         $this->assertTrue($mapper->delete($mapper->find(1)));
-        $this->assertRowPresent('content', 'id = 1');
+        $this->assertRowPresent('tbl_products', 'id = 1');
 
         // check the mapper doesn't find the row
         $this->assertNull($mapper->find(1));

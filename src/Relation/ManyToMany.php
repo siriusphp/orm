@@ -20,8 +20,6 @@ class ManyToMany extends Relation
     {
         parent::applyDefaults();
 
-        $this->setOptionIfMissing(RelationConfig::THROUGH_COLUMNS_PREFIX, 'pivot_');
-
         $foreignKey = $this->foreignMapper->getConfig()->getPrimaryKey();
         if ( ! isset($this->options[RelationConfig::FOREIGN_KEY])) {
             $this->options[RelationConfig::FOREIGN_KEY] = $foreignKey;
@@ -96,9 +94,8 @@ class ManyToMany extends Relation
         $throughName  = $throughAlias ?? $through;
 
         if ( ! empty($throughColumns)) {
-            $prefix = $this->getOption(RelationConfig::THROUGH_COLUMNS_PREFIX);
-            foreach ($throughColumns as $col) {
-                $query->columns("{$throughName}.{$col} AS {$prefix}{$col}");
+            foreach ($throughColumns as $col => $alias) {
+                $query->columns("{$throughName}.{$col} AS {$alias}");
             }
         }
 
@@ -126,6 +123,16 @@ class ManyToMany extends Relation
         $subselect = $this->applyForeignGuards($subselect);
 
         return $query->join('INNER', $subselect->getStatement(), $this->getJoinOnForSubselect());
+    }
+
+    protected function getJoinOnForSubselect()
+    {
+        return QueryHelper::joinCondition(
+            $this->nativeMapper->getConfig()->getTableAlias(true),
+            $this->getOption(RelationConfig::NATIVE_KEY),
+            $this->name,
+            $this->getOption(RelationConfig::THROUGH_NATIVE_COLUMN)
+        );
     }
 
     protected function computeKeyPairs()
@@ -220,10 +227,15 @@ class ManyToMany extends Relation
 
     protected function addActionOnSave(BaseAction $action)
     {
+        if ( ! $action->includesRelation($this->name)) {
+            return;
+        }
+
         $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
 
+        /** @var Collection $foreignEntities */
         $foreignEntities = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
-        if ( ! $foreignEntities) {
+        if ( ! $foreignEntities || !$foreignEntities instanceof Collection || $foreignEntities->isEmpty()) {
             return;
         }
 

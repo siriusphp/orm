@@ -11,12 +11,12 @@ use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
-use Sirius\Orm\Tests\Generated\Entity\Product;
 use Sirius\Sql\Insert;
 use Sirius\Sql\Select;
 
 class BaseTestCase extends TestCase
 {
+
     protected $dbEngine = 'sqlite';
 
     /**
@@ -48,43 +48,49 @@ class BaseTestCase extends TestCase
         $connectionLocator       = ConnectionLocator::new($this->connection);
         $this->connectionLocator = $connectionLocator;
         $this->orm               = new Orm($connectionLocator);
-        $this->createTables($this->dbEngine);
+        $this->createTables();
         $this->loadMappers();
         $connectionLocator->logQueries();
     }
 
-    public function createTables($dbEngine = 'generic')
+    public function createTables()
     {
         $platform = new SqlitePlatform();
-        switch ($dbEngine) {
+        switch ($this->dbEngine) {
             case 'mysql':
                 $platform = new MySQL80Platform();
         }
         /** @var Schema $schema */
         $schema = include(__DIR__ . "/resources/schema.php");
-        foreach ($schema->getTables() as $table) {
-            $this->connection->perform('DROP TABLE IF EXISTS ' . $table->getName());
-        }
-        foreach ($schema->toSql($platform) as $table => $sql) {
-            $this->connection->perform($sql);
-        }
 
-        $product = new Product([]);
+        $schemaCreatedPath = __DIR__ . '/' . $this->dbEngine . '_schema_created';
+        if (file_exists($schemaCreatedPath) && $this->dbEngine !== 'sqlite') {
+            foreach ($schema->getTables() as $table) {
+                $this->connection->perform('DELETE FROM ' . $table->getName());
+            }
+        } else {
+            foreach ($schema->getTables() as $table) {
+                $this->connection->perform('DROP TABLE IF EXISTS ' . $table->getName());
+            }
+            foreach ($schema->toSql($platform) as $table => $sql) {
+                $this->connection->perform($sql);
+            }
+            file_put_contents($schemaCreatedPath, '1');
+        }
     }
 
     public function loadMappers()
     {
-        $this->orm->register('images', $this->getMapperConfig('images'));
-        $this->orm->register('tags', $this->getMapperConfig('tags'));
-        $this->orm->register('categories', $this->getMapperConfig('categories'));
-        $this->orm->register('products', $this->getMapperConfig('products'));
-        $this->orm->register('content_products', $this->getMapperConfig('content_products'));
-
+        $mappers = include(__DIR__ . '/resources/mappers.php');
+        foreach ($mappers as $name => $config) {
+            $this->orm->register($name, MapperConfig::fromArray($config));
+        }
     }
 
     public function getMapperConfig($name, callable $callback = null)
     {
-        $arr = include(__DIR__ . '/resources/mappers/' . $name . '.php');
+        $mappers = include(__DIR__ . '/resources/mappers.php');
+        $arr     = $mappers[$name];
         if ($callback) {
             $arr = $callback($arr);
         }
@@ -95,6 +101,11 @@ class BaseTestCase extends TestCase
     protected function insertRow($table, $values)
     {
         $insert = new Insert($this->connection);
+        foreach ($values as $col => $value) {
+            if (is_array($value)) {
+                $values[$col] = json_encode($value);
+            }
+        }
         $insert->into($table)->columns($values);
         $this->connection->perform($insert->getStatement(), $insert->getBindValues());
     }
@@ -140,7 +151,7 @@ class BaseTestCase extends TestCase
         $str = preg_replace('/^[ \t]*/m', '', $str);
         $str = preg_replace('/[ \t]*$/m', '', $str);
         $str = preg_replace('/[ ]{2,}/m', ' ', $str);
-        $str = preg_replace('/[\r\n|\n|\r]+/', ' ', $str);
+        $str = preg_replace('/[\r\n|\n|\r ]+/', ' ', $str);
         $str = str_replace('( ', '(', $str);
         $str = str_replace(' )', ')', $str);
 

@@ -14,105 +14,128 @@ class OneToOneTest extends BaseTestCase
     /**
      * @var Mapper
      */
-    protected $nativeMapper;
+    protected $productsMapper;
     /**
      * @var Mapper
      */
-    protected $foreignMapper;
+    protected $ebayProductsMapper;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->loadMappers();
 
-        $this->nativeMapper  = $this->orm->get('products');
-        $this->foreignMapper = $this->orm->get('content_products');
+        $this->productsMapper     = $this->orm->get('products');
+        $this->ebayProductsMapper = $this->orm->get('ebay_products');
     }
 
     public function test_delete_with_cascade_true()
     {
         // reconfigure products-featured_image to use CASCADE
-        $config             = $this->getMapperConfig('products', function ($arr) {
-            $arr[MapperConfig::RELATIONS]['fields'][RelationConfig::CASCADE] = true;
+        $config               = $this->getMapperConfig('products', function ($arr) {
+            $arr[MapperConfig::RELATIONS]['ebay'][RelationConfig::CASCADE] = true;
 
             return $arr;
         });
-        $this->nativeMapper = $this->orm->register('products', $config)->get('products');
+        $this->productsMapper = $this->orm->register('products', $config)->get('products');
 
-        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
-        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1', 'price' => 5]);
+        $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
 
-        $product = $this->nativeMapper->find(1);
-        $this->assertNotNull($product->fields);
-        $this->assertTrue($this->nativeMapper->delete($product, true));
-        $this->assertRowDeleted('content', 'id', 1);
-        $this->assertRowDeleted('content_products', 'content_id', 1);
+        $product = $this->productsMapper->find(1);
+        $this->assertNotNull($product->ebay);
+        $this->assertTrue($this->productsMapper->delete($product, true));
+        $this->assertRowDeleted('tbl_products', 'id', 1);
+        $this->assertRowDeleted('tbl_ebay_products', 'id', 2);
     }
 
     public function test_delete_with_cascade_false()
     {
-        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
-        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1', 'price' => 5]);
+        $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
 
-        $product                            = $this->nativeMapper->find(1);
-        $product->fields->featured_image_id = 3;
-
-        $this->assertTrue($this->nativeMapper->delete($product, false));
-        $this->assertRowDeleted('content', 'id', 1);
-        $fields = $this->foreignMapper->find(1);
-        $this->assertEquals('2', $fields->featured_image_id);
+        $product = $this->productsMapper->find(1);
+        $this->assertNotNull($product->ebay);
+        $this->assertTrue($this->productsMapper->delete($product, true));
+        $ebayProduct = $this->ebayProductsMapper->find(2);
+        $this->assertEquals('1', $ebayProduct->product_id);
     }
 
-    public function test_save_with_relations()
+    public function test_save_with_all_relations()
     {
-        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
-        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
+        $this->insertRow('categories', ['id' => 1, 'name' => 'category']);
+        $this->insertRow('tbl_products', ['id' => 1, 'category_id' => 1, 'sku' => 'sku_1', 'price' => 5]);
+        $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
 
-        $product                            = $this->nativeMapper->find(1);
-        $product->title                     = 'Product 2';
-        $product->fields->featured_image_id = 3;
+        $product                 = $this->productsMapper->find(1);
+        $product->sku            = 'sku_updated';
+        $product->category->name = 'updated_category';
+        $product->ebay->price    = 20;
 
-        $this->assertTrue($this->nativeMapper->save($product, true));
+        $this->assertTrue($this->productsMapper->save($product, true));
 
-        $product = $this->nativeMapper->find(1);
-        $this->assertEquals('Product 2', $product->title);
-        $this->assertEquals(3, $product->fields->featured_image_id);
+        $product = $this->productsMapper->find(1);
+        $this->assertEquals('sku_updated', $product->sku);
+        $this->assertEquals(20, $product->ebay->price);
+        $this->assertEquals('updated_category', $product->category->name);
+    }
+
+
+    public function test_save_with_partial_relations()
+    {
+        $this->insertRow('categories', ['id' => 1, 'name' => 'category']);
+        $this->insertRow('tbl_products', ['id' => 1, 'category_id' => 1, 'sku' => 'sku_1', 'price' => 5]);
+        $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
+
+        $product                 = $this->productsMapper->find(1);
+        $product->sku            = 'sku_updated';
+        $product->category->name = 'updated_category';
+        $product->ebay->price    = 20;
+
+        $this->assertTrue($this->productsMapper->save($product, ['ebay']));
+
+        $product = $this->productsMapper->find(1);
+        $this->assertEquals('sku_updated', $product->sku);
+        $this->assertEquals(20, $product->ebay->price);
+        $this->assertEquals('category', $product->category->name);
     }
 
     public function test_save_without_relations()
     {
-        $this->insertRow('content', ['id' => 1, 'content_type' => 'product', 'title' => 'Product 1']);
-        $this->insertRow('content_products', ['content_id' => 1, 'featured_image_id' => 2]);
+        $this->insertRow('categories', ['id' => 1, 'name' => 'category']);
+        $this->insertRow('tbl_products', ['id' => 1, 'category_id' => 1, 'sku' => 'sku_1', 'price' => 5]);
+        $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
 
-        $product                            = $this->nativeMapper->find(1);
-        $product->title                     = 'Product 2';
-        $product->fields->featured_image_id = 3;
+        $product                 = $this->productsMapper->find(1);
+        $product->sku            = 'sku_updated';
+        $product->category->name = 'updated_category';
+        $product->ebay->price    = 20;
 
-        $this->assertTrue($this->nativeMapper->save($product, false));
+        $this->assertTrue($this->productsMapper->save($product, false));
 
-        $product = $this->nativeMapper->find(1);
-        $this->assertEquals('Product 2', $product->title);
-        $this->assertEquals(2, $product->fields->featured_image_id);
+        $product = $this->productsMapper->find(1);
+        $this->assertEquals('sku_updated', $product->sku);
+        $this->assertEquals(10, $product->ebay->price);
+        $this->assertEquals('category', $product->category->name);
     }
 
     public function test_join_with()
     {
-        $query = $this->nativeMapper->newQuery()
-                                    ->joinWith('fields');
+        $query = $this->productsMapper->newQuery()
+                                      ->joinWith('ebay');
 
         // the featured_image is not a real one-to-one relation
         $expectedStatement = <<<SQL
 SELECT
-    content.*
+    products.*
 FROM
-    content
+    tbl_products as products
         INNER JOIN     (
     SELECT
-        content_products.*
+        tbl_ebay_products.*
     FROM
-        content_products
-    ) AS fields ON content.id = fields.content_id
-WHERE content_type = :__1__
+        tbl_ebay_products
+    ) AS ebay ON products.id = ebay.product_id
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());

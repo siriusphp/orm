@@ -11,7 +11,7 @@ class InsertTest extends BaseTestCase
     {
         $mapper = $this->orm->get('products');
 
-        $product = $mapper->newEntity(['title' => 'Product 1']);
+        $product = $mapper->newEntity(['sku' => 'sku_1']);
 
         $this->assertNull($product->id);
 
@@ -20,7 +20,7 @@ class InsertTest extends BaseTestCase
         $this->assertNotNull($product->id);
 
         $product = $mapper->find($product->id);
-        $this->assertEquals('Product 1', $product->title);
+        $this->assertEquals('sku_1', $product->sku);
     }
 
     public function test_entity_is_reverted_on_exception_thrown()

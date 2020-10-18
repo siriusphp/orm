@@ -140,6 +140,9 @@ class CastingManager
         if (is_object($value) && method_exists($value, 'toArray')) {
             return json_encode($value->toArray());
         }
+        if (is_object($value) && method_exists($value, 'getArrayCopy')) {
+            return json_encode($value->getArrayCopy());
+        }
 
         return $value;
     }

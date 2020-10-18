@@ -15,17 +15,17 @@ class UpdateTest extends BaseTestCase
     {
         $mapper = $this->orm->get('products');
 
-        $product = $mapper->newEntity(['title' => 'Product 1']);
+        $product = $mapper->newEntity(['sku' => 'sku_1']);
         $mapper->save($product);
 
         // reload after insert
-        $product              = $mapper->find($product->id);
-        $product->description = 'Description product 1';
+        $product      = $mapper->find($product->id);
+        $product->sku = 'sku_2';
         $mapper->save($product);
 
         // reload after save
         $product = $mapper->find($product->id);
-        $this->assertEquals('Description product 1', $product->description);
+        $this->assertEquals('sku_2', $product->sku);
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getState());
     }
 
@@ -35,10 +35,10 @@ class UpdateTest extends BaseTestCase
         $mapper = $this->orm->get('products')->without();
         $mapper->use(new ThrowExceptionBehaviour());
 
-        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1']);
 
-        $product        = $mapper->find(1);
-        $product->title = 'Product 2';
+        $product      = $mapper->find(1);
+        $product->sku = 'sku_2';
 
         $this->expectException(\Exception::class);
         $mapper->save($product);
@@ -47,23 +47,22 @@ class UpdateTest extends BaseTestCase
 
     public function test_column_is_mapped_to_attribute()
     {
-        $mapper = Mapper::make($this->connectionLocator, MapperConfig::fromArray([
-            MapperConfig::TABLE                => 'content',
-            MapperConfig::COLUMNS              => ['id', 'content_type', 'title', 'description', 'summary'],
-            MapperConfig::COLUMN_ATTRIBUTE_MAP => ['summary' => 'excerpt'],
-            MapperConfig::GUARDS               => ['content_type' => 'product']
-        ]));
-        $mapper->setOrm($this->orm);
+        $config = $this->getMapperConfig('products', function($arr) {
+            $arr[MapperConfig::COLUMN_ATTRIBUTE_MAP] = ['price' => 'value'];
+            return $arr;
+        });
+        $this->orm->register('products', $config);
+        $mapper = $this->orm->get('products');
 
-        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1', 'summary' => 'Excerpt']);
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'product_1', 'price' => 10]);
 
         $product = $mapper->find(1);
-        $this->assertEquals('Excerpt', $product->excerpt);
+        $this->assertEquals(10, $product->value);
 
-        $product->excerpt = 'New excerpt';
+        $product->value = 20;
 
         $mapper->save($product);
         $product = $mapper->find(1);
-        $this->assertEquals('New excerpt', $product->excerpt);
+        $this->assertEquals(20, $product->value);
     }
 }

@@ -96,12 +96,13 @@ class OneToMany extends Relation
     protected function addActionOnDelete(BaseAction $action)
     {
         $nativeEntity       = $action->getEntity();
-        $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
+        $relations          = $action->getOption('relations');
+        $remainingRelations = $this->getRemainingRelations($relations);
 
         // no cascade delete? treat as save so we can process the changes
         if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
-        } else {
+        } elseif ($relations === true || in_array($this->name, (array)$relations)) {
             // retrieve them again from the DB since the related collection might not have everything
             // for example due to a relation query callback
             $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->toArray()]))
@@ -119,6 +120,10 @@ class OneToMany extends Relation
     protected function addActionOnSave(BaseAction $action)
     {
         if ( ! $this->relationWasChanged($action->getEntity())) {
+            return;
+        }
+
+        if ( ! $action->includesRelation($this->name)) {
             return;
         }
 

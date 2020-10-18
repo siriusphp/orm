@@ -118,6 +118,11 @@ class ManyToOne extends Relation
         if ( ! $this->relationWasChanged($action->getEntity())) {
             return;
         }
+
+        if ( ! $action->includesRelation($this->name)) {
+            return;
+        }
+        
         $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
         if ($foreignEntity) {
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));

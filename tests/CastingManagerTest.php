@@ -9,10 +9,30 @@ use Sirius\Orm\CastingManager;
 class CastingManagerTest extends TestCase
 {
 
+    /**
+     * @var CastingManager
+     */
+    protected $cm;
+
     public function setUp(): void
     {
         parent::setUp();
         $this->cm = new CastingManager();
+    }
+
+    public function test_custom_cast() {
+        $this->cm->register('short_text', function($value, $limit = 100) {
+            return substr($value, 0, $limit);
+        });
+
+        $this->assertEquals('abc', $this->cm->cast('short_text', 'abcdef', 3));
+    }
+
+    public function test_bool()
+    {
+        $this->assertFalse($this->cm->cast('bool', ''));
+        $this->assertFalse($this->cm->cast('bool',0));
+        $this->assertFalse($this->cm->cast('bool','0'));
     }
 
     public function test_json()

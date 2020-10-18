@@ -6,7 +6,6 @@ namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
-use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\OneToMany;
 use Sirius\Orm\Relation\RelationConfig;
@@ -18,26 +17,26 @@ class OneToManyTest extends BaseTestCase
     /**
      * @var Mapper
      */
-    protected $nativeMapper;
+    protected $categoryMapper;
     /**
      * @var Mapper
      */
-    protected $foreignMapper;
+    protected $productsMapper;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->loadMappers();
 
-        $this->nativeMapper  = $this->orm->get('categories');
-        $this->foreignMapper = $this->orm->get('content_products');
+        $this->categoryMapper = $this->orm->get('categories');
+        $this->productsMapper = $this->orm->get('products');
     }
 
     public function test_query_callback()
     {
-        $relation = new OneToMany('products', $this->nativeMapper, $this->foreignMapper, [
+        $relation = new OneToMany('products', $this->categoryMapper, $this->productsMapper, [
             RelationConfig::QUERY_CALLBACK => function (Query $query) {
-                return $query->where('deleted_at', null);
+                return $query->where('deleted_on', null);
             }
         ]);
 
@@ -49,11 +48,11 @@ class OneToManyTest extends BaseTestCase
 
         $expectedSql = <<<SQL
 SELECT
-    content_products.*
+    products.*
 FROM
-    content_products
+    tbl_products as products
 WHERE
-    category_id IN (:__1__, :__2__) AND deleted_at IS NULL
+    category_id IN (:__1__, :__2__) AND deleted_on IS NULL
 SQL;
 
         $this->assertSameStatement($expectedSql, $query->getStatement());
@@ -65,8 +64,8 @@ SQL;
 
     public function test_join_with()
     {
-        $query = $this->nativeMapper->newQuery()
-                                    ->joinWith('products');
+        $query = $this->categoryMapper->newQuery()
+                                      ->joinWith('products');
 
         $expectedStatement = <<<SQL
 SELECT
@@ -75,9 +74,9 @@ FROM
     categories
     INNER JOIN (
     SELECT
-        content_products.*
+        products.*
     FROM
-        content_products
+        tbl_products as products
     ) AS products ON categories.id = products.category_id
 SQL;
 
@@ -86,7 +85,7 @@ SQL;
 
     public function test_query_guards()
     {
-        $relation = new OneToMany('products', $this->nativeMapper, $this->foreignMapper, [
+        $relation = new OneToMany('products', $this->categoryMapper, $this->productsMapper, [
             RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
@@ -98,9 +97,9 @@ SQL;
 
         $expectedSql = <<<SQL
 SELECT
-    content_products.*
+    products.*
 FROM
-    content_products
+    tbl_products as products
 WHERE
     (category_id IN (:__1__, :__2__)) AND status = :__3__ AND deleted_at IS NULL
 SQL;
@@ -113,145 +112,208 @@ SQL;
         ], $query->getBindValues());
     }
 
-    public function test_eager_load()
+    public function test_eager_load_executes_the_query_immediately()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper
+        $category = $this->categoryMapper
             ->newQuery()
-            ->load('products')
+            ->load('children')
             ->first();
 
-        $this->assertExpectedQueries(2); // category + products
-        $this->assertEquals(3, count($category->products));
+        $this->assertExpectedQueries(2); // category + children
+        $this->assertEquals(2, count($category->children));
     }
 
-    public function test_lazy_load()
+    public function test_lazy_load_executes_query_when_necessary()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper
+        $category = $this->categoryMapper
             ->newQuery()
             ->first();
 
         $this->assertExpectedQueries(1); // category only
-        $this->assertEquals(3, count($category->products));
+        $this->assertEquals(2, count($category->children));
         $this->assertExpectedQueries(2); // category + products
     }
 
-    public function test_delete_with_cascade_true()
+    public function test_delete_with_all_relations_when_relation_is_cascade()
     {
         $this->populateDb();
 
-        // reconfigure products-featured_image to use CASCADE
-        $config             = $this->getMapperConfig('categories', function ($arr) {
-            $arr[MapperConfig::RELATIONS]['products'][RelationConfig::CASCADE] = true;
-
-            return $arr;
-        });
-        $this->nativeMapper = $this->orm->register('categories', $config)->get('categories');
-
-        $category = $this->nativeMapper
+        $category = $this->categoryMapper
             ->newQuery()
             ->first();
-        $product  = $category->products[0];
 
-        $this->assertTrue($this->nativeMapper->delete($category, true));
+        $this->assertTrue($this->categoryMapper->delete($category, true));
         $this->assertNull($category->id);
-        $this->assertNotNull($product->content_id); // related entities are not deleted via the relations bc possible relation query callback
-        $this->assertRowDeleted('content_products', 'content_id', 1);
-        $this->assertRowDeleted('content_products', 'content_id', 2);
+        $this->assertRowDeleted('categories', 'id', 2);
+        $this->assertRowDeleted('categories', 'id', 3);
+        $this->assertRowDeleted('tbl_languages', 'content_id', 1);
+    }
+
+    public function test_delete_with_limited_relations_when_relation_is_cascade()
+    {
+        $this->populateDb();
+
+        $category = $this->categoryMapper
+            ->newQuery()
+            ->first();
+
+        $this->assertTrue($this->categoryMapper->delete($category, ['children']));
+        $this->assertNull($category->id);
+        $this->assertRowDeleted('categories', 'id', 2);
+        $this->assertRowDeleted('categories', 'id', 3);
+        $this->assertRowPresent('tbl_languages', 'content_id', 1);
+    }
+
+    public function test_delete_without_relations()
+    {
+        $this->populateDb();
+
+        $category = $this->categoryMapper
+            ->newQuery()
+            ->first();
+
+        $this->assertTrue($this->categoryMapper->delete($category));
+        $this->assertNull($category->id);
+        $this->assertRowPresent('categories', 'id', 2);
+        $this->assertRowPresent('categories', 'id', 3);
+        $this->assertRowPresent('tbl_languages', 'content_id', 1);
     }
 
     public function test_delete_with_cascade_false()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper
+        $category = $this->categoryMapper
             ->newQuery()
             ->first();
-        /** @var Collection $products */
-        $products         = $category->products;
-        $products[0]->sku = 'sku_1';
-        $products->removeElement($products[1]);
 
-        $this->assertTrue($this->nativeMapper->delete($category, true));
-        // check if the first product was updated
-        $product = $this->foreignMapper->find($products[0]->content_id);
-        $this->assertNotNull($product);
-        $this->assertEquals('sku_1', $product->sku);
+        $this->assertTrue($this->categoryMapper->delete($category, false));
+        $this->assertNull($category->id);
+        $this->assertRowPresent('categories', 'id', 2);
+        $this->assertRowPresent('categories', 'id', 3);
+        $this->assertRowPresent('tbl_languages', 'content_id', 1);
     }
 
-    public function test_insert()
+    public function test_deep_insert()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper->newEntity([
+        $category = $this->categoryMapper->newEntity([
             'name'     => 'New category',
-            'products' => new Collection([], $this->nativeMapper->getHydrator(), $this->nativeMapper->getConfig()->getPrimaryKey())
+            'children' => new Collection([], $this->categoryMapper->getHydrator()),
+            'products' => new Collection([], $this->productsMapper->getHydrator())
         ]);
-        $product  = $this->foreignMapper->newEntity([
+
+        $child = $this->categoryMapper->newEntity([
+            'name'     => 'New child category'
+        ]);
+        /** @var Collection $products */
+        $children = $category->children;
+        $children->add($child);
+
+        $product  = $this->productsMapper->newEntity([
             'sku' => 'New sku'
         ]);
         /** @var Collection $products */
         $products = $category->products;
         $products->add($product);
 
-        $this->nativeMapper->save($category, true);
+        $this->categoryMapper->save($category, true);
         $this->assertEquals($category->id, $product->category_id);
+        $this->assertEquals($category->id, $child->parent_id);
     }
 
-    public function test_save_with_relations()
+    public function test_save_with_partial_relations()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper
+        $category = $this->categoryMapper
             ->newQuery()
             ->first();
-        /** @var Collection $products */
-        $product      = $category->products[0];
-        $product->sku = 'sku_1';
 
-        $this->nativeMapper->save($category, ['products']);
-        $product = $this->foreignMapper->find($product->content_id);
-        $this->assertEquals('sku_1', $product->sku);
+        $child       = $category->children[0];
+        $child->name = 'child updated';
+
+        $product      = $category->products[0];
+        $product->sku = 'sku_updated';
+
+        $this->categoryMapper->save($category, ['products']);
+
+        $product = $this->productsMapper->find($product->id);
+        $this->assertEquals('sku_updated', $product->sku);
+
+        $child = $this->categoryMapper->find($child->id);
+        $this->assertNotEquals('child updated', $child->name);
     }
 
     public function test_save_without_relations()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper
-            ->newQuery()
-            ->first();
+        $category = $this->categoryMapper
+            ->find(1);
         /** @var Collection $products */
         $products         = $category->products;
-        $products[0]->sku = 'sku_1';
+        $products[0]->sku = 'sku_updated';
 
-        $this->nativeMapper->save($category, false);
-        $product = $this->foreignMapper->find($products[0]->content_id);
-        $this->assertEquals('abc', $product->sku);
+        $this->categoryMapper->save($category, false);
+        $product = $this->productsMapper->find($products[0]->id);
+        $this->assertEquals('sku_1', $product->sku);
     }
 
     public function test_aggregates()
     {
         $this->populateDb();
 
-        $category = $this->nativeMapper
+        $category = $this->categoryMapper
             ->newQuery()
             ->get()
             ->get(0);
 
-        $this->assertEquals(3, $category->products_count);
-        $this->assertEquals(3, $category->products_count);
-        $this->assertExpectedQueries(2);
+        $this->assertEquals(5, $category->lowest_price);
+        $this->assertEquals(10, $category->highest_price);
+        $this->assertExpectedQueries(3);
     }
 
     protected function populateDb(): void
     {
-        $this->insertRow('categories', ['id' => 10, 'name' => 'Category']);
-        $this->insertRow('content_products', ['content_id' => 1, 'category_id' => 10, 'sku' => 'abc', 'price' => 10]);
-        $this->insertRow('content_products', ['content_id' => 2, 'category_id' => 10, 'sku' => 'xyz', 'price' => 30]);
-        $this->insertRow('content_products', ['content_id' => 3, 'category_id' => 10, 'sku' => 'qwe', 'price' => 20]);
+        $this->insertRow('categories', [
+            'id'   => 1,
+            'name' => 'parent'
+        ]);
+        $this->insertRow('categories', [
+            'id'        => 2,
+            'parent_id' => 1,
+            'name'      => 'child 1'
+        ]);
+        $this->insertRow('categories', [
+            'id'        => 3,
+            'parent_id' => 1,
+            'name'      => 'child 2'
+        ]);
+        $this->insertRow('tbl_languages', [
+            'id'           => 3,
+            'content_type' => 'categories',
+            'content_id'   => 1,
+            'lang'         => 'en',
+            'title'        => 'parent category',
+            'slug'         => 'parent-category',
+        ]);
+        $this->insertRow('tbl_products', [
+            'id'          => 1,
+            'category_id' => 1,
+            'sku'         => 'sku_1',
+            'price'       => 5
+        ]);
+        $this->insertRow('tbl_products', [
+            'id'          => 2,
+            'category_id' => 1,
+            'sku'         => 'sku_2',
+            'price'       => 10
+        ]);
     }
 }

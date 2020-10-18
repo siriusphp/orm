@@ -17,43 +17,42 @@ class ManyToManyTest extends BaseTestCase
     /**
      * @var Mapper
      */
-    protected $nativeMapper;
+    protected $productsMapper;
     /**
      * @var Mapper
      */
-    protected $foreignMapper;
+    protected $tagsMapper;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->loadMappers();
 
-        $this->nativeMapper  = $this->orm->get('products');
-        $this->foreignMapper = $this->orm->get('tags');
+        $this->productsMapper = $this->orm->get('products');
+        $this->tagsMapper     = $this->orm->get('tags');
     }
 
     public function test_join_with()
     {
-        $query = $this->nativeMapper->newQuery()
-                                    ->joinWith('tags');
+        $query = $this->productsMapper->newQuery()
+                                      ->joinWith('tags');
 
         $expectedStatement = <<<SQL
 SELECT
-    content.*
+    products.*
 FROM
-    content
+    tbl_products as products
     INNER JOIN (
     SELECT
         tags.*,
-        products_tags.position AS pivot_position,
-        products_tags.product_id
+        products_to_tags.position AS position_in_product,
+        products_to_tags.tagable_id
     FROM
         tags
-            INNER JOIN products_tags ON tags.id = products_tags.tag_id
+            INNER JOIN tbl_links_to_tags as products_to_tags ON tags.id = products_to_tags.tag_id
     ORDER BY
         position ASC
-    ) AS tags ON content.id = tags.id
-    WHERE content_type = :__1__
+    ) AS tags ON products.id = tags.tagable_id
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
@@ -61,10 +60,10 @@ SQL;
 
     public function test_query_callback()
     {
-        $relation = new ManyToMany('tags', $this->nativeMapper, $this->foreignMapper, [
+        $relation = new ManyToMany('tags', $this->productsMapper, $this->tagsMapper, [
             RelationConfig::THROUGH_TABLE         => 'products_tags',
             RelationConfig::THROUGH_NATIVE_COLUMN => 'product_id',
-            RelationConfig::THROUGH_COLUMNS       => ['position'],
+            RelationConfig::THROUGH_COLUMNS       => ['position' => 'pivot_position'],
             RelationConfig::QUERY_CALLBACK        => function (Query $query) {
                 return $query->where('status', 'active');
             }
@@ -96,7 +95,7 @@ SQL;
 
     public function test_query_guards()
     {
-        $relation = new ManyToMany('category', $this->nativeMapper, $this->foreignMapper, [
+        $relation = new ManyToMany('category', $this->productsMapper, $this->tagsMapper, [
             RelationConfig::THROUGH_TABLE         => 'products_tags',
             RelationConfig::THROUGH_NATIVE_COLUMN => 'product_id',
             RelationConfig::FOREIGN_GUARDS        => ['status' => 'active', 'deleted_at IS NULL']
@@ -130,12 +129,12 @@ SQL;
     {
         $this->populateDb();
 
-        $products = $this->nativeMapper
+        $products = $this->productsMapper
             ->newQuery()
             ->load('tags')
             ->get();
 
-        $this->assertExpectedQueries(3); // products + fields + tags
+        $this->assertExpectedQueries(2); // products + tags
         $tag1 = $products[0]->tags[0];
         $tag2 = $products[1]->tags[0];
         $this->assertNotNull($tag1);
@@ -147,19 +146,19 @@ SQL;
     {
         $this->populateDb();
 
-        $products = $this->nativeMapper
+        $products = $this->productsMapper
             ->newQuery()
             ->get();
 
-        $this->assertExpectedQueries(2); // products + fields
+        $this->assertExpectedQueries(1); // products
         $tag1 = $products[0]->tags[0];
         $tag2 = $products[1]->tags[0];
         $this->assertNotNull($tag1);
         $this->assertNotNull($tag2);
-        $this->assertEquals(1, $tag1->pivot_position);
-        $this->assertEquals(1, $tag2->pivot_position);
+        $this->assertEquals(1, $tag1->position_in_product);
+        $this->assertEquals(1, $tag2->position_in_product);
         $this->assertEquals($tag1->id, $tag2->id); // the tags are not the same object (due to the pivot) but they have the same ID
-        $this->assertExpectedQueries(3); // products + fields + tags
+        $this->assertExpectedQueries(2); // products + tags
     }
 
     public function test_delete_with_cascade_true()
@@ -167,36 +166,37 @@ SQL;
         $this->populateDb();
 
         // reconfigure products-featured_image to use CASCADE
-        $config             = $this->getMapperConfig('products', function ($arr) {
+        $config               = $this->getMapperConfig('products', function ($arr) {
             $arr[MapperConfig::RELATIONS]['tags'][RelationConfig::CASCADE] = true;
 
             return $arr;
         });
-        $this->nativeMapper = $this->orm->register('products', $config)->get('products');
+        $this->orm->register('products', $config);
+        $this->productsMapper =  $this->orm->get('products');
 
-        $product = $this->nativeMapper
+        $product = $this->productsMapper
             ->newQuery()
             ->first();
 
-        $this->assertTrue($this->nativeMapper->delete($product, true));
+        $this->assertTrue($this->productsMapper->delete($product, true));
 
-        $tag = $this->foreignMapper->find(1);
+        $tag = $this->tagsMapper->find(1);
         $this->assertNull($tag);
-        $this->assertRowDeleted('products_tags', 'product_id = 1 AND tag_id = 1');
-        $this->assertRowDeleted('products_tags', 'product_id = 1 AND tag_id = 2');
+        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_id = 1 AND tag_id = 1');
+        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_id = 1 AND tag_id = 2');
     }
 
     public function test_delete_with_cascade_false()
     {
         $this->populateDb();
 
-        $product = $this->nativeMapper
+        $product = $this->productsMapper
             ->newQuery()
             ->first();
 
-        $this->assertTrue($this->nativeMapper->delete($product));
+        $this->assertTrue($this->productsMapper->delete($product));
 
-        $tag = $this->foreignMapper->find(1);
+        $tag = $this->tagsMapper->find(10);
         $this->assertNotNull($tag);
     }
 
@@ -204,28 +204,29 @@ SQL;
     {
         $this->populateDb();
 
-        $product = $this->nativeMapper->find(1, ['tags_count']);
+        $product = $this->productsMapper->find(1, ['tags_count']);
+        $product2 = $this->productsMapper->find(2, ['tags_count']);
 
-        $this->assertExpectedQueries(3);
+        $this->assertExpectedQueries(4);
         $this->assertEquals(2, $product->tags_count);
-        $this->assertEquals(2, $product->tags_count);
+        $this->assertEquals(1, $product2->tags_count);
     }
 
     public function test_save_with_relations()
     {
         $this->populateDb();
 
-        $product = $this->nativeMapper
+        $product = $this->productsMapper
             ->newQuery()
             ->first();
 
         $tag                 = $product->tags[0];
         $tag->name           = 'New tag';
-        $tag->pivot_position = 3;
+        $tag->position_in_product = 3;
 
-        $this->nativeMapper->save($product, true);
+        $this->productsMapper->save($product, true);
 
-        $product    = $this->nativeMapper->find($product->id);
+        $product    = $this->productsMapper->find($product->id);
         $updatedTag = null;
         foreach ($product->tags as $tag) {
             if ( ! $updatedTag && $tag->name == 'New tag') {
@@ -235,48 +236,44 @@ SQL;
 
         $this->assertNotNull($updatedTag);
         $this->assertEquals('New tag', $updatedTag->name);
-        $this->assertEquals(3, $updatedTag->pivot_position);
+        $this->assertEquals(3, $updatedTag->position_in_product);
     }
 
     public function test_save_without_relations()
     {
         $this->populateDb();
 
-        $product = $this->nativeMapper
+        $product = $this->productsMapper
             ->newQuery()
             ->first();
 
         $tag                 = $product->tags[0];
         $tag->name           = 'New tag';
-        $tag->pivot_position = 3;
+        $tag->position_in_product = 3;
 
-        $this->nativeMapper->save($product, false);
+        $this->productsMapper->save($product, false);
 
-        $product = $this->nativeMapper->find($product->id);
+        $product = $this->productsMapper->find($product->id);
         $tag     = $product->tags[0];
 
         $this->assertEquals('tag_1', $tag->name);
-        $this->assertEquals(1, $tag->pivot_position);
+        $this->assertEquals(1, $tag->position_in_product);
     }
 
     protected function populateDb(): void
     {
         $this->insertRows('tags', ['id', 'name'], [
-            [1, 'tag_1'],
-            [2, 'tag_2'],
+            [10, 'tag_1'],
+            [20, 'tag_2'],
         ]);
-        $this->insertRows('content', ['id', 'content_type', 'title', 'description'], [
-            [1, 'product', 'Product 1', 'Product description 1'],
-            [2, 'product', 'Product 2', 'Product description 2'],
+        $this->insertRows('tbl_products', ['id', 'sku', 'price'], [
+            [1, 'sku_1', 3],
+            [2, 'sku_2', 4],
         ]);
-        $this->insertRows('content_products', ['content_id', 'category_id', 'sku', 'price'], [
-            [1, 10, 'abc', 10],
-            [2, 10, 'xyz', 20],
-        ]);
-        $this->insertRows('products_tags', ['product_id', 'tag_id', 'position'], [
-            [1, 1, 1],
-            [1, 2, 2],
-            [2, 1, 1],
+        $this->insertRows('tbl_links_to_tags', ['tagable_id', 'tagable_type', 'tag_id', 'position'], [
+            [1, 'products', 10, 1],
+            [1, 'products', 20, 2],
+            [2, 'products', 10, 1],
         ]);
     }
 }

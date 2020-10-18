@@ -20,43 +20,83 @@ class QueryTest extends BaseTestCase
         $this->mapper = $this->orm->get('products');
     }
 
+    public function test_exception_thrown_when_joining_with_invalid_relation() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->mapper->newQuery()->joinWith('undefined');
+    }
+
+    public function test_joining_multiple_times_with_the_same_relation() {
+        $query = $this->mapper->newQuery()
+                     ->joinWith('category')
+                     ->joinWith('category');
+
+        $statement = <<<SQL
+SELECT
+    products.*
+FROM
+    tbl_products as products 
+INNER JOIN (
+    SELECT categories.* FROM categories
+    ) AS category ON products.category_id = category.id
+SQL;
+
+        $this->assertSameStatement($statement, $query->getStatement());
+    }
+
     public function test_find()
     {
-        $this->insertRow('content', [
-            'content_type' => 'product',
-            'title'        => 'Product 1'
+        $this->insertRow('tbl_products', [
+            'sku' => 'sku_1'
         ]);
         $entity = $this->mapper->find(1);
-        $this->assertSame('Product 1', $entity->title);
+        $this->assertSame('sku_1', $entity->sku);
 
         $this->assertNull($this->mapper->find(2));
     }
 
     public function test_query_get()
     {
-        $this->insertRows('content', ['content_type', 'title'], [
-            ['product', 'Product 1'],
-            ['product', 'Product 2'],
-            ['product', 'Product 3'],
-            ['product', 'Product 4'],
+        $this->insertRows('tbl_products', ['price', 'sku'], [
+            [10, 'sku_1'],
+            [20, 'sku_2'],
+            [30, 'sku_3'],
+            [40, 'sku_4'],
         ]);
 
         $result = $this->mapper->newQuery()
-                               ->where('title', 'Product 2', '>=')
+                               ->where('sku', 'sku_2', '>=')
                                ->get();
 
         $this->assertEquals(3, count($result));
     }
 
+    public function test_where_field_in_relation()
+    {
+        $this->insertRow('categories', [
+            'id' => 1,
+            'name' => 'category'
+        ]);
+        $this->insertRow('tbl_products', [
+            'category_id' => 1,
+            'sku' => 'sku_1'
+        ]);
+
+        $result = $this->mapper->newQuery()
+                               ->where('category.name', 'category')
+                               ->get();
+
+        $this->assertEquals(1, count($result));
+    }
+
     public function test_chunk()
     {
-        $this->insertRows('content', ['content_type', 'title'], [
-            ['product', 'Product 1'],
-            ['product', 'Product 2'],
-            ['product', 'Product 3'],
-            ['product', 'Product 4'],
-            ['product', 'Product 5'],
-            ['product', 'Product 6'],
+        $this->insertRows('tbl_products', ['price', 'sku'], [
+            [2, 'sku_ 1'],
+            [3, 'sku_ 2'],
+            [4, 'sku_ 3'],
+            [5, 'sku_ 4'],
+            [6, 'sku_ 5'],
+            [7, 'sku_ 6'],
         ]);
 
         $found  = 0;
@@ -70,18 +110,18 @@ class QueryTest extends BaseTestCase
 
     public function test_chunk_no_limit()
     {
-        $this->insertRows('content', ['content_type', 'title'], [
-            ['product', 'Product 1'],
-            ['product', 'Product 2'],
-            ['product', 'Product 3'],
-            ['product', 'Product 4'],
-            ['product', 'Product 5'],
-            ['page', 'Page 1'],
+        $this->insertRows('tbl_products', ['price', 'sku'], [
+            [2, 'sku_ 1'],
+            [3, 'sku_ 2'],
+            [4, 'sku_ 3'],
+            [5, 'sku_ 4'],
+            [6, 'sku_ 5'],
+            [100, 'sku_7'],
         ]);
 
         $found = 0;
 
-        $query = $this->mapper->newQuery();
+        $query = $this->mapper->newQuery()->where('price', 100, '<');
         $query->chunk(2, function ($entity) use (&$found) {
             $found += 1;
         });
@@ -91,11 +131,11 @@ class QueryTest extends BaseTestCase
 
     public function test_query_paginate()
     {
-        $this->insertRows('content', ['content_type', 'title'], [
-            ['product', 'Product 1'],
-            ['product', 'Product 2'],
-            ['product', 'Product 3'],
-            ['product', 'Product 4'],
+        $this->insertRows('tbl_products', ['price', 'sku'], [
+            [2, 'sku_ 1'],
+            [3, 'sku_ 2'],
+            [4, 'sku_ 3'],
+            [5, 'sku_ 4'],
         ]);
 
         $result = $this->mapper->newQuery()
@@ -112,7 +152,7 @@ class QueryTest extends BaseTestCase
 
 
         $result = $this->mapper->newQuery()
-                               ->where('title', 'Product 5', '>')
+                               ->where('sku', 'sku_2', '>')
                                ->paginate(3, 2);
 
         $this->assertEquals(0, $result->getTotalCount());

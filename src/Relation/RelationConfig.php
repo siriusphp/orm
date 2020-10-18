@@ -20,11 +20,9 @@ final class RelationConfig
     const THROUGH_TABLE = 'through_table';
     const THROUGH_TABLE_ALIAS = 'through_table_alias';
     const THROUGH_GUARDS = 'through_guards';
-    const THROUGH_COLUMNS = 'through_columns';
+    const THROUGH_COLUMNS = 'through_columns'; // column/attribute pairs from the THROUGH_TABLE
     const THROUGH_NATIVE_COLUMN = 'through_native_column';
     const THROUGH_FOREIGN_COLUMN = 'through_foreign_column';
-    // prefix of the attributes in the relations, defaults to 'pivot_'
-    const THROUGH_COLUMNS_PREFIX = 'through_columns_prefix';
 
     // setters and getters
     const NATIVE_SETTER = 'native_setter';

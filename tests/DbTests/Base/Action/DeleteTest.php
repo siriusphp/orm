@@ -14,10 +14,17 @@ class DeleteTest extends BaseTestCase
     {
         $mapper = $this->orm->get('products');
 
-        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
+        $attrs = ['hide_in_store' => true];
+        $this->insertRow('tbl_products', [
+            'id'         => 1,
+            'sku'        => 'sku_1',
+            'price'      => 13.5,
+            'attributes' => $attrs
+        ]);
 
         $product = $mapper->find(1);
         $this->assertNotNull($product);
+        $this->assertTrue($product->attributes['hide_in_store']);
 
         $mapper->delete($product);
         $this->assertNull($mapper->find(1));
@@ -25,13 +32,19 @@ class DeleteTest extends BaseTestCase
         $this->assertEquals(StateEnum::DELETED, $product->getState());
     }
 
-    public function test_entity_is_reverted_on_exception()
+    public function test_entity_is_reverted_on_exception_thrown_during_delete()
     {
         // create a clone so the ORM is not affected
         $mapper = $this->orm->get('products')->without();
         $mapper->use(new ThrowExceptionBehaviour());
 
-        $this->insertRow('content', ['content_type' => 'product', 'title' => 'Product 1']);
+        $attrs = ['hide_in_store' => true];
+        $this->insertRow('tbl_products', [
+            'id'         => 1,
+            'sku'        => 'sku_1',
+            'price'      => 13.5,
+            'attributes' => $attrs
+        ]);
 
         $product = $mapper->find(1);
         $this->assertNotNull($product);
@@ -41,4 +54,5 @@ class DeleteTest extends BaseTestCase
         $this->assertEquals(1, $product->id);
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getState());
     }
+
 }

@@ -141,6 +141,8 @@ class Query extends Select
 
         $relation = $this->mapper->getRelation($name);
 
+        $this->joinedWith[] = $name;
+
         return $relation->joinSubselect($this, $name);
     }
 

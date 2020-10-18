@@ -1,6 +1,7 @@
 <?php
 
 use Sirius\Orm\MapperConfig;
+use Sirius\Orm\Query;
 use Sirius\Orm\Relation\RelationConfig;
 
 return [
@@ -13,14 +14,15 @@ return [
         ]
     ],
     'products'  => [
-        MapperConfig::TABLE     => 'tbl_products',
-        MapperConfig::COLUMNS   => ['id', 'created_on', 'updated_on', 'deleted_on', 'sku', 'price', 'attributes'],
-        MapperConfig::CASTS     => [
+        MapperConfig::TABLE       => 'tbl_products',
+        MapperConfig::TABLE_ALIAS => 'products',
+        MapperConfig::COLUMNS     => ['id', 'created_on', 'updated_on', 'deleted_on', 'category_id', 'sku', 'price', 'attributes'],
+        MapperConfig::CASTS       => [
             'id'         => 'int',
-            'sku'        => 'decimal:2',
+            'price'      => 'decimal:2',
             'attributes' => 'json'
         ],
-        MapperConfig::RELATIONS => [
+        MapperConfig::RELATIONS   => [
             'languages' => [
                 RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_MANY,
                 RelationConfig::FOREIGN_MAPPER => 'product_languages',
@@ -38,15 +40,21 @@ return [
             'ebay'      => [
                 RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_ONE,
                 RelationConfig::FOREIGN_MAPPER => 'ebay_products',
+                RelationConfig::FOREIGN_KEY    => 'product_id'
             ],
             'tags'      => [
-                RelationConfig::TYPE                => RelationConfig::TYPE_MANY_TO_MANY,
-                RelationConfig::FOREIGN_MAPPER      => 'tags',
-                RelationConfig::THROUGH_TABLE       => 'tbl_links_to_tags',
-                RelationConfig::THROUGH_TABLE_ALIAS => 'products_to_tags',
-                RelationConfig::THROUGH_GUARDS      => ['tagable_type' => 'products'],
-                RelationConfig::THROUGH_COLUMNS     => ['position' => 'position_in_product'],
-                RelationConfig::AGGREGATES     => [
+                RelationConfig::TYPE                  => RelationConfig::TYPE_MANY_TO_MANY,
+                RelationConfig::FOREIGN_MAPPER        => 'tags',
+                RelationConfig::THROUGH_TABLE         => 'tbl_links_to_tags',
+                RelationConfig::THROUGH_TABLE_ALIAS   => 'products_to_tags',
+                RelationConfig::THROUGH_NATIVE_COLUMN => 'tagable_id',
+                RelationConfig::THROUGH_GUARDS        => ['tagable_type' => 'products'],
+                RelationConfig::THROUGH_COLUMNS       => ['position' => 'position_in_product'],
+                RelationConfig::QUERY_CALLBACK       => function(Query $query) {
+                    $query->orderBy('position ASC');
+                    return $query;
+                },
+                RelationConfig::AGGREGATES            => [
                     'tags_count' => [
                         RelationConfig::AGG_FUNCTION => 'count(tags.id)',
                     ]
@@ -96,10 +104,11 @@ return [
 
     'categories' => [
         MapperConfig::TABLE     => 'categories',
-        MapperConfig::COLUMNS   => ['id', 'position', 'name'],
+        MapperConfig::COLUMNS   => ['id', 'parent_id', 'position', 'name'],
         MapperConfig::CASTS     => [
-            'id'       => 'int',
-            'position' => 'int',
+            'id'        => 'int',
+            'parent_id' => 'int',
+            'position'  => 'int',
         ],
         MapperConfig::RELATIONS => [
             'parent'    => [
@@ -110,17 +119,20 @@ return [
                 RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_MANY,
                 RelationConfig::FOREIGN_MAPPER => 'categories',
                 RelationConfig::FOREIGN_KEY    => 'parent_id',
+                RelationConfig::CASCADE        => true
             ],
             'languages' => [
                 RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_MANY,
                 RelationConfig::FOREIGN_MAPPER => 'languages',
-                RelationConfig::FOREIGN_GUARDS => ['content_type' => 'categories']
+                RelationConfig::FOREIGN_KEY    => 'content_id',
+                RelationConfig::FOREIGN_GUARDS => ['content_type' => 'categories'],
+                RelationConfig::CASCADE        => true
             ],
-            'products' => [
+            'products'  => [
                 RelationConfig::TYPE           => RelationConfig::TYPE_ONE_TO_MANY,
-                RelationConfig::FOREIGN_MAPPER => 'categories',
-                RelationConfig::AGGREGATES => [
-                    'lowest_price' => [
+                RelationConfig::FOREIGN_MAPPER => 'products',
+                RelationConfig::AGGREGATES     => [
+                    'lowest_price'  => [
                         RelationConfig::AGG_FUNCTION => 'min(products.price)',
                     ],
                     'highest_price' => [

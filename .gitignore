@@ -5,3 +5,5 @@ phpcbf.phar
 phpcs.phar
 .couscous/
 couscous.phar
+tests/mysql_schema_created
+tests/sqlite_schema_created

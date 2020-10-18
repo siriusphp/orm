@@ -144,10 +144,6 @@ class Orm
      */
     protected function buildMapper($mapperConfigOrFactory): Mapper
     {
-        if ($mapperConfigOrFactory instanceof Mapper) {
-            return $mapperConfigOrFactory;
-        }
-
         if ($mapperConfigOrFactory instanceof MapperConfig) {
             return Mapper::make($this->connectionLocator, $mapperConfigOrFactory);
         }
