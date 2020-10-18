@@ -42,6 +42,11 @@ class ClassGenerator
 
     public function writeFiles()
     {
+        if (!$this->orm->isValid()) {
+            echo implode(PHP_EOL, $this->orm->getErrors());
+            throw new \Exception('Invalid ORM specifications');
+        }
+
         foreach ($this->getGeneratedClasses() as $class) {
             file_put_contents($class['path'], $class['contents']);
         }
@@ -49,6 +54,11 @@ class ClassGenerator
 
     private function generateBaseMapperClass(Mapper $mapper)
     {
+        if (!$mapper->isValid()) {
+            echo implode(PHP_EOL, $mapper->getErrors());
+            throw new \Exception(sprintf('Specifications for %s mapper are not valid', $mapper->getName()));
+        }
+
         $class = (new MapperBaseGenerator($mapper))->getClass();
 
         $file = new PhpFile();
