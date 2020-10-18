@@ -72,15 +72,6 @@ class Timestamps extends Behaviour
         return $this;
     }
 
-    public function observeBaseMapperClass(ClassType $class): ClassType
-    {
-        $class->addProperty('createdAtColumn', $this->createdAtColumn)
-              ->setVisibility('protected');
-        $class->addProperty('updatedAtColumn', $this->updatedAtColumn)
-              ->setVisibility('protected');
-        return parent::observeBaseMapperClass($class);
-    }
-
     public function observeBaseQueryClass(ClassType $class): ClassType
     {
         $class->getNamespace()->addUse(\Sirius\Orm\Query\TimestampsTrait::class);
