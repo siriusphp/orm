@@ -57,7 +57,7 @@ abstract class ProductMapperBase extends Mapper
 
     public function newQuery(): ProductQuery
     {
-        $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
+        $query = new ProductQuery($this->getReadConnection(), $this);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

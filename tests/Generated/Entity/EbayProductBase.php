@@ -26,6 +26,6 @@ abstract class EbayProductBase extends GenericEntity
 
     protected function castPriceAttribute($value)
     {
-        return round((float)$value, 14);
+        return round((float)$value, 2);
     }
 }

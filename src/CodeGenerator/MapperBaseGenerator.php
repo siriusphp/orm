@@ -131,7 +131,7 @@ class MapperBaseGenerator
     {
         $method = $this->class->addMethod('newQuery')
                               ->setReturnType($this->mapper->getQueryClass());
-        $method->addBody('$query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);');
+        $method->addBody(sprintf('$query = new %s($this->getReadConnection(), $this);', $this->mapper->getQueryClass()));
         $method->addBody('return $this->behaviours->apply($this, __FUNCTION__, $query);');
 
 

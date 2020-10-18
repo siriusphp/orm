@@ -50,7 +50,7 @@ abstract class LanguageMapperBase extends Mapper
 
     public function newQuery(): LanguageQuery
     {
-        $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
+        $query = new LanguageQuery($this->getReadConnection(), $this);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

@@ -50,7 +50,7 @@ abstract class ProductLanguageMapperBase extends Mapper
 
     public function newQuery(): ProductLanguageQuery
     {
-        $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
+        $query = new ProductLanguageQuery($this->getReadConnection(), $this);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

@@ -42,7 +42,7 @@ abstract class EbayProductMapperBase extends Mapper
 
     public function newQuery(): EbayProductQuery
     {
-        $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
+        $query = new EbayProductQuery($this->getReadConnection(), $this);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 
