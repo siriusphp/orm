@@ -24,14 +24,6 @@ class SoftDelete extends Behaviour
     }
 
     /**
-     * @return string
-     */
-    public function getDeletedAtColumn(): string
-    {
-        return $this->deletedAtColumn;
-    }
-
-    /**
      * @param string $deletedAtColumn
      *
      * @return SoftDelete

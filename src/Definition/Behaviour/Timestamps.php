@@ -29,14 +29,6 @@ class Timestamps extends Behaviour
     }
 
     /**
-     * @return string
-     */
-    public function getCreatedAtColumn(): string
-    {
-        return $this->createdAtColumn;
-    }
-
-    /**
      * @param string $createdAtColumn
      *
      * @return Timestamps
@@ -46,14 +38,6 @@ class Timestamps extends Behaviour
         $this->createdAtColumn = $createdAtColumn;
 
         return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUpdatedAtColumn(): string
-    {
-        return $this->updatedAtColumn;
     }
 
     /**
