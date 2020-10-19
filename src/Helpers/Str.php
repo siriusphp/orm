@@ -16,6 +16,7 @@ class Str
     public static function underscore(string $str): string
     {
         if ( ! isset(static::$cache['underscore'][$str])) {
+            $str = preg_replace("/([A-Z]+)/", ' $1', $str);
             $str = strtolower($str);
             $str = preg_replace("/[^a-z0-9]+/", ' ', $str);
 

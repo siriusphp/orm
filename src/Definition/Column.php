@@ -563,19 +563,19 @@ class Column extends Base
     {
         switch ($this->getType()) {
             case static::TYPE_FLOAT:
-                return 'return floatval($value);';
+                return 'return $value === null ? $value : floatval($value);';
 
             case static::TYPE_INTEGER:
             case static::TYPE_BIG_INTEGER:
             case static::TYPE_SMALL_INTEGER:
             case static::TYPE_TINY_INTEGER:
-                return 'return intval($value);';
+                return 'return $value === null ? $value : intval($value);';
 
             case static::TYPE_DECIMAL:
-                return 'return round((float)$value, ' . $this->getPrecision() . ');';
+                return 'return $value === null ? $value : round((float)$value, ' . $this->getPrecision() . ');';
 
             case static::TYPE_DATETIME:
-                return 'return ($value instanceof DateTime) ? $value : new DateTime($value);';
+                return 'return !$value ? null : (($value instanceof DateTime) ? $value : new DateTime($value));';
 
             default:
                 return null;

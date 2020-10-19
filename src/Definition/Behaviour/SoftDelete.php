@@ -55,6 +55,7 @@ class SoftDelete extends Behaviour
         $class->addTrait('SoftDeleteTrait');
         $class->addProperty('deletedAtColumn', $this->deletedAtColumn)
               ->setVisibility('protected');
+
         return parent::observeBaseMapperClass($class);
     }
 
@@ -64,6 +65,16 @@ class SoftDelete extends Behaviour
         $class->addTrait('SoftDeleteTrait');
         $class->addProperty('deletedAtColumn', $this->deletedAtColumn)
               ->setVisibility('protected');
+
+        // add guard
+        if ( ! $class->hasMethod('init')) {
+            $class->addMethod('init')
+                  ->setVisibility(ClassType::VISIBILITY_PROTECTED)
+                  ->setBody('parent::init();' . PHP_EOL);
+        }
+        $init = $class->getMethod('init');
+        $init->setBody($init->getBody() . '$this->initSoftDelete();' . PHP_EOL);
+
         return parent::observeBaseQueryClass($class);
     }
 }

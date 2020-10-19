@@ -10,7 +10,6 @@ use Sirius\Orm\Contract\EntityInterface;
 
 trait SoftDeleteTrait
 {
-    protected $deletedAtColumn = 'deleted_at';
 
     public function newDeleteAction(EntityInterface $entity, $options)
     {
@@ -21,8 +20,6 @@ trait SoftDeleteTrait
 
     public function forceDelete(EntityInterface $entity, $withRelations = false)
     {
-        $this->assertCanPersistEntity($entity);
-
         $action = new Delete($this, $entity, ['relations' => $withRelations]);
 
         $this->connectionLocator->lockToWrite(true);

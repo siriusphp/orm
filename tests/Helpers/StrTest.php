@@ -14,7 +14,7 @@ class StrTest extends TestCase
     {
         $this->assertEquals('abc_def', Str::underscore('abc Def'));
         $this->assertEquals('abc_def', Str::underscore('abc-def'));
-        $this->assertEquals('abcdef', Str::underscore('abcDef'));
+        $this->assertEquals('abc_def', Str::underscore('abcDef'));
     }
 
     public function test_method_name()

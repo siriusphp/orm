@@ -12,6 +12,7 @@ use Sirius\Orm\Definition\Mapper;
 use Sirius\Orm\Definition\Relation;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\QueryBuilder;
 
@@ -55,6 +56,7 @@ class MapperBaseGenerator
     protected function build()
     {
         $this->namespace->addUse(\Sirius\Orm\Mapper::class);
+        $this->namespace->addUse(FailedActionException::class);
 
         $this->class->setExtends('Mapper');
 
@@ -66,6 +68,7 @@ class MapperBaseGenerator
         $this->addFindMethod();
         $this->addNewQueryMethod();
         $this->addSaveMethod();
+        $this->addDeleteMethod();
 
         foreach ($this->mapper->getTraits() as $trait) {
             $this->class->addTrait($trait);
@@ -76,7 +79,6 @@ class MapperBaseGenerator
 
     protected function addInitMethod()
     {
-        $this->namespace->addUse(ConnectionLocator::class);
         $this->namespace->addUse(MapperConfig::class);
         $this->namespace->addUse(QueryBuilder::class);
         $this->namespace->addUse(Behaviours::class);
@@ -89,7 +91,7 @@ class MapperBaseGenerator
         $body .= '$this->mapperConfig      = MapperConfig::fromArray(';
 
         $config = [
-            'entityClass'        => $this->mapper->getNamespace() . '\\' . $this->mapper->getEntityClass(),
+            'entityClass'        => $this->mapper->getEntityNamespace() . '\\' . $this->mapper->getEntityClass(),
             'primaryKey'         => $this->mapper->getPrimaryKey(),
             'table'              => $this->mapper->getTable(),
             'tableAlias'         => $this->mapper->getTableAlias(),
@@ -112,6 +114,7 @@ class MapperBaseGenerator
             $this->namespace->addUse(ClassMethodsHydrator::class);
             $body .= '$this->hydrator      = new ClassMethodsHydrator;' . PHP_EOL;
         }
+        $body .= '$this->hydrator->setMapperConfig($this->mapperConfig);' . PHP_EOL;
 
         $body .= PHP_EOL;
 
@@ -166,6 +169,45 @@ class MapperBaseGenerator
                               ->setReturnType('bool');
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
         $method->addParameter('withRelations', false);
-        $method->setBody('return parent::save($entity, $withRelations);');
+        $method->setBody('
+$action = $this->newSaveAction($entity, [\'relations\' => $withRelations]);
+
+$this->connectionLocator->lockToWrite(true);
+$this->getWriteConnection()->beginTransaction();
+try {
+    $action->run();
+    $this->getWriteConnection()->commit();
+    $this->connectionLocator->lockToWrite(false);
+
+    return true;
+} catch (FailedActionException $e) {
+    $this->getWriteConnection()->rollBack();
+    $this->connectionLocator->lockToWrite(false);
+    throw $e;
+}
+        ');
+    }
+
+    protected function addDeleteMethod()
+    {
+        $method = $this->class->addMethod('delete')
+                              ->setReturnType('bool');
+        $method->addParameter('entity')->setType($this->mapper->getEntityClass());
+        $method->addParameter('withRelations', false);
+        $method->setBody('
+$action = $this->newDeleteAction($entity, [\'relations\' => $withRelations]);
+
+$this->connectionLocator->lockToWrite(true);
+$this->getWriteConnection()->beginTransaction();
+try {
+    $action->run();
+    $this->getWriteConnection()->commit();
+
+    return true;
+} catch (\Exception $e) {
+    $this->getWriteConnection()->rollBack();
+    throw $e;
+}
+        ');
     }
 }

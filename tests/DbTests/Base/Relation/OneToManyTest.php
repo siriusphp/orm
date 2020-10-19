@@ -5,7 +5,7 @@ namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\OneToMany;
 use Sirius\Orm\Relation\RelationConfig;
@@ -15,11 +15,11 @@ class OneToManyTest extends BaseTestCase
 {
 
     /**
-     * @var Mapper
+     * @var DynamicMapper
      */
     protected $categoryMapper;
     /**
-     * @var Mapper
+     * @var DynamicMapper
      */
     protected $productsMapper;
 

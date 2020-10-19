@@ -40,4 +40,10 @@ abstract class ProductQueryBase extends Query
     {
         return parent::paginate($perPage, $page);
     }
+
+    protected function init()
+    {
+        parent::init();
+        $this->initSoftDelete();
+    }
 }

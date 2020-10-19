@@ -2,7 +2,7 @@
 
 
 use Sirius\Orm\ConnectionLocator;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
 use Sirius\Orm\Relation\RelationConfig;
@@ -31,7 +31,7 @@ class SiriusOrmTestSuite extends AbstractTestSuite
 
         $this->initTables();
 
-        $this->orm->register('products', Mapper::make($this->orm, MapperConfig::fromArray([
+        $this->orm->register('products', DynamicMapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE     => 'products',
             MapperConfig::COLUMNS   => ['id', 'name', 'sku', 'price', 'category_id'],
             MapperConfig::RELATIONS => [
@@ -52,19 +52,19 @@ class SiriusOrmTestSuite extends AbstractTestSuite
             ]
         ])));
 
-        $this->orm->register('categories', Mapper::make($this->orm, MapperConfig::fromArray([
+        $this->orm->register('categories', DynamicMapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE   => 'categories',
             MapperConfig::COLUMNS => ['id', 'name'],
 
         ])));
 
-        $this->orm->register('tags', Mapper::make($this->orm, MapperConfig::fromArray([
+        $this->orm->register('tags', DynamicMapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE   => 'tags',
             MapperConfig::COLUMNS => ['id', 'name'],
 
         ])));
 
-        $this->orm->register('images', Mapper::make($this->orm, MapperConfig::fromArray([
+        $this->orm->register('images', DynamicMapper::make($this->orm, MapperConfig::fromArray([
             MapperConfig::TABLE   => 'images',
             MapperConfig::COLUMNS => ['id', 'path', 'imageable_id', 'imageable_type'],
 

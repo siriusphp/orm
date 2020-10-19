@@ -123,9 +123,9 @@ Check out `GenericEntityHydrator` class for inspiration.
 For this you need to alter the behavior of `setEntityAttribute` and `getEntityAttribute` methods
 
 ```php
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 
-class CategoryMapper extends Mapper { 
+class CategoryMapper extends DynamicMapper { 
     protected $table = 'category';
     protected $primaryKey = 'id';
     // here goes the rest of the mapper's properties

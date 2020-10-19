@@ -14,6 +14,6 @@ abstract class TagBase extends GenericEntity
 {
     protected function castIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 }

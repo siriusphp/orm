@@ -1,10 +1,10 @@
 <?php
 
 use Sirius\Orm\Entity\EntityInterface;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\Query;
 
-class ProductsMapper extends Mapper
+class ProductsMapper extends DynamicMapper
 {
 
     public function __construct($connectionLocator)

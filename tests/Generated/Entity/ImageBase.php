@@ -18,11 +18,11 @@ abstract class ImageBase extends GenericEntity
 {
     protected function castIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 
     protected function castImageableIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 }

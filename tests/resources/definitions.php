@@ -52,7 +52,7 @@ $orm->addMapper(
         // relations
           ->addRelation('languages', OneToMany::make('product_languages')
                                               ->setForeignKey('content_id'))
-          ->addRelation('images', OneToMany::make()
+          ->addRelation('images', OneToMany::make('images')
                                            ->setCascade(true)
                                            ->setForeignKey('imageable_id')
                                            ->setForeignGuards(['imageable_type' => 'products'])) // @testing: one to many | relation guards

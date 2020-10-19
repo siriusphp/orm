@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToMany;
@@ -15,11 +15,11 @@ class ManyToManyTest extends BaseTestCase
 {
 
     /**
-     * @var Mapper
+     * @var DynamicMapper
      */
     protected $productsMapper;
     /**
-     * @var Mapper
+     * @var DynamicMapper
      */
     protected $tagsMapper;
 

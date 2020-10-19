@@ -16,16 +16,16 @@ abstract class CategoryBase extends GenericEntity
 {
     protected function castIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 
     protected function castParentIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 
     protected function castPositionAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 
 class QueryTest extends BaseTestCase
 {
     /**
-     * @var Mapper
+     * @var DynamicMapper
      */
     protected $mapper;
 

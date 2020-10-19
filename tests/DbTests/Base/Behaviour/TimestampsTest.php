@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\DbTests\Base\Behaviour;
 
 use Sirius\Orm\Behaviour\Timestamps;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\Tests\BaseTestCase;
 
 class TimestampsTest extends BaseTestCase
 {
     /**
-     * @var Mapper
+     * @var DynamicMapper
      */
     protected $mapper;
 

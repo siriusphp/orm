@@ -19,11 +19,11 @@ abstract class LanguageBase extends GenericEntity
 {
     protected function castIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 
     protected function castContentIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 }

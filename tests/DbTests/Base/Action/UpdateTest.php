@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\DbTests\Base\Action;
 
 use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 use Sirius\Orm\Tests\DbTests\Base\Behaviour\ThrowExceptionBehaviour;

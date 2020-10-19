@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
 use Sirius\Orm\Behaviours;
-use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\QueryBuilder;
@@ -23,7 +23,7 @@ abstract class LanguageMapperBase extends Mapper
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
-            'entityClass' => 'Sirius\Orm\Tests\Generated\Mapper\Language',
+            'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Language',
             'primaryKey' => 'id',
             'table' => 'tbl_languages',
             'tableAlias' => null,
@@ -41,6 +41,7 @@ abstract class LanguageMapperBase extends Mapper
             ],
         ]);
         $this->hydrator      = new GenericHydrator;
+        $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();
     }
@@ -62,6 +63,37 @@ abstract class LanguageMapperBase extends Mapper
 
     public function save(Language $entity, $withRelations = false): bool
     {
-        return parent::save($entity, $withRelations);
+        $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
+
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+            $this->connectionLocator->lockToWrite(false);
+
+            return true;
+        } catch (FailedActionException $e) {
+            $this->getWriteConnection()->rollBack();
+            $this->connectionLocator->lockToWrite(false);
+            throw $e;
+        }
+    }
+
+    public function delete(Language $entity, $withRelations = false): bool
+    {
+        $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
     }
 }

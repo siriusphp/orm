@@ -145,7 +145,7 @@ class Orm
     protected function buildMapper($mapperConfigOrFactory): Mapper
     {
         if ($mapperConfigOrFactory instanceof MapperConfig) {
-            return Mapper::make($this->connectionLocator, $mapperConfigOrFactory);
+            return DynamicMapper::make($this->connectionLocator, $mapperConfigOrFactory);
         }
 
         $mapper = $mapperConfigOrFactory($this);

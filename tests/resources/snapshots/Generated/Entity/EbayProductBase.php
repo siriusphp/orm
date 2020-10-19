@@ -16,16 +16,16 @@ abstract class EbayProductBase extends GenericEntity
 {
     protected function castIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 
     protected function castProductIdAttribute($value)
     {
-        return intval($value);
+        return $value === null ? $value : intval($value);
     }
 
     protected function castPriceAttribute($value)
     {
-        return round((float)$value, 2);
+        return $value === null ? $value : round((float)$value, 2);
     }
 }

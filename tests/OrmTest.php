@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use Sirius\Orm\Mapper;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 
@@ -21,7 +21,7 @@ class OrmTest extends BaseTestCase
         $this->orm->register('products', $mapperConfig);
 
         $this->assertTrue($this->orm->has('products'));
-        $this->assertInstanceOf(Mapper::class, $this->orm->get('products'));
+        $this->assertInstanceOf(DynamicMapper::class, $this->orm->get('products'));
     }
 
     public function test_lazy_mapper_factory()
@@ -33,11 +33,11 @@ class OrmTest extends BaseTestCase
         ]);
         $connectionLocator = $this->connectionLocator;
         $this->orm->register('products', function () use ($mapperConfig, $connectionLocator) {
-            return Mapper::make($connectionLocator, $mapperConfig);
+            return DynamicMapper::make($connectionLocator, $mapperConfig);
         });
 
         $this->assertTrue($this->orm->has('products'));
-        $this->assertInstanceOf(Mapper::class, $this->orm->get('products'));
+        $this->assertInstanceOf(DynamicMapper::class, $this->orm->get('products'));
     }
 
     public function test_mapper_instance()
@@ -47,10 +47,10 @@ class OrmTest extends BaseTestCase
             MapperConfig::TABLE_ALIAS => 'p',
             MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
         ]);
-        $mapper       = Mapper::make($this->connectionLocator, $mapperConfig);
+        $mapper       = DynamicMapper::make($this->connectionLocator, $mapperConfig);
         $this->orm->register('products', $mapper);
 
-        $this->assertInstanceOf(Mapper::class, $this->orm->get('products'));
+        $this->assertInstanceOf(DynamicMapper::class, $this->orm->get('products'));
     }
 
     public function test_exception_thrown_on_invalid_relation_type()

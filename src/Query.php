@@ -85,6 +85,13 @@ class Query extends Select
         $this->from($this->tableReference);
         $this->resetColumns();
         $this->columns($this->table . '.*');
+
+        $this->init();
+    }
+
+    protected function init()
+    {
+
     }
 
     public function __call(string $method, array $params)
@@ -149,6 +156,13 @@ class Query extends Select
     public function subSelectForJoinWith(Mapper $mapper): Query
     {
         return new Query($this->connection, $mapper, $this->bindings, $this->indent . '    ');
+    }
+
+    public function find($pk, array $load = [])
+    {
+        return $this->where($this->primaryKey, $pk)
+                    ->load(...$load)
+                    ->first();
     }
 
     public function first()

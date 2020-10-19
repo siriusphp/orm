@@ -9,6 +9,9 @@ use Doctrine\DBAL\Schema\Schema;
 use PHPUnit\Framework\TestCase;
 use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
+use Sirius\Orm\Helpers\Inflector;
+use Sirius\Orm\Helpers\Str;
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Orm;
 use Sirius\Sql\Insert;
@@ -18,6 +21,8 @@ class BaseTestCase extends TestCase
 {
 
     protected $dbEngine = 'sqlite';
+
+    protected $useGeneratedMappers = false;
 
     /**
      * @var Orm
@@ -81,9 +86,32 @@ class BaseTestCase extends TestCase
 
     public function loadMappers()
     {
+        if ($this->useGeneratedMappers) {
+            $this->loadGeneratedMappers();
+
+            return;
+        }
+
         $mappers = include(__DIR__ . '/resources/mappers.php');
         foreach ($mappers as $name => $config) {
             $this->orm->register($name, MapperConfig::fromArray($config));
+        }
+    }
+
+    protected function loadGeneratedMappers()
+    {
+        $mappers           = ['products', 'ebay_products', 'categories', 'languages', 'images', 'tags', 'product_languages'];
+        $connectionLocator = $this->connectionLocator;
+
+        foreach ($mappers as $name) {
+            $this->orm->register($name, function ($orm) use ($name, $connectionLocator) {
+                $class = 'Sirius\\Orm\\Tests\\Generated\\Mapper\\' . Str::className(Inflector::singularize($name)) . 'Mapper';
+                /** @var DynamicMapper $mapper */
+                $mapper = new $class($connectionLocator);
+                $mapper->setOrm($orm);
+
+                return $mapper;
+            });
         }
     }
 

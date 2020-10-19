@@ -5,7 +5,6 @@ namespace Sirius\Orm\Query;
 
 trait SoftDeleteTrait
 {
-    protected $deletedAtColumn = 'deleted_at';
 
     protected function initSoftDelete() {
         $this->guards[] = $this->deletedAtColumn . ' IS NULL';
@@ -15,7 +14,7 @@ trait SoftDeleteTrait
     {
         $guards = [];
         foreach ($this->guards as $k => $v) {
-            if ($v == $this->deletedAtColumn . ' IS NULL') {
+            if ($v != $this->deletedAtColumn . ' IS NULL') {
                 $guards[$k] = $v;
             }
         }

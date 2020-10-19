@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Definition;
 
+use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\RelationConfig;
 
 abstract class Relation extends Base
@@ -196,7 +197,7 @@ abstract class Relation extends Base
                 $value !== '' &&
                 $value !== [] &&
                 !is_object($value)) {
-                $result[$prop] = $value;
+                $result[Str::underscore($prop)] = $value;
             }
         }
 

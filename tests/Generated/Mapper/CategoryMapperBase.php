@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
 use Sirius\Orm\Behaviours;
-use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\QueryBuilder;
@@ -23,7 +23,7 @@ abstract class CategoryMapperBase extends Mapper
         $this->queryBuilder      = QueryBuilder::getInstance();
         $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
-            'entityClass' => 'Sirius\Orm\Tests\Generated\Mapper\Category',
+            'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Category',
             'primaryKey' => 'id',
             'table' => 'categories',
             'tableAlias' => null,
@@ -33,6 +33,7 @@ abstract class CategoryMapperBase extends Mapper
             'casts' => ['id' => 'int', 'parent_id' => 'int', 'position' => 'int', 'name' => 'string'],
         ]);
         $this->hydrator      = new GenericHydrator;
+        $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();
     }
@@ -41,27 +42,27 @@ abstract class CategoryMapperBase extends Mapper
     {
         $this->addRelation('parent', [
             'type' => 'many_to_one',
-            'foreignKey' => 'id',
-            'nativeKey' => 'id',
-            'foreignMapper' => 'categories',
-            'loadStrategy' => 'lazy',
+            'foreign_key' => 'id',
+            'native_key' => 'id',
+            'foreign_mapper' => 'categories',
+            'load_strategy' => 'lazy',
         ]);
 
         $this->addRelation('children', [
             'type' => 'one_to_many',
-            'nativeKey' => 'id',
-            'foreignMapper' => 'categories',
-            'foreignKey' => 'category_id',
-            'loadStrategy' => 'lazy',
+            'native_key' => 'id',
+            'foreign_mapper' => 'categories',
+            'foreign_key' => 'category_id',
+            'load_strategy' => 'lazy',
         ]);
 
         $this->addRelation('languages', [
             'type' => 'one_to_many',
-            'nativeKey' => 'id',
-            'foreignMapper' => 'languages',
-            'foreignKey' => 'content_id',
-            'foreignGuards' => ['content_type' => 'categories'],
-            'loadStrategy' => 'lazy',
+            'native_key' => 'id',
+            'foreign_mapper' => 'languages',
+            'foreign_key' => 'content_id',
+            'foreign_guards' => ['content_type' => 'categories'],
+            'load_strategy' => 'lazy',
         ]);
 
         $this->addRelation('products', [
@@ -70,10 +71,10 @@ abstract class CategoryMapperBase extends Mapper
                 'lowest_price' => ['function' => 'min(products.price)'],
                 'highest_price' => ['function' => 'max(products.price)'],
             ],
-            'nativeKey' => 'id',
-            'foreignMapper' => 'products',
-            'foreignKey' => 'category_id',
-            'loadStrategy' => 'lazy',
+            'native_key' => 'id',
+            'foreign_mapper' => 'products',
+            'foreign_key' => 'category_id',
+            'load_strategy' => 'lazy',
         ]);
     }
 
@@ -90,6 +91,37 @@ abstract class CategoryMapperBase extends Mapper
 
     public function save(Category $entity, $withRelations = false): bool
     {
-        return parent::save($entity, $withRelations);
+        $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
+
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+            $this->connectionLocator->lockToWrite(false);
+
+            return true;
+        } catch (FailedActionException $e) {
+            $this->getWriteConnection()->rollBack();
+            $this->connectionLocator->lockToWrite(false);
+            throw $e;
+        }
+    }
+
+    public function delete(Category $entity, $withRelations = false): bool
+    {
+        $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
     }
 }
