@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
+use Sirius\Orm\Action\Delete as DeleteAction;
+use Sirius\Orm\Action\Insert as InsertAction;
+use Sirius\Orm\Action\SoftDelete as SoftDeleteAction;
+use Sirius\Orm\Action\Update as UpdateAction;
+use Sirius\Orm\Behaviour\Timestamps;
 use Sirius\Orm\Behaviours;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\Mapper\SoftDeleteTrait;
 use Sirius\Orm\QueryBuilder;
 use Sirius\Orm\Tests\Generated\Entity\Product;
 
@@ -19,8 +23,8 @@ use Sirius\Orm\Tests\Generated\Entity\Product;
  */
 abstract class ProductMapperBase extends Mapper
 {
-    use SoftDeleteTrait;
-
+    protected $createdAtColumn = 'created_on';
+    protected $updatedAtColumn = 'updated_on';
     protected $deletedAtColumn = 'deleted_on';
 
     protected function init()
@@ -49,6 +53,7 @@ abstract class ProductMapperBase extends Mapper
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();
+        $this->behaviours->add(new Timestamps($this->createdAtColumn, $this->updatedAtColumn));
     }
 
     protected function initRelations()
@@ -133,9 +138,70 @@ abstract class ProductMapperBase extends Mapper
         }
     }
 
+    public function newSaveAction(Product $entity, $options): UpdateAction
+    {
+        if ( ! $this->getHydrator()->getPk($entity) || $entity->getState() == StateEnum::NEW) {
+            $action = new InsertAction($this, $entity, $options);
+        } else {
+            $action = new UpdateAction($this, $entity, $options);
+        }
+
+        return $this->behaviours->apply($this, __FUNCTION__, $action);
+    }
+
     public function delete(Product $entity, $withRelations = false): bool
     {
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
+    }
+
+    public function newDeleteAction(Product $entity, $options)
+    {
+        $action = new SoftDeleteAction($this, $entity, ['deleted_at_column' => $this->deletedAtColumn]);
+
+        return $this->behaviours->apply($this, __FUNCTION__, $action);
+    }
+
+    public function forceDelete(Product $entity, $withRelations = false)
+    {
+        $action = new DeleteAction($this, $entity, ['relations' => $withRelations]);
+
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
+    }
+
+    public function restore($pk): bool
+    {
+        $entity = $this->newQuery()
+                       ->withTrashed()
+                       ->find($pk);
+
+        if ( ! $entity) {
+            return false;
+        }
+
+        $this->getHydrator()->set($entity, $this->deletedAtColumn, null);
+        $action = new UpdateAction($this, $entity);
 
         $this->connectionLocator->lockToWrite(true);
         $this->getWriteConnection()->beginTransaction();

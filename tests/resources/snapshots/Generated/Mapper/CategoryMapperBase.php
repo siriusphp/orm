@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
+use Sirius\Orm\Action\Insert as InsertAction;
+use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Behaviours;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
@@ -108,6 +110,17 @@ abstract class CategoryMapperBase extends Mapper
         }
     }
 
+    public function newSaveAction(Category $entity, $options): UpdateAction
+    {
+        if ( ! $this->getHydrator()->getPk($entity) || $entity->getState() == StateEnum::NEW) {
+            $action = new InsertAction($this, $entity, $options);
+        } else {
+            $action = new UpdateAction($this, $entity, $options);
+        }
+
+        return $this->behaviours->apply($this, __FUNCTION__, $action);
+    }
+
     public function delete(Category $entity, $withRelations = false): bool
     {
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
@@ -123,5 +136,12 @@ abstract class CategoryMapperBase extends Mapper
             $this->getWriteConnection()->rollBack();
             throw $e;
         }
+    }
+
+    public function newDeleteAction(Category $entity, $options): UpdateAction
+    {
+        $action = new DeleteAction($this, $entity, $options);
+
+        return $this->behaviours->apply($this, __FUNCTION__, $action);
     }
 }

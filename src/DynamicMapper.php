@@ -3,7 +3,11 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
+use Sirius\Orm\Action\Delete;
+use Sirius\Orm\Action\Insert;
+use Sirius\Orm\Action\Update;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 
 /**
@@ -41,6 +45,23 @@ class DynamicMapper extends Mapper
 
     /**
      * @param EntityInterface $entity
+     * @param $options
+     *
+     * @return Update
+     */
+    public function newSaveAction(EntityInterface $entity, $options)
+    {
+        if ( ! $this->getHydrator()->getPk($entity) || $entity->getState() == StateEnum::NEW) {
+            $action = new Insert($this, $entity, $options);
+        } else {
+            $action = new Update($this, $entity, $options);
+        }
+
+        return $this->behaviours->apply($this, __FUNCTION__, $action);
+    }
+
+    /**
+     * @param EntityInterface $entity
      * @param false $withRelations
      *
      * @return bool
@@ -63,6 +84,19 @@ class DynamicMapper extends Mapper
             $this->getWriteConnection()->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * @param EntityInterface $entity
+     * @param $options
+     *
+     * @return Action\
+     */
+    public function newDeleteAction(EntityInterface $entity, $options)
+    {
+        $action = new Delete($this, $entity, $options);
+
+        return $this->behaviours->apply($this, __FUNCTION__, $action);
     }
 
     protected function assertCanPersistEntity($entity)

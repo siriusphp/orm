@@ -7,15 +7,10 @@ namespace Sirius\Orm\Tests\Generated\Mapper;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Orm\Query;
-use Sirius\Orm\Query\SoftDeleteTrait;
-use Sirius\Orm\Query\TimestampsTrait;
 use Sirius\Orm\Tests\Generated\Entity\Product;
 
 abstract class ProductQueryBase extends Query
 {
-    use TimestampsTrait;
-    use SoftDeleteTrait;
-
     protected $createdAtColumn = 'created_on';
     protected $updatedAtColumn = 'updated_on';
     protected $deletedAtColumn = 'deleted_on';
@@ -41,9 +36,43 @@ abstract class ProductQueryBase extends Query
         return parent::paginate($perPage, $page);
     }
 
+    public function orderByFirstCreated()
+    {
+        $this->orderBy($this->createdAtColumn . ' ASC');
+
+        return $this;
+    }
+
+    public function orderByLastCreated()
+    {
+        $this->orderBy($this->updatedAtColumn . ' DESC');
+
+        return $this;
+    }
+
+    public function orderByFirstUpdated()
+    {
+        $this->orderBy($this->updatedAtColumn . ' ASC');
+
+        return $this;
+    }
+
     protected function init()
     {
         parent::init();
-        $this->initSoftDelete();
+        $this->guards[] = $this->deletedAtColumn . ' IS NULL';
+    }
+
+    public function withTrashed()
+    {
+        $guards = [];
+        foreach ($this->guards as $k => $v) {
+            if ($v != $this->deletedAtColumn . ' IS NULL') {
+                $guards[$k] = $v;
+            }
+        }
+        $this->guards = $guards;
+
+        return $this;
     }
 }

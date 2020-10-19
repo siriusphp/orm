@@ -35,7 +35,7 @@ class ProductMapperTest extends BaseTestCase
         // test query with thrashed
         $this->assertNotNull($this->mapper->newQuery()->withTrashed()->find(1));
 
-        // test restroe
+        // test restore
         $this->mapper->restore(1);
         $product = $this->mapper->find(1);
         $this->assertNotNull($product);
@@ -44,4 +44,41 @@ class ProductMapperTest extends BaseTestCase
         $this->mapper->forceDelete($product);
         $this->assertRowDeleted('tbl_products', 'id = 1');
     }
+
+    public function test_timestamps()
+    {
+        /**
+         * @todo write tests
+         */
+    }
+
+    public function test_deep_save()
+    {
+        /**
+         * @todo write tests
+         */
+    }
+
+    public function test_aggregates_for_tags()
+    {
+        /**
+         * @todo write tests
+         */
+    }
+
+    public function test_foreign_guards_for_images()
+    {
+        /**
+         * @todo write tests
+         */
+    }
+
+    public function test_json_attribute()
+    {
+        /**
+         * @todo write tests
+         */
+    }
+
+
 }

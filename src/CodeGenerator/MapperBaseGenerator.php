@@ -6,8 +6,9 @@ namespace Sirius\Orm\CodeGenerator;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Dumper;
 use Nette\PhpGenerator\PhpNamespace;
+use Sirius\Orm\Action\Insert;
+use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviours;
-use Sirius\Orm\ConnectionLocator;
 use Sirius\Orm\Definition\Mapper;
 use Sirius\Orm\Definition\Relation;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
@@ -165,6 +166,9 @@ class MapperBaseGenerator
 
     protected function addSaveMethod()
     {
+        $this->namespace->addUse(Insert::class, 'InsertAction');
+        $this->namespace->addUse(Update::class, 'UpdateAction');
+
         $method = $this->class->addMethod('save')
                               ->setReturnType('bool');
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
@@ -185,6 +189,19 @@ try {
     $this->connectionLocator->lockToWrite(false);
     throw $e;
 }
+        ');
+
+        $method = $this->class->addMethod('newSaveAction')->setReturnType('UpdateAction');
+        $method->addParameter('entity')->setType($this->mapper->getEntityClass());
+        $method->addParameter('options');
+        $method->setBody('
+if ( ! $this->getHydrator()->getPk($entity) || $entity->getState() == StateEnum::NEW) {
+    $action = new InsertAction($this, $entity, $options);
+} else {
+    $action = new UpdateAction($this, $entity, $options);
+}
+
+return $this->behaviours->apply($this, __FUNCTION__, $action);
         ');
     }
 
@@ -208,6 +225,15 @@ try {
     $this->getWriteConnection()->rollBack();
     throw $e;
 }
+        ');
+
+        $method = $this->class->addMethod('newDeleteAction')->setReturnType('UpdateAction');
+        $method->addParameter('entity')->setType($this->mapper->getEntityClass());
+        $method->addParameter('options');
+        $method->setBody('
+$action = new DeleteAction($this, $entity, $options);
+
+return $this->behaviours->apply($this, __FUNCTION__, $action);
         ');
     }
 }

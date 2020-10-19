@@ -20,7 +20,9 @@ class CodeGenerationTest extends TestCase
                 $classFile    = $path . '/' . $file;
                 $snapshotFile = $snapshotsPath . '/' . $file;
                 if (is_file($classFile)) {
-                    $this->assertEquals(file_get_contents($snapshotFile), file_get_contents($classFile));
+                    $snapshot  = str_replace("\r", "", file_get_contents($snapshotFile));
+                    $generated = str_replace("\r", "", file_get_contents($classFile));
+                    $this->assertEquals($snapshot, $generated);
                 }
             }
         }

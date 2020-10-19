@@ -227,36 +227,6 @@ class Mapper
         return $this->newQuery()->find($pk, $load);
     }
 
-    /**
-     * @param EntityInterface $entity
-     * @param $options
-     *
-     * @return Update
-     */
-    public function newSaveAction(EntityInterface $entity, $options)
-    {
-        if ( ! $this->getHydrator()->getPk($entity)) {
-            $action = new Insert($this, $entity, $options);
-        } else {
-            $action = new Update($this, $entity, $options);
-        }
-
-        return $this->behaviours->apply($this, __FUNCTION__, $action);
-    }
-
-    /**
-     * @param EntityInterface $entity
-     * @param $options
-     *
-     * @return Action\
-     */
-    public function newDeleteAction(EntityInterface $entity, $options)
-    {
-        $action = new Delete($this, $entity, $options);
-
-        return $this->behaviours->apply($this, __FUNCTION__, $action);
-    }
-
     public function getReadConnection(): Connection
     {
         return $this->connectionLocator->getRead();
