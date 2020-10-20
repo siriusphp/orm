@@ -7,10 +7,10 @@ use Sirius\Orm\Action\AttachEntities;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\DetachEntities;
+use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
-use Sirius\Orm\Entity\LazyRelation;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\QueryHelper;
@@ -64,7 +64,7 @@ abstract class Relation
         $this->name          = $name;
         $this->options       = $options;
         $this->applyDefaults();
-        $this->keyPairs              = $this->computeKeyPairs();
+        $this->keyPairs = $this->computeKeyPairs();
 
         $this->nativeEntityHydrator  = $nativeMapper->getHydrator();
         $this->foreignEntityHydrator = $foreignMapper->getHydrator();

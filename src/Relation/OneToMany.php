@@ -68,9 +68,7 @@ class OneToMany extends Relation
 
         $found = $result[$nativeId] ?? [];
 
-        $collection = new Collection($found,
-            $this->foreignMapper->getHydrator(),
-            $this->foreignMapper->getConfig()->getPrimaryKey());
+        $collection = new Collection($found, $this->foreignMapper->getHydrator());
         $this->nativeEntityHydrator->set($nativeEntity, $this->name, $collection);
     }
 

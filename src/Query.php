@@ -230,7 +230,7 @@ class Query extends Select
         }
         $tracker->replaceRows($entities);
 
-        return new Collection($entities, $this->mapper->getHydrator(), $this->primaryKey);
+        return new Collection($entities, $this->mapper->getHydrator());
     }
 
     protected function newPaginatedCollectionFromRows(
@@ -253,8 +253,7 @@ class Query extends Select
             $totalCount,
             $perPage,
             $currentPage,
-            $this->mapper->getHydrator(),
-            $this->primaryKey
+            $this->mapper->getHydrator()
         );
     }
 
