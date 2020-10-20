@@ -55,7 +55,7 @@ class Mapper extends Base
 
     protected $queryScopes = [];
 
-    public static function make(string $name = null)
+    public static function make(string $name)
     {
         return (new static)->setName($name);
     }
@@ -92,7 +92,7 @@ class Mapper extends Base
             }
         }
 
-        if ( ! is_array($this->columns) || empty($this->columns)) {
+        if (empty($this->columns)) {
             $errors[] = 'Missing columns definitions';
         }
 

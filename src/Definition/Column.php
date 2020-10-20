@@ -561,7 +561,7 @@ class Column extends Base
 
     private function getCastMethodBody(string $type)
     {
-        switch ($this->getType()) {
+        switch ($type) {
             case static::TYPE_FLOAT:
                 return 'return $value === null ? $value : floatval($value);';
 
