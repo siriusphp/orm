@@ -7,7 +7,6 @@ use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Definition\Behaviour;
 use Sirius\Orm\Definition\Column;
 use Sirius\Orm\Definition\Mapper;
-use Sirius\Orm\Query\SoftDeleteTrait;
 
 class Timestamps extends Behaviour
 {
@@ -18,7 +17,7 @@ class Timestamps extends Behaviour
 
     static public function make($createdAtColumn = 'created_at', $updatedAtColumn = 'updated_at')
     {
-        return parent::make()
+        return (new static)
                      ->setCreatedAtColumn($createdAtColumn)
                      ->setUpdatedAtColumn($updatedAtColumn);
     }

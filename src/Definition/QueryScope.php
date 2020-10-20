@@ -24,7 +24,7 @@ class QueryScope extends Base
     /**
      * @param mixed $name
      *
-     * @return ComputedProperty
+     * @return self
      */
     public function setName($name)
     {

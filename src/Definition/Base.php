@@ -7,12 +7,6 @@ use Nette\PhpGenerator\ClassType;
 
 abstract class Base
 {
-
-    static function make()
-    {
-        return new static;
-    }
-
     public function isValid()
     {
         return count($this->getErrors()) === 0;

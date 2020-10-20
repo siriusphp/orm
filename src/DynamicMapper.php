@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
+use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
@@ -90,7 +91,7 @@ class DynamicMapper extends Mapper
      * @param EntityInterface $entity
      * @param $options
      *
-     * @return Action\
+     * @return BaseAction
      */
     public function newDeleteAction(EntityInterface $entity, $options)
     {

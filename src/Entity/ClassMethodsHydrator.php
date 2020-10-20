@@ -28,24 +28,14 @@ class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInte
         $this->mapperConfig = $mapperConfig;
     }
 
-    /**
-     * @param CastingManager $castingManager
-     *
-     * @return GenericHydrator
-     */
-    public function setCastingManager(CastingManager $castingManager = null): GenericHydrator
+    public function setCastingManager(CastingManager $castingManager = null): ClassMethodsHydrator
     {
         $this->castingManager = $castingManager;
 
         return $this;
     }
 
-    /**
-     * @param MapperConfig $mapperConfig
-     *
-     * @return GenericHydrator
-     */
-    public function setMapperConfig(MapperConfig $mapperConfig): GenericHydrator
+    public function setMapperConfig(MapperConfig $mapperConfig): ClassMethodsHydrator
     {
         $this->mapperConfig = $mapperConfig;
 
@@ -55,7 +45,7 @@ class ClassMethodsHydrator implements HydratorInterface, CastingManagerAwareInte
     /**
      * @param array $attributes
      *
-     * @return mixed|GenericEntity
+     * @return mixed|ClassMethodsEntity
      */
     public function hydrate(array $attributes = [])
     {

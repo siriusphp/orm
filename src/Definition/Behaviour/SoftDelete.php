@@ -11,14 +11,10 @@ use Sirius\Orm\Definition\Mapper;
 class SoftDelete extends Behaviour
 {
     protected $deletedAtColumn = 'deleted_at';
-    /**
-     * @var Mapper
-     */
-    protected $mapper;
 
     static function make($deletedAtColumn = 'deleted_at')
     {
-        return parent::make()->setDeletedAtColumn($deletedAtColumn);
+        return (new static)->setDeletedAtColumn($deletedAtColumn);
     }
 
     function getName(): string

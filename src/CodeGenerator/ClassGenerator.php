@@ -17,6 +17,11 @@ class ClassGenerator
      */
     protected $orm;
 
+    /**
+     * @var PsrPrinter
+     */
+    protected $classPrinter;
+
     protected $files = [];
 
     public function __construct(Orm $orm)
@@ -68,7 +73,7 @@ class ClassGenerator
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -89,7 +94,7 @@ class ClassGenerator
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
 
@@ -106,7 +111,7 @@ class ClassGenerator
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -128,7 +133,7 @@ class ClassGenerator
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -148,14 +153,9 @@ class ClassGenerator
             'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
-
-        $class = new ClassType(
-            $mapper->getClassName() . 'Base',
-            new PhpNamespace($mapper->getNamespace())
-        );
     }
 
     private function generateEntityClass(Mapper $mapper)
@@ -175,7 +175,7 @@ class ClassGenerator
             'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . $this->classPrinter->printNamespace($class->getNamespace())
+                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
 

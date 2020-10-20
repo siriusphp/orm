@@ -92,7 +92,7 @@ class Mapper extends Base
             }
         }
 
-        if ( ! $this->columns || empty($this->columns)) {
+        if ( ! is_array($this->columns) || empty($this->columns)) {
             $errors[] = 'Missing columns definitions';
         }
 
@@ -362,7 +362,7 @@ class Mapper extends Base
     public function addAutoIncrementColumn($name = 'id')
     {
         return $this->addColumn(
-            Column::integer('id', true)
+            Column::integer($name, true)
                   ->setAutoIncrement(true)
         );
     }
