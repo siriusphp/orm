@@ -225,9 +225,4 @@ class MapperConfig
 
         return $this->tableReference;
     }
-
-    public function addQueryScope($scope, callable $callback)
-    {
-        $this->queryScopes[$scope] = $callback;
-    }
 }

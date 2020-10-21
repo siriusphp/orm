@@ -11,7 +11,6 @@ use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\QueryBuilder;
 use Sirius\Orm\Tests\Generated\Entity\Language;
 
 /**
@@ -22,8 +21,6 @@ abstract class LanguageMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->queryBuilder      = QueryBuilder::getInstance();
-        $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Language',
             'primaryKey' => 'id',
@@ -54,7 +51,7 @@ abstract class LanguageMapperBase extends Mapper
 
     public function find($pk, array $load = []): ?Language
     {
-        return parent::find($pk, $load);
+        return $this->newQuery()->find($pk, $load);
     }
 
     public function newQuery(): LanguageQuery

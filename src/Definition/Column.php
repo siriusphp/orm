@@ -534,7 +534,7 @@ class Column extends Base
             }
             $class->addComment(sprintf('@property %s $%s', $type, $name));
 
-            if (($body = $this->getCastMethodBody($type))) {
+            if (($body = $this->getCastMethodBody($this->type))) {
                 $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'cast'));
                 $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
                 $cast->addParameter('value');

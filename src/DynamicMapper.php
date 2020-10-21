@@ -8,6 +8,8 @@ use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Entity\ClassMethodsEntity;
+use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 
@@ -98,6 +100,17 @@ class DynamicMapper extends Mapper
         $action = new Delete($this, $entity, $options);
 
         return $this->behaviours->apply($this, __FUNCTION__, $action);
+    }
+
+    /**
+     * @param mixed $pk Value of the primary key
+     * @param array $load Eager load relations
+     *
+     * @return null|EntityInterface|GenericEntity|ClassMethodsEntity
+     */
+    public function find($pk, array $load = []): ?EntityInterface
+    {
+        return $this->newQuery()->find($pk, $load);
     }
 
     protected function assertCanPersistEntity($entity)

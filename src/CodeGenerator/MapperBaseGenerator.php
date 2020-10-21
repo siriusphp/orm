@@ -15,7 +15,6 @@ use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\QueryBuilder;
 
 class MapperBaseGenerator
 {
@@ -81,15 +80,11 @@ class MapperBaseGenerator
     protected function addInitMethod()
     {
         $this->namespace->addUse(MapperConfig::class);
-        $this->namespace->addUse(QueryBuilder::class);
         $this->namespace->addUse(Behaviours::class);
 
         $method = $this->class->addMethod('init')->setVisibility(ClassType::VISIBILITY_PROTECTED);
 
-        $body = '$this->queryBuilder      = QueryBuilder::getInstance();' . PHP_EOL;
-        $body .= '$this->behaviours        = new Behaviours();' . PHP_EOL;
-
-        $body .= '$this->mapperConfig      = MapperConfig::fromArray(';
+        $body = '$this->mapperConfig      = MapperConfig::fromArray(';
 
         $config = [
             'entityClass'        => $this->mapper->getEntityNamespace() . '\\' . $this->mapper->getEntityClass(),
@@ -151,7 +146,7 @@ class MapperBaseGenerator
                               ->setReturnType($this->mapper->getEntityClass());
         $method->addParameter('pk');
         $method->addParameter('load', [])->setType('array');
-        $method->setBody('return parent::find($pk, $load);');
+        $method->setBody('return $this->newQuery()->find($pk, $load);');
     }
 
     protected function addNewQueryMethod()

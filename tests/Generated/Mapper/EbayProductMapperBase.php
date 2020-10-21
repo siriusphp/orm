@@ -11,7 +11,6 @@ use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\QueryBuilder;
 use Sirius\Orm\Tests\Generated\Entity\EbayProduct;
 
 /**
@@ -22,8 +21,6 @@ abstract class EbayProductMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->queryBuilder      = QueryBuilder::getInstance();
-        $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\EbayProduct',
             'primaryKey' => 'id',
@@ -46,7 +43,7 @@ abstract class EbayProductMapperBase extends Mapper
 
     public function find($pk, array $load = []): ?EbayProduct
     {
-        return parent::find($pk, $load);
+        return $this->newQuery()->find($pk, $load);
     }
 
     public function newQuery(): EbayProductQuery

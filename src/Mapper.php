@@ -40,11 +40,6 @@ class Mapper
     protected $hydrator;
 
     /**
-     * @var QueryBuilder
-     */
-    protected $queryBuilder;
-
-    /**
      * @var Behaviours
      */
     protected $behaviours;
@@ -73,12 +68,11 @@ class Mapper
     public function __construct(ConnectionLocator $connectionLocator)
     {
         $this->connectionLocator = $connectionLocator;
+        $this->behaviours        = new Behaviours();
         $this->init();
     }
 
     protected function init() {
-        $this->queryBuilder      = QueryBuilder::getInstance();
-        $this->behaviours        = new Behaviours();
         $this->hydrator          = new GenericHydrator();
     }
 
@@ -211,20 +205,9 @@ class Mapper
      */
     public function newQuery()
     {
-        $query = $this->queryBuilder->newQuery($this->getReadConnection(), $this);
+        $query = new Query($this->getReadConnection(), $this);
 
         return $this->behaviours->apply($this, __FUNCTION__, $query);
-    }
-
-    /**
-     * @param mixed $pk Value of the primary key
-     * @param array $load Eager load relations
-     *
-     * @return null|EntityInterface
-     */
-    public function find($pk, array $load = [])
-    {
-        return $this->newQuery()->find($pk, $load);
     }
 
     public function getReadConnection(): Connection

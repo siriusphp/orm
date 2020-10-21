@@ -12,7 +12,7 @@ services:
     #ports:
     #  - "9000:9000"
     networks:
-      - siriusorm-network
+      - local
 
   ### MySQL ################################################
   mysql:
@@ -30,13 +30,9 @@ services:
     #ports:
     #  - "3306:3306"
     networks:
-      - siriusorm-network
+      - local
 
 #Docker Networks
 networks:
-  siriusorm-network:
+  local:
     driver: bridge
-#Volumes
-volumes:
-  siriusorm-local:
-    driver: local

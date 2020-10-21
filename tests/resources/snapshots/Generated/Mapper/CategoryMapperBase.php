@@ -11,7 +11,6 @@ use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\QueryBuilder;
 use Sirius\Orm\Tests\Generated\Entity\Category;
 
 /**
@@ -22,8 +21,6 @@ abstract class CategoryMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->queryBuilder      = QueryBuilder::getInstance();
-        $this->behaviours        = new Behaviours();
         $this->mapperConfig      = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Category',
             'primaryKey' => 'id',
@@ -82,7 +79,7 @@ abstract class CategoryMapperBase extends Mapper
 
     public function find($pk, array $load = []): ?Category
     {
-        return parent::find($pk, $load);
+        return $this->newQuery()->find($pk, $load);
     }
 
     public function newQuery(): CategoryQuery
