@@ -28,7 +28,7 @@ abstract class ProductMapperBase extends Mapper
 
     protected function init()
     {
-        $this->mapperConfig      = MapperConfig::fromArray([
+        $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Product',
             'primaryKey' => 'id',
             'table' => 'tbl_products',
@@ -46,7 +46,7 @@ abstract class ProductMapperBase extends Mapper
                 'deleted_on' => 'DateTime',
             ],
         ]);
-        $this->hydrator      = new GenericHydrator;
+        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();

@@ -107,8 +107,7 @@ class BaseTestCase extends TestCase
             $this->orm->register($name, function ($orm) use ($name, $connectionLocator) {
                 $class = 'Sirius\\Orm\\Tests\\Generated\\Mapper\\' . Str::className(Inflector::singularize($name)) . 'Mapper';
                 /** @var DynamicMapper $mapper */
-                $mapper = new $class($connectionLocator);
-                $mapper->setOrm($orm);
+                $mapper = new $class($this->orm);
 
                 return $mapper;
             });

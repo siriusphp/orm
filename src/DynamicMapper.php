@@ -19,6 +19,23 @@ use Sirius\Orm\Exception\FailedActionException;
  */
 class DynamicMapper extends Mapper
 {
+
+    public static function make(Orm $orm, MapperConfig $mapperConfig)
+    {
+        $mapper               = new static($orm);
+        $mapper->mapperConfig = $mapperConfig;
+
+        if ( ! empty($mapperConfig->getBehaviours())) {
+            $mapper->use(...$mapperConfig->getBehaviours());
+        }
+
+        $mapper->relations = $mapperConfig->getRelations();
+
+        $mapper->hydrator->setMapperConfig($mapperConfig);
+
+        return $mapper;
+    }
+
     /**
      * @param EntityInterface $entity
      * @param bool|array $withRelations relations to be also updated

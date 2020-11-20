@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm;
 
 use Sirius\Orm\Behaviour\BehaviourInterface;
-use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\GenericEntity;
-use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Helpers\QueryHelper;
 use Sirius\Orm\Relation\Relation;
 
@@ -20,12 +18,13 @@ class MapperConfig
 {
     const ENTITY_CLASS = 'entityClass';
     const PRIMARY_KEY = 'primaryKey';
+    const NAME = 'name';
     const TABLE = 'table';
     const TABLE_ALIAS = 'tableAlias';
     const COLUMNS = 'columns';
     const COLUMN_ATTRIBUTE_MAP = 'columnAttributeMap';
     const CASTS = 'casts';
-    const DEFAULT_ATTRIBUTES = 'defaultEntityAttributes';
+    const ATTRIBUTE_DEFAULTS = 'attributeDefaults';
     const ENTITY_HYDRATOR = 'entityHydrator';
     const BEHAVIOURS = 'behaviours';
     const RELATIONS = 'relations';
@@ -80,7 +79,7 @@ class MapperConfig
      * Default attributes
      * @var array
      */
-    protected $defaultEntityAttributes = [];
+    protected $attributeDefaults = [];
 
     /**
      * List of behaviours to be attached to the mapper
@@ -180,9 +179,9 @@ class MapperConfig
     /**
      * @return array
      */
-    public function getDefaultEntityAttributes(): array
+    public function getAttributeDefaults(): array
     {
-        return $this->defaultEntityAttributes;
+        return $this->attributeDefaults;
     }
 
     /**

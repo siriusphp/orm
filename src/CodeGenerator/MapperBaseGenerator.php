@@ -84,7 +84,7 @@ class MapperBaseGenerator
 
         $method = $this->class->addMethod('init')->setVisibility(ClassType::VISIBILITY_PROTECTED);
 
-        $body = '$this->mapperConfig      = MapperConfig::fromArray(';
+        $body = '$this->mapperConfig = MapperConfig::fromArray(';
 
         $config = [
             'entityClass'        => $this->mapper->getEntityNamespace() . '\\' . $this->mapper->getEntityClass(),
@@ -105,10 +105,10 @@ class MapperBaseGenerator
 
         if ($this->mapper->getEntityStyle() == Mapper::ENTITY_STYLE_PROPERTIES) {
             $this->namespace->addUse(GenericHydrator::class);
-            $body .= '$this->hydrator      = new GenericHydrator;' . PHP_EOL;
+            $body .= '$this->hydrator     = new GenericHydrator($this->orm->getCastingManager());' . PHP_EOL;
         } else {
             $this->namespace->addUse(ClassMethodsHydrator::class);
-            $body .= '$this->hydrator      = new ClassMethodsHydrator;' . PHP_EOL;
+            $body .= '$this->hydrator     = new ClassMethodsHydrator($this->orm->getCastingManager());' . PHP_EOL;
         }
         $body .= '$this->hydrator->setMapperConfig($this->mapperConfig);' . PHP_EOL;
 

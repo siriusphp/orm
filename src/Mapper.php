@@ -3,14 +3,10 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
-use Sirius\Orm\Action\Delete;
-use Sirius\Orm\Action\Insert;
-use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\GenericHydrator;
-use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Relation\Relation;
 
 /**
@@ -49,38 +45,23 @@ class Mapper
      */
     protected $relations = [];
 
-    public static function make(ConnectionLocator $connectionLocator, MapperConfig $mapperConfig)
+    public function __construct(Orm $orm)
     {
-        $mapper               = new static($connectionLocator);
-        $mapper->mapperConfig = $mapperConfig;
-
-        if ( ! empty($mapperConfig->getBehaviours())) {
-            $mapper->use(...$mapperConfig->getBehaviours());
-        }
-
-        $mapper->relations = $mapperConfig->getRelations();
-
-        $mapper->hydrator->setMapperConfig($mapperConfig);
-
-        return $mapper;
-    }
-
-    public function __construct(ConnectionLocator $connectionLocator)
-    {
-        $this->connectionLocator = $connectionLocator;
+        $this->orm               = $orm;
+        $this->connectionLocator = $orm->getConnectionLocator();
         $this->behaviours        = new Behaviours();
+        $this->hydrator          = new GenericHydrator($this->orm->getCastingManager());
         $this->init();
     }
 
-    protected function init() {
-        $this->hydrator          = new GenericHydrator();
+    protected function init()
+    {
     }
 
     public function __call(string $method, array $params)
     {
         switch ($method) {
             case 'where':
-            case 'columns':
             case 'orderBy':
                 $query = $this->newQuery();
 
@@ -88,12 +69,6 @@ class Mapper
         }
 
         throw new \BadMethodCallException("Unknown method {$method} for class " . get_class($this));
-    }
-
-    public function setOrm(Orm $orm)
-    {
-        $this->orm = $orm;
-        $this->hydrator->setCastingManager($this->orm->getCastingManager());
     }
 
     /**
@@ -154,7 +129,7 @@ class Mapper
     {
         $entity = $this->getHydrator()
                        ->hydrate(array_merge(
-                           $this->getConfig()->getDefaultEntityAttributes(),
+                           $this->getConfig()->getAttributeDefaults(),
                            $data
                        ));
 

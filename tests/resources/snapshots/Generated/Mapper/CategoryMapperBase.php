@@ -21,7 +21,7 @@ abstract class CategoryMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->mapperConfig      = MapperConfig::fromArray([
+        $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Category',
             'primaryKey' => 'id',
             'table' => 'categories',
@@ -31,7 +31,7 @@ abstract class CategoryMapperBase extends Mapper
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'parent_id' => 'int', 'position' => 'int', 'name' => 'string'],
         ]);
-        $this->hydrator      = new GenericHydrator;
+        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();

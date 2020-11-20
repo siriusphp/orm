@@ -21,7 +21,7 @@ abstract class ImageMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->mapperConfig      = MapperConfig::fromArray([
+        $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Image',
             'primaryKey' => 'id',
             'table' => 'tbl_images',
@@ -38,7 +38,7 @@ abstract class ImageMapperBase extends Mapper
                 'description' => 'array',
             ],
         ]);
-        $this->hydrator      = new GenericHydrator;
+        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();

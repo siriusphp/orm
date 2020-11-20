@@ -21,7 +21,7 @@ abstract class EbayProductMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->mapperConfig      = MapperConfig::fromArray([
+        $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\EbayProduct',
             'primaryKey' => 'id',
             'table' => 'tbl_ebay_products',
@@ -31,7 +31,7 @@ abstract class EbayProductMapperBase extends Mapper
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'product_id' => 'int', 'price' => 'decimal:2', 'is_active' => 'bool'],
         ]);
-        $this->hydrator      = new GenericHydrator;
+        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();

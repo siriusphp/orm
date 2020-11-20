@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm;
 
 use InvalidArgumentException;
-use Sirius\Orm\Contract\CastingManagerAwareInterface;
+use Sirius\Orm\Contract\MapperLocatorInterface;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Relation\RelationConfig;
@@ -24,41 +24,52 @@ class Orm
     /**
      * @var ConnectionLocator
      */
-
     protected $connectionLocator;
+
     /**
      * @var CastingManager
      */
     protected $castingManager;
 
     /**
+     * @var MapperLocatorInterface|null
+     */
+    protected $mapperLocator;
+
+    /**
      * Orm constructor.
      *
      * @param ConnectionLocator $connectionLocator
+     * @param CastingManager|null $castingManager
+     * @param MapperLocatorInterface|null $mapperLocator
      */
-    public function __construct(ConnectionLocator $connectionLocator = null, CastingManager $castingManager = null)
-    {
+    public function __construct(
+        ConnectionLocator $connectionLocator,
+        CastingManager $castingManager = null,
+        MapperLocatorInterface $mapperLocator = null
+    ) {
         $this->connectionLocator = $connectionLocator;
         $this->castingManager    = $castingManager ?: new CastingManager();
+        $this->mapperLocator     = $mapperLocator;
     }
 
     /**
      * Register a mapper with a name
      *
      * @param string $name
-     * @param Mapper|MapperConfig|callable $mapperOrConfigOrFactory
+     * @param Mapper|MapperConfig|callable $mapper
      *
      * @return $this
      */
-    public function register(string $name, $mapperOrConfigOrFactory): self
+    public function register(string $name, $mapper): self
     {
-        if ($mapperOrConfigOrFactory instanceof MapperConfig || is_callable($mapperOrConfigOrFactory)) {
-            $this->lazyMappers[$name] = $mapperOrConfigOrFactory;
-        } elseif ($mapperOrConfigOrFactory instanceof Mapper) {
-            $this->mappers[$name] = $mapperOrConfigOrFactory;
+        if ($mapper instanceof Mapper) {
+            $this->mappers[$name] = $mapper;
+        } elseif (is_callable($mapper) || is_string($mapper) || $mapper instanceof MapperConfig) {
+            $this->lazyMappers[$name] = $mapper;
         } else {
-            throw new InvalidArgumentException('$mapperOrConfigOrFactory must be a Mapper instance, 
-            a MapperConfig instance or a callable that returns a Mapper instance');
+            throw new \InvalidArgumentException('The $mapper argument must be a Mapper object, 
+                a MapperConfig object, a callable or a string that can be used by the mapper locator');
         }
 
         return $this;
@@ -94,10 +105,7 @@ class Orm
             throw new InvalidArgumentException(sprintf('Mapper named %s is not registered', $name));
         }
 
-        $mapper = $this->mappers[$name];
-        $mapper->setOrm($this);
-
-        return $mapper;
+        return $this->mappers[$name];
     }
 
     /**
@@ -106,6 +114,11 @@ class Orm
     public function getCastingManager(): CastingManager
     {
         return $this->castingManager;
+    }
+
+    public function getConnectionLocator(): ConnectionLocator
+    {
+        return $this->connectionLocator;
     }
 
     /**
@@ -145,13 +158,25 @@ class Orm
     protected function buildMapper($mapperConfigOrFactory): Mapper
     {
         if ($mapperConfigOrFactory instanceof MapperConfig) {
-            return DynamicMapper::make($this->connectionLocator, $mapperConfigOrFactory);
+            return DynamicMapper::make($this, $mapperConfigOrFactory);
         }
 
-        $mapper = $mapperConfigOrFactory($this);
-        if ( ! $mapper instanceof Mapper) {
+        $mapper = null;
+        if (is_callable($mapperConfigOrFactory)) {
+            $mapper = $mapperConfigOrFactory($this);
+        } elseif ($this->mapperLocator) {
+            $mapper = $this->mapperLocator->get($mapperConfigOrFactory);
+        }
+
+        if (! $mapper) {
             throw new InvalidArgumentException(
-                'The mapper generated from the factory is not a valid `Mapper` instance'
+                'The mapper could not be generated/retrieved.'
+            );
+        }
+
+        if (! $mapper instanceof Mapper) {
+            throw new InvalidArgumentException(
+                'The mapper generated from the factory is not a valid `Mapper` instance.'
             );
         }
 

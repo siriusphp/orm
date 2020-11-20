@@ -21,7 +21,7 @@ abstract class TagMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->mapperConfig      = MapperConfig::fromArray([
+        $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Tag',
             'primaryKey' => 'id',
             'table' => 'tags',
@@ -31,7 +31,7 @@ abstract class TagMapperBase extends Mapper
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'name' => 'string'],
         ]);
-        $this->hydrator      = new GenericHydrator;
+        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();

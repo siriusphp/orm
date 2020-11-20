@@ -21,7 +21,7 @@ abstract class LanguageMapperBase extends Mapper
 {
     protected function init()
     {
-        $this->mapperConfig      = MapperConfig::fromArray([
+        $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Language',
             'primaryKey' => 'id',
             'table' => 'tbl_languages',
@@ -39,7 +39,7 @@ abstract class LanguageMapperBase extends Mapper
                 'description' => 'string',
             ],
         ]);
-        $this->hydrator      = new GenericHydrator;
+        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapperConfig($this->mapperConfig);
 
         $this->initRelations();

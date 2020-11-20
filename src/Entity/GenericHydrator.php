@@ -11,7 +11,7 @@ use Sirius\Orm\Contract\LazyLoader;
 use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\MapperConfig;
 
-class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
+class GenericHydrator implements HydratorInterface
 {
     /**
      * @var CastingManager
@@ -23,16 +23,9 @@ class GenericHydrator implements HydratorInterface, CastingManagerAwareInterface
      */
     protected $mapperConfig;
 
-    /**
-     * @param ?CastingManager $castingManager
-     *
-     * @return GenericHydrator
-     */
-    public function setCastingManager(CastingManager $castingManager = null): GenericHydrator
+    public function __construct(CastingManager $castingManager)
     {
         $this->castingManager = $castingManager;
-
-        return $this;
     }
 
     /**

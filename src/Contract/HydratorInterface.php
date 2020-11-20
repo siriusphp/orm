@@ -10,8 +10,6 @@ interface HydratorInterface
 {
     public function setMapperConfig(MapperConfig $mapperConfig);
 
-    public function setCastingManager(CastingManager $castingManager = null);
-
     public function hydrate(array $attributes = []);
 
     public function extract(EntityInterface $entity);
