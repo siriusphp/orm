@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
+use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
-use Sirius\Orm\Behaviours;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
@@ -107,7 +107,7 @@ abstract class ProductLanguageMapperBase extends Mapper
         }
     }
 
-    public function newDeleteAction(ProductLanguage $entity, $options): UpdateAction
+    public function newDeleteAction(ProductLanguage $entity, $options): DeleteAction
     {
         $action = new DeleteAction($this, $entity, $options);
 

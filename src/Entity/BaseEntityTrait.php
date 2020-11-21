@@ -52,6 +52,8 @@ trait BaseEntityTrait
     /**
      * Returns an array representation of the entity
      *
+     * @todo implement option to force loading of specific relations (for when the relations are lazy loaded)
+     *
      * @return mixed
      */
     public function toArray()

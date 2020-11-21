@@ -10,7 +10,7 @@ use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Orm\Definition\Mapper;
 
-class EntityBaseGeneratorUsingObjectProperties
+class EntityBaseGenerator
 {
     /**
      * @var ClassType
@@ -49,9 +49,13 @@ class EntityBaseGeneratorUsingObjectProperties
 
     protected function build()
     {
-        $this->namespace->addUse(\Sirius\Orm\Entity\GenericEntity::class);
-
-        $this->class->setExtends('GenericEntity');
+        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            $this->namespace->addUse(\Sirius\Orm\Entity\GenericEntity::class);
+            $this->class->setExtends('GenericEntity');
+        } else {
+            $this->namespace->addUse(\Sirius\Orm\Entity\ClassMethodsEntity::class);
+            $this->class->setExtends('ClassMethodsEntity');
+        }
 
         $this->class = $this->mapper->observeBaseEntityClass($this->class);
     }

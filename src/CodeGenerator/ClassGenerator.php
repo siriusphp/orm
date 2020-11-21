@@ -140,11 +140,7 @@ class ClassGenerator
 
     private function generateBaseEntityClass(Mapper $mapper)
     {
-        if ($mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            $class = (new EntityBaseGeneratorUsingObjectProperties($mapper))->getClass();
-        } else {
-            $class = (new QueryBaseGenerator($mapper))->getClass();
-        }
+        $class = (new EntityBaseGenerator($mapper))->getClass();
 
         $file = new PhpFile();
         $file->setStrictTypes(true);

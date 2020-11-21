@@ -6,6 +6,7 @@ namespace Sirius\Orm\CodeGenerator;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Dumper;
 use Nette\PhpGenerator\PhpNamespace;
+use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Behaviours;
@@ -80,7 +81,6 @@ class MapperBaseGenerator
     protected function addInitMethod()
     {
         $this->namespace->addUse(MapperConfig::class);
-        $this->namespace->addUse(Behaviours::class);
 
         $method = $this->class->addMethod('init')->setVisibility(ClassType::VISIBILITY_PROTECTED);
 
@@ -222,7 +222,8 @@ try {
 }
         ');
 
-        $method = $this->class->addMethod('newDeleteAction')->setReturnType('UpdateAction');
+        $this->namespace->addUse(Delete::class, 'DeleteAction');
+        $method = $this->class->addMethod('newDeleteAction')->setReturnType('DeleteAction');
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
         $method->addParameter('options');
         $method->setBody('

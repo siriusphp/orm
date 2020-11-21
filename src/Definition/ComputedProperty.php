@@ -108,29 +108,40 @@ class ComputedProperty extends Base
         $name = $this->getName();
         $type = $this->getType();
 
+        if ($type && class_exists($type)) {
+            $class->getNamespace()->addUse($type);
+            $type = basename($type);
+        }
+
         if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            if ($type && class_exists($type)) {
-                $class->getNamespace()->addUse($type);
-                $type = basename($type);
-            }
             $class->addComment(sprintf('@property %s $%s', $type ?: 'mixed', $name));
 
             if (($body = $this->getSetterBody())) {
-                $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
-                $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
-                $cast->addParameter('value');
-                $cast->addBody($body);
+                $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
+                $setter->setVisibility(ClassType::VISIBILITY_PROTECTED);
+                $setter->addParameter('value');
+                $setter->addBody($body);
             }
 
             if (($body = $this->getGetterBody())) {
-                $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
-                $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
-                $cast->addBody($body);
+                $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
+                $getter->setVisibility(ClassType::VISIBILITY_PROTECTED);
+                $getter->addBody($body);
             }
         } else {
-            /**
-             * @todo add getters and setters
-             */
+            if (($body = $this->getSetterBody())) {
+                $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
+                $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
+                $setter->addParameter('value');
+                $setter->addBody($body);
+            }
+
+            if (($body = $this->getGetterBody())) {
+                $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
+                $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
+                $getter->addBody($body);
+                $getter->setReturnType($type);
+            }
         }
 
         return parent::observeBaseEntityClass($class);

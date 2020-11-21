@@ -72,6 +72,7 @@ $orm->addMapper(
 $orm->addMapper(
     Mapper::make('ebay_products')
           ->setTable('tbl_ebay_products')
+          ->setEntityStyle(Mapper::ENTITY_STYLE_METHODS)
         // columns
           ->addAutoIncrementColumn()
           ->addColumn(Column::bigInteger('product_id', true)->setIndex(true))
@@ -79,9 +80,6 @@ $orm->addMapper(
           ->addColumn(Column::bool('is_active')->setIndex(true))
 );
 
-/**
- * @todo implement a simpler way to do this as 'languages' is alreayd defined
- */
 $orm->addMapper(
     Mapper::make('product_languages')
           ->setTable('tbl_languages')

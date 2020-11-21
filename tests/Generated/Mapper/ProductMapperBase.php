@@ -9,7 +9,6 @@ use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\SoftDelete as SoftDeleteAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Behaviour\Timestamps;
-use Sirius\Orm\Behaviours;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;

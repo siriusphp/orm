@@ -527,23 +527,30 @@ class Column extends Base
         $name = $this->getAttributeName() ?: $this->getName();
         $type = $this->getAttributeTypeForEntityClass();
 
-        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            if (class_exists($type)) {
-                $class->getNamespace()->addUse($type);
-                $type = basename($type);
-            }
-            $class->addComment(sprintf('@property %s $%s', $type, $name));
+        if (class_exists($type)) {
+            $class->getNamespace()->addUse($type);
+            $type = basename($type);
+        }
 
-            if (($body = $this->getCastMethodBody($this->type))) {
-                $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'cast'));
-                $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
-                $cast->addParameter('value');
-                $cast->addBody($body);
-            }
+        if (($body = $this->getCastMethodBody($this->type))) {
+            $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'cast'));
+            $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
+            $cast->addParameter('value');
+            $cast->addBody($body);
+        }
+
+        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            $class->addComment(sprintf('@property %s $%s', $type, $name));
         } else {
-            /**
-             * @todo add getters and setters
-             */
+            $setter = $class->addMethod(Str::methodName($name, 'set'));
+            $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
+            $setter->addParameter('value');
+            $setter->addBody('$this->set(\''. $name. '\', $value);');
+
+            $getter = $class->addMethod(Str::methodName($name, 'get'));
+            $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
+            $getter->addBody('return $this->get(\''. $name. '\');');
+            $getter->setReturnType($type);
         }
 
         return parent::observeBaseEntityClass($class);

@@ -135,9 +135,6 @@ abstract class BaseAction implements ActionInterface
             return;
         }
 
-        /**
-         * @todo check if the relations should be added or not depending on the `relations` option
-         */
         foreach ($this->mapper->getRelations() as $name) {
             $this->mapper->getRelation($name)->addActions($this);
         }
