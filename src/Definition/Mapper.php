@@ -53,8 +53,6 @@ class Mapper extends Base
 
     protected $computedProperties = [];
 
-    protected $queryScopes = [];
-
     public static function make(string $name)
     {
         return (new static)->setName($name);
@@ -428,17 +426,6 @@ class Mapper extends Base
 
     public function getRelations() {
         return $this->relations;
-    }
-
-    public function addQueryScope($name, QueryScope $queryScope)
-    {
-        $queryScope->setMapper($this);
-        if ( ! $queryScope->getName()) {
-            $queryScope->setName($name);
-        }
-        $this->queryScopes[$name] = $queryScope;
-
-        return $this;
     }
 
     public function addComputedProperty(ComputedProperty $property)
