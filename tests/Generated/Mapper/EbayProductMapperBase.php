@@ -8,6 +8,7 @@ use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;

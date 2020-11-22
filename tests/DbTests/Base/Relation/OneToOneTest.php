@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
-use Sirius\Orm\DynamicMapper;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
@@ -12,11 +12,11 @@ class OneToOneTest extends BaseTestCase
 {
 
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $productsMapper;
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $ebayProductsMapper;
 

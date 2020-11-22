@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\DbTests\BaseGenerated\Mapper;
 
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Tests\BaseTestCase;
 use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
@@ -47,30 +48,54 @@ class ProductMapperTest extends BaseTestCase
 
     public function test_timestamps()
     {
-        /**
-         * @todo write tests
-         */
+        $product = $this->mapper->newEntity(['sku' => 'sku_1']);
+        $product->setState(StateEnum::NEW);
+        $this->mapper->save($product);
+        $this->assertNotNull($product->created_on);
     }
 
     public function test_deep_save()
     {
-        /**
-         * @todo write tests
-         */
+        $product = $this->mapper->newEntity([
+            'sku'    => 'sku_1',
+            'images' => [
+                [
+                    'name' => 'a.jpg'
+                ],
+                [
+                    'name' => 'b.jpg'
+                ],
+            ]
+        ]);
+        print_r($product->images);
+        $this->mapper->save($product, true);
+
+        $product = $this->mapper->find($product->id);
+        print_r($product->images->toArray());
     }
 
     public function test_aggregates_for_tags()
     {
-        /**
-         * @todo write tests
-         */
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1']);
+        $this->insertRow('tags', ['id' => 1, 'name' => 'a']);
+        $this->insertRow('tags', ['id' => 2, 'name' => 'b']);
+        $this->insertRow('tbl_links_to_tags', ['tagable_id' => 1, 'tagable_type' => 'product', 'tag_id' => 1]);
+        $this->insertRow('tbl_links_to_tags', ['tagable_id' => 1, 'tagable_type' => 'product', 'tag_id' => 2]);
+        $this->insertRow('tbl_links_to_tags', ['tagable_id' => 1, 'tagable_type' => 'product', 'tag_id' => 3]);
+        $this->insertRow('tbl_links_to_tags', ['tagable_id' => 1, 'tagable_type' => 'category', 'tag_id' => 3]);
+
+        $product = $this->mapper->find(1);
+        $this->assertEquals(2, $product->tags_count);
     }
 
     public function test_foreign_guards_for_images()
     {
-        /**
-         * @todo write tests
-         */
+        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1']);
+        $this->insertRow('images', ['content_id' => 1, 'content_type' => 'products', 'name' => 'a.jpg']);
+        $this->insertRow('images', ['content_id' => 1, 'content_type' => 'categories', 'name' => 'b.jpg']);
+
+        $product = $this->mapper->find(1);
+        $this->assertEquals(1, count($product->images));
     }
 
     public function test_json_attribute()

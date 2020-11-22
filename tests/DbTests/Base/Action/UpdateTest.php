@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\DbTests\Base\Action;
 
 use Sirius\Orm\Entity\StateEnum;
-use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\BaseTestCase;
 use Sirius\Orm\Tests\DbTests\Base\Behaviour\ThrowExceptionBehaviour;
@@ -47,11 +46,6 @@ class UpdateTest extends BaseTestCase
 
     public function test_column_is_mapped_to_attribute()
     {
-        $config = $this->getMapperConfig('products', function($arr) {
-            $arr[MapperConfig::COLUMN_ATTRIBUTE_MAP] = ['price' => 'value'];
-            return $arr;
-        });
-        $this->orm->register('products', $config);
         $mapper = $this->orm->get('products');
 
         $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'product_1', 'price' => 10]);

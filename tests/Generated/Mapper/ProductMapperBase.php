@@ -10,6 +10,7 @@ use Sirius\Orm\Action\SoftDelete as SoftDeleteAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Behaviour\Timestamps;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -31,14 +32,14 @@ abstract class ProductMapperBase extends Mapper
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Product',
             'primaryKey' => 'id',
             'table' => 'tbl_products',
-            'tableAlias' => null,
+            'tableAlias' => 'products',
             'guards' => [],
-            'columns' => ['id', 'sku', 'value', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
-            'columnAttributeMap' => ['value' => 'price'],
+            'columns' => ['id', 'sku', 'price', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
+            'columnAttributeMap' => ['price' => 'value'],
             'casts' => [
                 'id' => 'int',
                 'sku' => 'string',
-                'value' => 'decimal:2',
+                'price' => 'decimal:2',
                 'attributes' => 'array',
                 'created_on' => 'DateTime',
                 'updated_on' => 'DateTime',
@@ -66,8 +67,23 @@ abstract class ProductMapperBase extends Mapper
             'type' => 'one_to_many',
             'native_key' => 'id',
             'foreign_mapper' => 'images',
-            'foreign_key' => 'imageable_id',
-            'foreign_guards' => ['imageable_type' => 'products'],
+            'foreign_key' => 'content_id',
+            'foreign_guards' => ['content_type' => 'products'],
+            'load_strategy' => 'lazy',
+            'cascade' => true,
+        ]);
+
+        $this->addRelation('cascade_tags', [
+            'type' => 'many_to_many',
+            'foreign_key' => 'id',
+            'through_table' => 'tbl_links_to_tags',
+            'through_table_alias' => 'products_to_tags',
+            'through_guards' => ['tagable_type' => 'products'],
+            'through_columns' => ['position' => 'position_in_product'],
+            'through_native_column' => 'tagable_id',
+            'through_foreign_column' => 'tag_id',
+            'native_key' => 'id',
+            'foreign_mapper' => 'tags',
             'load_strategy' => 'lazy',
             'cascade' => true,
         ]);
@@ -75,22 +91,36 @@ abstract class ProductMapperBase extends Mapper
         $this->addRelation('tags', [
             'type' => 'many_to_many',
             'foreign_key' => 'id',
-            'through_table' => 'tags_tbl_products',
+            'through_table' => 'tbl_links_to_tags',
             'through_table_alias' => 'products_to_tags',
             'through_guards' => ['tagable_type' => 'products'],
             'through_columns' => ['position' => 'position_in_product'],
-            'through_native_column' => 'product_id',
+            'through_native_column' => 'tagable_id',
             'through_foreign_column' => 'tag_id',
             'aggregates' => ['tags_count' => ['function' => 'count(tags.id)']],
             'native_key' => 'id',
             'foreign_mapper' => 'tags',
             'load_strategy' => 'lazy',
+            'query_callback' => function (\Sirius\Orm\Query $query) {
+                $query->orderBy('position ASC');
+
+                return $query;
+            },
+        ]);
+
+        $this->addRelation('cascade_category', [
+            'type' => 'many_to_one',
+            'foreign_key' => 'id',
+            'native_key' => 'category_id',
+            'foreign_mapper' => 'categories',
+            'load_strategy' => 'lazy',
+            'cascade' => true,
         ]);
 
         $this->addRelation('category', [
             'type' => 'many_to_one',
             'foreign_key' => 'id',
-            'native_key' => 'id',
+            'native_key' => 'category_id',
             'foreign_mapper' => 'categories',
             'load_strategy' => 'lazy',
         ]);
@@ -164,7 +194,8 @@ abstract class ProductMapperBase extends Mapper
 
     public function newDeleteAction(Product $entity, $options)
     {
-        $action = new SoftDeleteAction($this, $entity, ['deleted_at_column' => $this->deletedAtColumn]);
+        $options = array_merge((array) $options, ['deleted_at_column' => $this->deletedAtColumn]);
+        $action = new SoftDeleteAction($this, $entity, $options);
 
         return $this->behaviours->apply($this, __FUNCTION__, $action);
     }

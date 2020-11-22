@@ -22,12 +22,4 @@ class ManyToOne extends Relation
 
         return parent::setForeignMapper($foreignMapper);
     }
-
-    public function setMapper(Mapper $mapper): Relation
-    {
-        $this->nativeKey = $mapper->getPrimaryKey();
-
-        return parent::setMapper($mapper);
-    }
-
 }

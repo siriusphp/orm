@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
+use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\ManyToOne;
 use Sirius\Orm\Relation\RelationConfig;

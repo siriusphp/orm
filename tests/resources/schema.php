@@ -50,7 +50,6 @@ $t->addColumn("content_type", "string", ["length" => 64]);
 $t->addColumn("name", "string", ["length" => 255]);
 $t->addColumn("folder", "string", ["length" => 255])->setNotnull(false);
 $t->setPrimaryKey(["id"]);
-$t->addUniqueIndex(['content_id', 'content_type']);
 
 $tables[$t->getName()] = $t;
 

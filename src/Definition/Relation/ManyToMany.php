@@ -51,17 +51,19 @@ class ManyToMany extends Relation
             return;
         }
 
-        $tablePrefix = $this->mapper->getTableAlias() ?
-            str_replace($this->mapper->getTable(), '', $this->mapper->getTableAlias())
-            : '';
+        if ( ! $this->throughTable) {
+            $tablePrefix = $this->mapper->getTableAlias() ?
+                str_replace($this->mapper->getTable(), '', $this->mapper->getTableAlias())
+                : '';
 
-        $tables = [$this->mapper->getTableAlias() ?: $this->mapper->getTable(), $this->foreignMapper];
-        sort($tables);
+            $tables = [$this->mapper->getTableAlias() ?: $this->mapper->getTable(), $this->foreignMapper];
+            sort($tables);
 
-        $this->throughTable = $tablePrefix . implode('_', $tables);
+            $this->throughTable = $tablePrefix . implode('_', $tables);
 
-        if ($tablePrefix) {
-            $this->throughTableAlias = implode('_', $tables);
+            if ($tablePrefix) {
+                $this->throughTableAlias = implode('_', $tables);
+            }
         }
 
         if ( ! $this->throughNativeColumn) {

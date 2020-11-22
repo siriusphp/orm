@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\Generated\Mapper;
 
+use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
-use Sirius\Orm\Behaviours;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -42,7 +43,7 @@ abstract class CategoryMapperBase extends Mapper
         $this->addRelation('parent', [
             'type' => 'many_to_one',
             'foreign_key' => 'id',
-            'native_key' => 'id',
+            'native_key' => 'category_id',
             'foreign_mapper' => 'categories',
             'load_strategy' => 'lazy',
         ]);
@@ -135,7 +136,7 @@ abstract class CategoryMapperBase extends Mapper
         }
     }
 
-    public function newDeleteAction(Category $entity, $options): UpdateAction
+    public function newDeleteAction(Category $entity, $options): DeleteAction
     {
         $action = new DeleteAction($this, $entity, $options);
 

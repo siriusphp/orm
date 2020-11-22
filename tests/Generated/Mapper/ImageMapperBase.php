@@ -8,6 +8,7 @@ use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -24,7 +25,7 @@ abstract class ImageMapperBase extends Mapper
         $this->mapperConfig = MapperConfig::fromArray([
             'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Image',
             'primaryKey' => 'id',
-            'table' => 'tbl_images',
+            'table' => 'images',
             'tableAlias' => null,
             'guards' => [],
             'columns' => ['id', 'imageable_type', 'imageable_id', 'path', 'title', 'description'],

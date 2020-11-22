@@ -28,7 +28,6 @@ class DeleteTest extends BaseTestCase
 
         $mapper->delete($product);
         $this->assertNull($mapper->find(1));
-        $this->assertNull($product->id);
         $this->assertEquals(StateEnum::DELETED, $product->getState());
     }
 

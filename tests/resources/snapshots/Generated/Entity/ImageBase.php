@@ -25,4 +25,14 @@ abstract class ImageBase extends GenericEntity
     {
         return $value === null ? $value : intval($value);
     }
+
+    protected function castTitleAttribute($value)
+    {
+        return $value === null ? $value : (is_array($value) ? $value : \json_decode($value, true));
+    }
+
+    protected function castDescriptionAttribute($value)
+    {
+        return $value === null ? $value : (is_array($value) ? $value : \json_decode($value, true));
+    }
 }

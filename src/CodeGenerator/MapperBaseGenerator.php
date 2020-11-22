@@ -9,11 +9,11 @@ use Nette\PhpGenerator\PhpNamespace;
 use Sirius\Orm\Action\Delete;
 use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
-use Sirius\Orm\Behaviours;
 use Sirius\Orm\Definition\Mapper;
 use Sirius\Orm\Definition\Relation;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\MapperConfig;
 
@@ -163,6 +163,7 @@ class MapperBaseGenerator
     {
         $this->namespace->addUse(Insert::class, 'InsertAction');
         $this->namespace->addUse(Update::class, 'UpdateAction');
+        $this->namespace->addUse(StateEnum::class);
 
         $method = $this->class->addMethod('save')
                               ->setReturnType('bool');

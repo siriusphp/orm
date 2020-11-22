@@ -23,6 +23,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.2",
+        "ext-json": "*",
         "atlas/pdo": "^1.1",
         "siriusphp/sql": "^1.2",
         "doctrine/collections": "^1.6",

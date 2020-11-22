@@ -572,6 +572,9 @@ class Column extends Base
             case static::TYPE_FLOAT:
                 return 'return $value === null ? $value : floatval($value);';
 
+            case static::TYPE_JSON:
+                return 'return $value === null ? $value : (is_array($value) ? $value : \json_decode($value, true));';
+
             case static::TYPE_INTEGER:
             case static::TYPE_BIG_INTEGER:
             case static::TYPE_SMALL_INTEGER:

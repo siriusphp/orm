@@ -5,7 +5,7 @@ namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\DynamicMapper;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\OneToMany;
 use Sirius\Orm\Relation\RelationConfig;
@@ -15,11 +15,11 @@ class OneToManyTest extends BaseTestCase
 {
 
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $categoryMapper;
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $productsMapper;
 
@@ -36,7 +36,7 @@ class OneToManyTest extends BaseTestCase
     {
         $relation = new OneToMany('products', $this->categoryMapper, $this->productsMapper, [
             RelationConfig::QUERY_CALLBACK => function (Query $query) {
-                return $query->where('deleted_on', null);
+                return $query->where('active', 1);
             }
         ]);
 
@@ -52,13 +52,14 @@ SELECT
 FROM
     tbl_products as products
 WHERE
-    category_id IN (:__1__, :__2__) AND deleted_on IS NULL
+    (category_id IN (:__1__, :__2__) AND active = :__3__) AND deleted_on IS NULL
 SQL;
 
         $this->assertSameStatement($expectedSql, $query->getStatement());
         $this->assertSame([
             '__1__' => [10, \PDO::PARAM_INT],
             '__2__' => [11, \PDO::PARAM_INT],
+            '__3__' => [1, \PDO::PARAM_INT],
         ], $query->getBindValues());
     }
 
@@ -77,7 +78,7 @@ FROM
         products.*
     FROM
         tbl_products as products
-    ) AS products ON categories.id = products.category_id
+    ) AS products ON categories.id = products.category_id 
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
@@ -86,7 +87,7 @@ SQL;
     public function test_query_guards()
     {
         $relation = new OneToMany('products', $this->categoryMapper, $this->productsMapper, [
-            RelationConfig::FOREIGN_GUARDS => ['status' => 'active', 'deleted_at IS NULL']
+            RelationConfig::FOREIGN_GUARDS => ['status' => 'active']
         ]);
 
         $tracker = new Tracker([
@@ -101,7 +102,7 @@ SELECT
 FROM
     tbl_products as products
 WHERE
-    (category_id IN (:__1__, :__2__)) AND status = :__3__ AND deleted_at IS NULL
+    (category_id IN (:__1__, :__2__)) AND deleted_on IS NULL AND status = :__3__
 SQL;
 
         $this->assertSameStatement($expectedSql, $query->getStatement());
@@ -148,9 +149,9 @@ SQL;
 
         $this->assertTrue($this->categoryMapper->delete($category, true));
         $this->assertNull($category->id);
-        $this->assertRowDeleted('categories', 'id', 2);
-        $this->assertRowDeleted('categories', 'id', 3);
-        $this->assertRowDeleted('tbl_languages', 'content_id', 1);
+        $this->assertRowDeleted('categories', 'id = 2');
+        $this->assertRowDeleted('categories', 'id = 3');
+        $this->assertRowDeleted('tbl_languages', 'content_id = 1');
     }
 
     public function test_delete_with_limited_relations_when_relation_is_cascade()
@@ -209,13 +210,13 @@ SQL;
         ]);
 
         $child = $this->categoryMapper->newEntity([
-            'name'     => 'New child category'
+            'name' => 'New child category'
         ]);
         /** @var Collection $products */
         $children = $category->children;
         $children->add($child);
 
-        $product  = $this->productsMapper->newEntity([
+        $product = $this->productsMapper->newEntity([
             'sku' => 'New sku'
         ]);
         /** @var Collection $products */

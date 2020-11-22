@@ -31,9 +31,9 @@ class ClassMethodsHydrator implements HydratorInterface
     /**
      * @param MapperConfig $mapperConfig
      *
-     * @return GenericHydrator
+     * @return ClassMethodsHydrator
      */
-    public function setMapperConfig(MapperConfig $mapperConfig): GenericHydrator
+    public function setMapperConfig(MapperConfig $mapperConfig): ClassMethodsHydrator
     {
         $this->mapperConfig = $mapperConfig;
 

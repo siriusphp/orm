@@ -8,6 +8,7 @@ use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
@@ -42,7 +43,7 @@ abstract class CategoryMapperBase extends Mapper
         $this->addRelation('parent', [
             'type' => 'many_to_one',
             'foreign_key' => 'id',
-            'native_key' => 'id',
+            'native_key' => 'category_id',
             'foreign_mapper' => 'categories',
             'load_strategy' => 'lazy',
         ]);
@@ -51,8 +52,9 @@ abstract class CategoryMapperBase extends Mapper
             'type' => 'one_to_many',
             'native_key' => 'id',
             'foreign_mapper' => 'categories',
-            'foreign_key' => 'category_id',
+            'foreign_key' => 'parent_id',
             'load_strategy' => 'lazy',
+            'cascade' => true,
         ]);
 
         $this->addRelation('languages', [
@@ -62,6 +64,7 @@ abstract class CategoryMapperBase extends Mapper
             'foreign_key' => 'content_id',
             'foreign_guards' => ['content_type' => 'categories'],
             'load_strategy' => 'lazy',
+            'cascade' => true,
         ]);
 
         $this->addRelation('products', [

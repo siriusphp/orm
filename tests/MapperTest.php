@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use Sirius\Orm\CastingManager;
-use Sirius\Orm\Entity\GenericHydrator;
-use Sirius\Orm\DynamicMapper;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\Entity\ProductEntity;
 
 class MapperTest extends BaseTestCase
 {
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $mapper;
 

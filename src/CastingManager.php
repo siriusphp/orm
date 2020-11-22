@@ -108,6 +108,17 @@ class CastingManager
         return round((float)$value, (int)$digits);
     }
 
+    public function array($value) {
+        if ($value === null) {
+            return null;
+        }
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return json_decode((string) $value, true);
+    }
+
     public function json($value)
     {
         if ( ! $value) {

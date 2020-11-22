@@ -53,6 +53,13 @@ class Mapper extends Base
 
     protected $computedProperties = [];
 
+    protected $mapperMethods = [];
+
+    protected $queryMethods = [];
+
+    protected $entityMethods = [];
+
+
     public static function make(string $name)
     {
         return (new static)->setName($name);
@@ -413,6 +420,10 @@ class Mapper extends Base
         return $this;
     }
 
+    public function addMethod() {
+        $this->mapperMethods[] = 1;
+    }
+
     public function addRelation($name, Relation $relation)
     {
         $relation->setMapper($this);
@@ -472,10 +483,12 @@ class Mapper extends Base
         foreach ($this->getColumns() as $column) {
             $config = $column->observeMapperConfig($config);
         }
+
         /** @var Behaviour $behaviour */
         foreach ($this->behaviours as $behaviour) {
             $config = $behaviour->observeMapperConfig($config);
         }
+
         /** @var Relation $relation */
         foreach ($this->relations as $relation) {
             $config = $relation->observeMapperConfig($config);
@@ -495,6 +508,11 @@ class Mapper extends Base
             $class = $relation->observeBaseMapperClass($class);
         }
 
+        /** @var ClassMethod $method */
+        foreach ($this->queryMethods as $method) {
+            $class = $method->observeBaseMapperClass($class);
+        }
+
         return parent::observeBaseMapperClass($class);
     }
 
@@ -509,6 +527,11 @@ class Mapper extends Base
             $class = $relation->observeBaseQueryClass($class);
         }
 
+        /** @var ClassMethod $method */
+        foreach ($this->queryMethods as $method) {
+            $class = $method->observeBaseQueryClass($class);
+        }
+
         return parent::observeBaseMapperClass($class);
     }
 
@@ -518,17 +541,25 @@ class Mapper extends Base
         foreach ($this->getColumns() as $column) {
             $class = $column->observeBaseEntityClass($class);
         }
+
         /** @var ComputedProperty $column */
         foreach ($this->computedProperties as $property) {
             $class = $property->observeBaseEntityClass($class);
         }
+
         /** @var Behaviour $behaviour */
         foreach ($this->behaviours as $behaviour) {
             $class = $behaviour->observeBaseEntityClass($class);
         }
+
         /** @var Relation $relation */
         foreach ($this->relations as $relation) {
             $class = $relation->observeBaseEntityClass($class);
+        }
+
+        /** @var ClassMethod $method */
+        foreach ($this->queryMethods as $method) {
+            $class = $method->observeBaseEntityClass($class);
         }
 
         return parent::observeBaseEntityClass($class);

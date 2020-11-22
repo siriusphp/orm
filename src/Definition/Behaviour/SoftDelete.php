@@ -61,7 +61,8 @@ class SoftDelete extends Behaviour
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
         $method->addParameter('options');
         $method->setBody('
-$action = new SoftDeleteAction($this, $entity, [\'deleted_at_column\' => $this->deletedAtColumn]);
+$options = array_merge((array) $options, [\'deleted_at_column\' => $this->deletedAtColumn]);         
+$action = new SoftDeleteAction($this, $entity, $options);
 
 return $this->behaviours->apply($this, __FUNCTION__, $action);           
             ');

@@ -10,7 +10,7 @@ use Sirius\Orm\Entity\GenericEntity;
 /**
  * @property int $id
  * @property string $sku
- * @property float $price
+ * @property float $value
  * @property array $attributes
  * @property DateTime $created_on
  * @property DateTime $updated_on
@@ -24,9 +24,14 @@ abstract class ProductBase extends GenericEntity
         return $value === null ? $value : intval($value);
     }
 
-    protected function castPriceAttribute($value)
+    protected function castValueAttribute($value)
     {
         return $value === null ? $value : round((float)$value, 2);
+    }
+
+    protected function castAttributesAttribute($value)
+    {
+        return $value === null ? $value : (is_array($value) ? $value : \json_decode($value, true));
     }
 
     protected function castCreatedOnAttribute($value)

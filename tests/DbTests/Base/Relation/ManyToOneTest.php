@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\DynamicMapper;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToOne;
@@ -15,11 +15,11 @@ class ManyToOneTest extends BaseTestCase
 {
 
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $productsMapper;
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $categoriesMapper;
 
@@ -48,6 +48,7 @@ FROM
     FROM
         categories
     ) AS category ON products.category_id = category.id
+    WHERE deleted_on IS NULL
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
@@ -156,22 +157,12 @@ SQL;
     {
         $this->populateDb();
 
-        $config               = $this->getMapperConfig('products', function ($arr) {
-            $arr[MapperConfig::RELATIONS]['category'][RelationConfig::CASCADE] = true;
+        $product = $this->productsMapper->find(1);
 
-            return $arr;
-        });
-        $this->orm->register('products', $config);
-        $this->productsMapper = $this->orm->get('products');
+        $this->assertTrue($this->productsMapper->delete($product, 'cascade_category'));
 
-        $product = $this->productsMapper
-            ->newQuery()
-            ->first();
-
-        $this->assertTrue($this->productsMapper->delete($product, true));
-
-        $category = $this->categoriesMapper->find($product->category_id);
-        $this->assertNull($category);
+        $this->assertRowPresent('categories', 'id = 10');
+        $this->assertRowDeleted('categories', 'id = 20');
     }
 
     public function test_delete_with_cascade_false()
@@ -193,7 +184,7 @@ SQL;
         $this->populateDb();
 
         $product = $this->productsMapper->newEntity([
-            'sku' => 'New sku',
+            'sku'   => 'New sku',
             'price' => 5,
         ]);
 
@@ -243,6 +234,7 @@ SQL;
     {
         $this->insertRow('categories', ['id' => 10, 'name' => 'Parent']);
         $this->insertRow('categories', ['id' => 20, 'parent_id' => 10, 'name' => 'Category']);
+
         $this->insertRow('tbl_products', ['id' => 1, 'category_id' => 20, 'sku' => 'abc', 'price' => 10.5]);
         $this->insertRow('tbl_products', ['id' => 2, 'category_id' => 20, 'sku' => 'xyz', 'price' => 20.5]);
     }

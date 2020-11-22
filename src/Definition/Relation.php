@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Definition;
 
+use Nette\PhpGenerator\Literal;
+use Nette\PhpGenerator\Parameter;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\RelationConfig;
 
@@ -21,6 +23,8 @@ abstract class Relation extends Base
     protected $foreignGuards = [];
 
     protected $loadStrategy = RelationConfig::LOAD_LAZY;
+
+    protected $queryCallback;
 
     protected $cascade;
 
@@ -185,6 +189,28 @@ abstract class Relation extends Base
         return $this;
     }
 
+    /**
+     * @return callable|null
+     */
+    public function getQueryCallback()
+    {
+        return $this->queryCallback;
+    }
+
+    /**
+     * @param callable|null $queryCallback
+     *
+     * @return Relation
+     */
+    public function setQueryCallback(callable $queryCallback = null)
+    {
+        $this->queryCallback = $queryCallback;
+
+        return $this;
+    }
+
+
+
     public function toArray() {
         $result = [];
         foreach(get_object_vars($this) as $prop => $value) {
@@ -199,8 +225,36 @@ abstract class Relation extends Base
                 !is_object($value)) {
                 $result[Str::underscore($prop)] = $value;
             }
+            if (is_object($value) && is_callable($value)) {
+                /** @var \Closure $value */
+                $result[Str::underscore($prop)] = new Literal($this->getClosureDump($value));
+            }
         }
 
         return $result;
+    }
+
+    protected function getClosureDump(\Closure $c) {
+        $closure = \Nette\PhpGenerator\Closure::from($c);
+        $r = new \ReflectionFunction($c);
+        $body = '';
+        $lines = file($r->getFileName());
+        for($l = $r->getStartLine(); $l < $r->getEndLine(); $l++) {
+            $body .= trim($lines[$l], " \t");
+        }
+        // strip everything after the last }
+        $body = preg_replace('/\}[^\}]+$/', '', $body);
+        $closure->setBody($body);
+
+        $params = $closure->getParameters();
+        /** @var Parameter $param */
+        foreach ($params as $param) {
+            if (strpos($param->getType(), '\\') !== false
+                && strpos($param->getType(), '\\') !== 0) {
+                $param->setType('\\' . $param->getType());
+            }
+        }
+
+        return (string) $closure;
     }
 }

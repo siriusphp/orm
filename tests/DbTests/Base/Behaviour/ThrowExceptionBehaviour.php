@@ -5,7 +5,7 @@ namespace Sirius\Orm\Tests\DbTests\Base\Behaviour;
 
 use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Contract\ActionInterface;
-use Sirius\Orm\DynamicMapper;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\Tests\DbTests\Base\Action\ThrowExceptionOnRun;
 
 class ThrowExceptionBehaviour implements BehaviourInterface
@@ -15,18 +15,18 @@ class ThrowExceptionBehaviour implements BehaviourInterface
         return 'fake';
     }
 
-    public function attachToMapper(DynamicMapper $mapper)
+    public function attachToMapper(Mapper $mapper)
     {
     }
 
-    public function onNewDeleteAction(DynamicMapper $mapper, ActionInterface $delete)
+    public function onNewDeleteAction(Mapper $mapper, ActionInterface $delete)
     {
         $delete->prepend(new ThrowExceptionOnRun());
 
         return $delete;
     }
 
-    public function onNewSaveAction(DynamicMapper $mapper, ActionInterface $delete)
+    public function onNewSaveAction(Mapper $mapper, ActionInterface $delete)
     {
         $delete->append(new ThrowExceptionOnRun());
 

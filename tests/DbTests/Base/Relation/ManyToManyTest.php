@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Entity\Tracker;
-use Sirius\Orm\DynamicMapper;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToMany;
@@ -15,11 +15,11 @@ class ManyToManyTest extends BaseTestCase
 {
 
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $productsMapper;
     /**
-     * @var DynamicMapper
+     * @var Mapper
      */
     protected $tagsMapper;
 
@@ -53,6 +53,7 @@ FROM
     ORDER BY
         position ASC
     ) AS tags ON products.id = tags.tagable_id
+    WHERE deleted_on IS NULL
 SQL;
 
         $this->assertSameStatement($expectedStatement, $query->getStatement());
@@ -165,20 +166,12 @@ SQL;
     {
         $this->populateDb();
 
-        // reconfigure products-featured_image to use CASCADE
-        $config               = $this->getMapperConfig('products', function ($arr) {
-            $arr[MapperConfig::RELATIONS]['tags'][RelationConfig::CASCADE] = true;
-
-            return $arr;
-        });
-        $this->orm->register('products', $config);
-        $this->productsMapper =  $this->orm->get('products');
 
         $product = $this->productsMapper
             ->newQuery()
             ->first();
 
-        $this->assertTrue($this->productsMapper->delete($product, true));
+        $this->assertTrue($this->productsMapper->delete($product, 'cascade_tags'));
 
         $tag = $this->tagsMapper->find(1);
         $this->assertNull($tag);
@@ -204,7 +197,7 @@ SQL;
     {
         $this->populateDb();
 
-        $product = $this->productsMapper->find(1, ['tags_count']);
+        $product  = $this->productsMapper->find(1, ['tags_count']);
         $product2 = $this->productsMapper->find(2, ['tags_count']);
 
         $this->assertExpectedQueries(4);
@@ -220,8 +213,8 @@ SQL;
             ->newQuery()
             ->first();
 
-        $tag                 = $product->tags[0];
-        $tag->name           = 'New tag';
+        $tag                      = $product->tags[0];
+        $tag->name                = 'New tag';
         $tag->position_in_product = 3;
 
         $this->productsMapper->save($product, true);
@@ -247,8 +240,8 @@ SQL;
             ->newQuery()
             ->first();
 
-        $tag                 = $product->tags[0];
-        $tag->name           = 'New tag';
+        $tag                      = $product->tags[0];
+        $tag->name                = 'New tag';
         $tag->position_in_product = 3;
 
         $this->productsMapper->save($product, false);

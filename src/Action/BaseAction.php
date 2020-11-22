@@ -115,7 +115,7 @@ abstract class BaseAction implements ActionInterface
     }
 
     public function includesRelation($relationName) {
-        $relations = $this->getOption('relations');
+        $relations = (array) $this->getOption('relations');
 
         return $relations === true || in_array($relationName, $relations);
     }
