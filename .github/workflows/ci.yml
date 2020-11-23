@@ -39,7 +39,7 @@ jobs:
 
     - name: Verify MySQL connection
       run: |
-        while ! mysqladmin ping -h"siriusorm_mysql" -P3306 --silent; do
+        while ! mysqladmin ping -h"127.0.0.1" -P3306 --silent; do
           sleep 1
         done
 
@@ -67,8 +67,8 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-suggest
 
     - name: Run test suite
-#      env:
-#        MYSQL_CONNECTION: 'mysql:host=localhost;dbname=siriusorm'
+      env:
+        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;dbname=siriusorm'
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit
