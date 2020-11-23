@@ -65,7 +65,7 @@ jobs:
     - name: Run test suite
       run: |
         mkdir -p build/logs
-        vendor/bin/phpunit -c tests/phpunit.xml
+        vendor/bin/phpunit
 
     - name: Upload to Scrutinizer-CI
       run: wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml
