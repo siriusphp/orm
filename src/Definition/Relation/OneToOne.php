@@ -12,6 +12,28 @@ class OneToOne extends Relation
 {
     protected $type = RelationConfig::TYPE_ONE_TO_ONE;
 
+    protected $cascade;
+
+    /**
+     * @return bool
+     */
+    public function getCascade()
+    {
+        return $this->cascade;
+    }
+
+    /**
+     * @param bool $cascade
+     *
+     * @return Relation
+     */
+    public function setCascade(bool $cascade)
+    {
+        $this->cascade = $cascade;
+
+        return $this;
+    }
+
     public function setMapper(Mapper $mapper): Relation
     {
         if ($mapper && ! $this->foreignKey) {

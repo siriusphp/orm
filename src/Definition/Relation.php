@@ -26,8 +26,6 @@ abstract class Relation extends Base
 
     protected $queryCallback;
 
-    protected $cascade;
-
     /**
      * @param string $foreignMapper defaults to the relation's name
      *
@@ -145,26 +143,6 @@ abstract class Relation extends Base
     public function setLoadStrategy(string $loadStrategy): Relation
     {
         $this->loadStrategy = $loadStrategy;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getCascade()
-    {
-        return $this->cascade;
-    }
-
-    /**
-     * @param bool $cascade
-     *
-     * @return Relation
-     */
-    public function setCascade(bool $cascade)
-    {
-        $this->cascade = $cascade;
 
         return $this;
     }

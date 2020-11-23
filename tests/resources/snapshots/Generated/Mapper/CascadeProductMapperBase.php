@@ -14,13 +14,13 @@ use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
-use Sirius\Orm\Tests\Generated\Entity\Product;
+use Sirius\Orm\Tests\Generated\Entity\CascadeProduct;
 
 /**
- * @method ProductQuery where($column, $value, $condition)
- * @method ProductQuery orderBy(string $expr, string ...$exprs)
+ * @method CascadeProductQuery where($column, $value, $condition)
+ * @method CascadeProductQuery orderBy(string $expr, string ...$exprs)
  */
-abstract class ProductMapperBase extends Mapper
+abstract class CascadeProductMapperBase extends Mapper
 {
     protected $createdAtColumn = 'created_on';
     protected $updatedAtColumn = 'updated_on';
@@ -29,7 +29,7 @@ abstract class ProductMapperBase extends Mapper
     protected function init()
     {
         $this->mapperConfig = MapperConfig::fromArray([
-            'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\Product',
+            'entityClass' => 'Sirius\Orm\Tests\Generated\Entity\CascadeProduct',
             'primaryKey' => 'id',
             'table' => 'tbl_products',
             'tableAlias' => 'products',
@@ -55,14 +55,6 @@ abstract class ProductMapperBase extends Mapper
 
     protected function initRelations()
     {
-        $this->addRelation('languages', [
-            'type' => 'one_to_many',
-            'native_key' => 'id',
-            'foreign_mapper' => 'product_languages',
-            'foreign_key' => 'content_id',
-            'load_strategy' => 'lazy',
-        ]);
-
         $this->addRelation('images', [
             'type' => 'one_to_many',
             'cascade' => true,
@@ -73,43 +65,7 @@ abstract class ProductMapperBase extends Mapper
             'load_strategy' => 'lazy',
         ]);
 
-        $this->addRelation('tags', [
-            'type' => 'many_to_many',
-            'foreign_key' => 'id',
-            'through_table' => 'tbl_links_to_tags',
-            'through_table_alias' => 'products_to_tags',
-            'through_guards' => ['tagable_type' => 'products'],
-            'through_columns' => ['position' => 'position_in_product'],
-            'through_native_column' => 'tagable_id',
-            'through_foreign_column' => 'tag_id',
-            'aggregates' => ['tags_count' => ['function' => 'count(tags.id)']],
-            'native_key' => 'id',
-            'foreign_mapper' => 'tags',
-            'load_strategy' => 'lazy',
-            'query_callback' => function (\Sirius\Orm\Query $query) {
-                $query->orderBy('position ASC');
-
-                return $query;
-            },
-        ]);
-
-        $this->addRelation('category', [
-            'type' => 'many_to_one',
-            'foreign_key' => 'id',
-            'native_key' => 'category_id',
-            'foreign_mapper' => 'categories',
-            'load_strategy' => 'lazy',
-        ]);
-
         $this->addRelation('ebay', [
-            'type' => 'one_to_one',
-            'native_key' => 'id',
-            'foreign_mapper' => 'ebay_products',
-            'foreign_key' => 'product_id',
-            'load_strategy' => 'lazy',
-        ]);
-
-        $this->addRelation('cascade_ebay', [
             'type' => 'one_to_one',
             'cascade' => true,
             'native_key' => 'id',
@@ -119,18 +75,18 @@ abstract class ProductMapperBase extends Mapper
         ]);
     }
 
-    public function find($pk, array $load = []): ?Product
+    public function find($pk, array $load = []): ?CascadeProduct
     {
         return $this->newQuery()->find($pk, $load);
     }
 
-    public function newQuery(): ProductQuery
+    public function newQuery(): CascadeProductQuery
     {
-        $query = new ProductQuery($this->getReadConnection(), $this);
+        $query = new CascadeProductQuery($this->getReadConnection(), $this);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 
-    public function save(Product $entity, $withRelations = false): bool
+    public function save(CascadeProduct $entity, $withRelations = false): bool
     {
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
 
@@ -149,7 +105,7 @@ abstract class ProductMapperBase extends Mapper
         }
     }
 
-    public function newSaveAction(Product $entity, $options): UpdateAction
+    public function newSaveAction(CascadeProduct $entity, $options): UpdateAction
     {
         if ( ! $this->getHydrator()->getPk($entity) || $entity->getState() == StateEnum::NEW) {
             $action = new InsertAction($this, $entity, $options);
@@ -160,7 +116,7 @@ abstract class ProductMapperBase extends Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $action);
     }
 
-    public function delete(Product $entity, $withRelations = false): bool
+    public function delete(CascadeProduct $entity, $withRelations = false): bool
     {
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
 
@@ -177,7 +133,7 @@ abstract class ProductMapperBase extends Mapper
         }
     }
 
-    public function newDeleteAction(Product $entity, $options)
+    public function newDeleteAction(CascadeProduct $entity, $options)
     {
         $options = array_merge((array) $options, ['deleted_at_column' => $this->deletedAtColumn]);
         $action = new SoftDeleteAction($this, $entity, $options);
@@ -185,7 +141,7 @@ abstract class ProductMapperBase extends Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $action);
     }
 
-    public function forceDelete(Product $entity, $withRelations = false)
+    public function forceDelete(CascadeProduct $entity, $withRelations = false)
     {
         $action = new DeleteAction($this, $entity, ['relations' => $withRelations]);
 

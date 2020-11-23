@@ -50,21 +50,21 @@ abstract class CategoryMapperBase extends Mapper
 
         $this->addRelation('children', [
             'type' => 'one_to_many',
+            'cascade' => true,
             'native_key' => 'id',
             'foreign_mapper' => 'categories',
             'foreign_key' => 'parent_id',
             'load_strategy' => 'lazy',
-            'cascade' => true,
         ]);
 
         $this->addRelation('languages', [
             'type' => 'one_to_many',
+            'cascade' => true,
             'native_key' => 'id',
             'foreign_mapper' => 'languages',
             'foreign_key' => 'content_id',
             'foreign_guards' => ['content_type' => 'categories'],
             'load_strategy' => 'lazy',
-            'cascade' => true,
         ]);
 
         $this->addRelation('products', [

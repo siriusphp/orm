@@ -9,6 +9,8 @@ use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Contract\LazyLoader;
 use Sirius\Orm\Helpers\Arr;
+use Sirius\Orm\Helpers\Inflector;
+use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\MapperConfig;
 
 class ClassMethodsHydrator implements HydratorInterface
@@ -85,7 +87,8 @@ class ClassMethodsHydrator implements HydratorInterface
      */
     public function get(EntityInterface $entity, $attribute)
     {
-        return $entity->{$attribute};
+        $method = Str::methodName($attribute, 'get');
+        return $entity->{$method}();
     }
 
     /**
@@ -97,7 +100,8 @@ class ClassMethodsHydrator implements HydratorInterface
      */
     public function set(EntityInterface $entity, $attribute, $value)
     {
-        return $entity->{$attribute} = $value;
+        $method = Str::methodName($attribute, 'set');
+        return $entity->{$method}($value);
     }
 
     public function setLazy(EntityInterface $entity, $attribute, LazyLoader $lazyLoader)

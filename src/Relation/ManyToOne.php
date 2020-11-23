@@ -97,20 +97,7 @@ class ManyToOne extends Relation
 
     protected function addActionOnDelete(BaseAction $action)
     {
-        // no cascade delete? treat it as a save
-        if ( ! $this->isCascade()) {
-            $this->addActionOnSave($action);
-        } else {
-            $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
-
-            if ($foreignEntity) {
-                $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
-                $deleteAction       = $this->foreignMapper
-                    ->newDeleteAction($foreignEntity, ['relations' => $remainingRelations]);
-                $action->prepend($deleteAction);
-                $action->prepend($this->newSyncAction($action->getEntity(), $foreignEntity, 'delete'));
-            }
-        }
+        $this->addActionOnSave($action);
     }
 
     protected function addActionOnSave(BaseAction $action)
@@ -122,7 +109,7 @@ class ManyToOne extends Relation
         if ( ! $action->includesRelation($this->name)) {
             return;
         }
-        
+
         $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
         if ($foreignEntity) {
             $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));

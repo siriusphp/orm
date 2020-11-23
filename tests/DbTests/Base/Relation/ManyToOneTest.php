@@ -153,32 +153,6 @@ SQL;
         $this->assertExpectedQueries(3); // products + category + category parent
     }
 
-    public function test_delete_with_cascade_true()
-    {
-        $this->populateDb();
-
-        $product = $this->productsMapper->find(1);
-
-        $this->assertTrue($this->productsMapper->delete($product, 'cascade_category'));
-
-        $this->assertRowPresent('categories', 'id = 10');
-        $this->assertRowDeleted('categories', 'id = 20');
-    }
-
-    public function test_delete_with_cascade_false()
-    {
-        $this->populateDb();
-
-        $product = $this->productsMapper
-            ->newQuery()
-            ->first();
-
-        $this->assertTrue($this->productsMapper->delete($product));
-
-        $category = $this->categoriesMapper->find($product->category_id);
-        $this->assertNotNull($category);
-    }
-
     public function test_insert_with_relations()
     {
         $this->populateDb();

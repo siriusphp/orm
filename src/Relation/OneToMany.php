@@ -26,6 +26,8 @@ class OneToMany extends Relation
             $this->options[RelationConfig::FOREIGN_KEY] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
+        $this->setOptionIfMissing(RelationConfig::CASCADE, false);
+
         parent::applyDefaults();
     }
 
@@ -93,14 +95,15 @@ class OneToMany extends Relation
 
     protected function addActionOnDelete(BaseAction $action)
     {
-        $nativeEntity       = $action->getEntity();
         $relations          = $action->getOption('relations');
-        $remainingRelations = $this->getRemainingRelations($relations);
 
         // no cascade delete? treat as save so we can process the changes
         if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
         } elseif ($relations === true || in_array($this->name, (array)$relations)) {
+            $nativeEntity       = $action->getEntity();
+            $remainingRelations = $this->getRemainingRelations($relations);
+
             // retrieve them again from the DB since the related collection might not have everything
             // for example due to a relation query callback
             $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->toArray()]))

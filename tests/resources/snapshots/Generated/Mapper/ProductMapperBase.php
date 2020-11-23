@@ -65,27 +65,12 @@ abstract class ProductMapperBase extends Mapper
 
         $this->addRelation('images', [
             'type' => 'one_to_many',
+            'cascade' => true,
             'native_key' => 'id',
             'foreign_mapper' => 'images',
             'foreign_key' => 'content_id',
             'foreign_guards' => ['content_type' => 'products'],
             'load_strategy' => 'lazy',
-            'cascade' => true,
-        ]);
-
-        $this->addRelation('cascade_tags', [
-            'type' => 'many_to_many',
-            'foreign_key' => 'id',
-            'through_table' => 'tbl_links_to_tags',
-            'through_table_alias' => 'products_to_tags',
-            'through_guards' => ['tagable_type' => 'products'],
-            'through_columns' => ['position' => 'position_in_product'],
-            'through_native_column' => 'tagable_id',
-            'through_foreign_column' => 'tag_id',
-            'native_key' => 'id',
-            'foreign_mapper' => 'tags',
-            'load_strategy' => 'lazy',
-            'cascade' => true,
         ]);
 
         $this->addRelation('tags', [
@@ -108,15 +93,6 @@ abstract class ProductMapperBase extends Mapper
             },
         ]);
 
-        $this->addRelation('cascade_category', [
-            'type' => 'many_to_one',
-            'foreign_key' => 'id',
-            'native_key' => 'category_id',
-            'foreign_mapper' => 'categories',
-            'load_strategy' => 'lazy',
-            'cascade' => true,
-        ]);
-
         $this->addRelation('category', [
             'type' => 'many_to_one',
             'foreign_key' => 'id',
@@ -127,6 +103,15 @@ abstract class ProductMapperBase extends Mapper
 
         $this->addRelation('ebay', [
             'type' => 'one_to_one',
+            'native_key' => 'id',
+            'foreign_mapper' => 'ebay_products',
+            'foreign_key' => 'product_id',
+            'load_strategy' => 'lazy',
+        ]);
+
+        $this->addRelation('cascade_ebay', [
+            'type' => 'one_to_one',
+            'cascade' => true,
             'native_key' => 'id',
             'foreign_mapper' => 'ebay_products',
             'foreign_key' => 'product_id',

@@ -166,7 +166,7 @@ SQL;
         $this->assertNull($category->id);
         $this->assertRowDeleted('categories', 'id', 2);
         $this->assertRowDeleted('categories', 'id', 3);
-        $this->assertRowPresent('tbl_languages', 'content_id', 1);
+        $this->assertRowPresent('tbl_languages', 'content_id = 1');
     }
 
     public function test_delete_without_relations()

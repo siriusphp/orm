@@ -5,6 +5,7 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
+use Sirius\Orm\Entity\Tracker;
 
 class OneToOne extends OneToMany
 {
@@ -24,14 +25,21 @@ class OneToOne extends OneToMany
 
     protected function addActionOnDelete(BaseAction $action)
     {
+        $relations          = $action->getOption('relations');
+
         // no cascade delete? treat it as a save
         if ( ! $this->isCascade()) {
             $this->addActionOnSave($action);
-        } else {
-            $foreignEntity = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
+        } elseif ($relations === true || in_array($this->name, (array)$relations)) {
+            $nativeEntity       = $action->getEntity();
+            $remainingRelations = $this->getRemainingRelations($relations);
+
+            // retrieve them again from the DB since the related collection might not have everything
+            // for example due to a relation query callback
+            $foreignEntity = $this->getQuery(new Tracker([$nativeEntity->toArray()]))
+                                    ->first();
 
             if ($foreignEntity) {
-                $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
                 $deleteAction       = $this->foreignMapper
                     ->newDeleteAction($foreignEntity, ['relations' => $remainingRelations]);
                 $action->prepend($deleteAction);

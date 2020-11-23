@@ -201,26 +201,7 @@ class ManyToMany extends Relation
 
     protected function addActionOnDelete(BaseAction $action)
     {
-        $nativeEntity       = $action->getEntity();
-        $remainingRelations = $this->getRemainingRelations($action->getOption('relations'));
-
-        // no cascade delete? treat as save so we can process the changes
-        if ( ! $this->isCascade()) {
-            $this->addActionOnSave($action);
-        } else {
-            // retrieve them again from the DB since the related collection might not have everything
-            // for example due to a relation query callback
-            $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->toArray()]))
-                                    ->get();
-
-            foreach ($foreignEntities as $entity) {
-                $deleteAction = $this->foreignMapper
-                    ->newDeleteAction($entity, ['relations' => $remainingRelations]);
-                $action->append($deleteAction);
-                $deletePivotAction = new DeletePivotRows($this, $nativeEntity, $entity);
-                $action->append($deletePivotAction);
-            }
-        }
+        $this->addActionOnSave($action);
     }
 
     protected function addActionOnSave(BaseAction $action)

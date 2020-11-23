@@ -162,37 +162,6 @@ SQL;
         $this->assertExpectedQueries(2); // products + tags
     }
 
-    public function test_delete_with_cascade_true()
-    {
-        $this->populateDb();
-
-
-        $product = $this->productsMapper
-            ->newQuery()
-            ->first();
-
-        $this->assertTrue($this->productsMapper->delete($product, 'cascade_tags'));
-
-        $tag = $this->tagsMapper->find(1);
-        $this->assertNull($tag);
-        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_id = 1 AND tag_id = 1');
-        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_id = 1 AND tag_id = 2');
-    }
-
-    public function test_delete_with_cascade_false()
-    {
-        $this->populateDb();
-
-        $product = $this->productsMapper
-            ->newQuery()
-            ->first();
-
-        $this->assertTrue($this->productsMapper->delete($product));
-
-        $tag = $this->tagsMapper->find(10);
-        $this->assertNotNull($tag);
-    }
-
     public function test_aggregates()
     {
         $this->populateDb();

@@ -100,7 +100,7 @@ class BaseTestCase extends TestCase
 
     protected function loadGeneratedMappers()
     {
-        $mappers           = ['products', 'ebay_products', 'categories', 'languages', 'images', 'tags', 'product_languages'];
+        $mappers           = ['products', 'cascade_products', 'ebay_products', 'categories', 'languages', 'images', 'tags', 'product_languages'];
         $connectionLocator = $this->connectionLocator;
 
         foreach ($mappers as $name) {

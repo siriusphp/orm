@@ -58,13 +58,6 @@ $orm->addMapper(
                                            ->setCascade(true)
                                            ->setForeignKey('content_id')
                                            ->setForeignGuards(['content_type' => 'products'])) // @testing: one to many | relation guards
-          ->addRelation('cascade_tags', ManyToMany::make('tags')// @testing: many to many
-                                                  ->setThroughTable('tbl_links_to_tags')
-                                                  ->setThroughTableAlias('products_to_tags')
-                                                  ->setThroughNativeColumn('tagable_id')
-                                                  ->setThroughGuards(['tagable_type' => 'products'])
-                                                  ->setThroughColumns(['position' => 'position_in_product'])
-                                                  ->setCascade(true))
           ->addRelation('tags', ManyToMany::make('tags')// @testing: many to many
                                           ->setThroughTable('tbl_links_to_tags')
                                           ->setThroughTableAlias('products_to_tags')
@@ -77,10 +70,43 @@ $orm->addMapper(
                                               return $query;
                                           })
                                           ->addAggregate('tags_count', [RelationConfig::AGG_FUNCTION => 'count(tags.id)']))
-          ->addRelation('cascade_category', ManyToOne::make('categories')
-                                                     ->setCascade(true)) // @testing: many to one
           ->addRelation('category', ManyToOne::make('categories')) // @testing: many to one
           ->addRelation('ebay', OneToOne::make('ebay_products'))// @testing: one to one
+          ->addRelation('cascade_ebay', OneToOne::make('ebay_products')
+                                                ->setCascade(true))// @testing: one to one
+        // behaviours
+          ->addBehaviour(Timestamps::make('created_on', 'updated_on'))
+          ->addBehaviour(SoftDelete::make('deleted_on'))
+);
+
+/**
+ * For testing relations with cascade
+ */
+$orm->addMapper(
+    Mapper::make('cascade_products')
+          ->setTable('tbl_products')
+          ->setTableAlias('products')
+        // columns
+          ->addAutoIncrementColumn()
+          ->addColumn(Column::varchar('sku')->setUnique(true))
+          ->addColumn(Column::decimal('price', 14, 2)
+                            ->setAttributeName('value')
+                            ->setDefault(0)
+                            ->setPreviousName('cost')) // @testing: migration column rename
+          ->addColumn(Column::json('attributes'))
+        // computed property
+          ->addComputedProperty(ComputedProperty::make('discounted_price')
+                                                ->setType('float')
+                                                ->setGetterBody('return round($this->price * 0.9, 2);')
+                                                ->setSetterBody('$this->price = $value / 0.9;'))
+        // relations
+          ->addRelation('images', OneToMany::make('images')
+                                           ->setCascade(true)
+                                           ->setForeignKey('content_id')
+                                           ->setForeignGuards(['content_type' => 'products'])) // @testing: one to many | relation guards
+          ->addRelation('ebay', OneToOne::make('ebay_products')
+                                                ->setForeignKey('product_id')
+                                                ->setCascade(true))// @testing: one to one
         // behaviours
           ->addBehaviour(Timestamps::make('created_on', 'updated_on'))
           ->addBehaviour(SoftDelete::make('deleted_on'))

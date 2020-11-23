@@ -73,7 +73,6 @@ abstract class Relation
     protected function applyDefaults(): void
     {
         $this->setOptionIfMissing(RelationConfig::LOAD_STRATEGY, RelationConfig::LOAD_LAZY);
-        $this->setOptionIfMissing(RelationConfig::CASCADE, false);
     }
 
     protected function setOptionIfMissing($name, $value)
