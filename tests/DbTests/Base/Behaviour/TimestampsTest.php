@@ -17,8 +17,7 @@ class TimestampsTest extends BaseTestCase
     public function test_behaviour_is_applied()
     {
         // create a clone so the ORM is not affected
-        $mapper = $this->orm->get('products')->without();
-        $mapper->use(new Timestamps('created_on', 'updated_on'));
+        $mapper = $this->orm->get('products');
 
         $product = $mapper->newEntity(['sku' => 'sku_1']);
 
@@ -29,5 +28,28 @@ class TimestampsTest extends BaseTestCase
 
         $this->assertNotNull($product->created_on);
         $this->assertNotNull($product->updated_on);
+    }
+
+
+
+    public function test_behaviour_is_removed() {
+        // create a clone so the ORM is not affected
+        $mapper = $this->orm->get('products')->without('timestamps');
+
+        $product = $mapper->newEntity(['sku' => 'sku_1']);
+
+        $this->assertTrue($mapper->save($product));
+
+        $updatedOn = $product->updated_on;
+
+        sleep(2);
+
+        $product->sku = 'sku_2';
+        $mapper->save($product);
+
+        $product = $mapper->find($product->id);
+
+        $this->assertEquals('sku_2', $product->sku);
+        $this->assertEquals($updatedOn, $product->updated_on);
     }
 }

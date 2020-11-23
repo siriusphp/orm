@@ -65,7 +65,6 @@ abstract class ProductMapperBase extends Mapper
 
         $this->addRelation('images', [
             'type' => 'one_to_many',
-            'cascade' => true,
             'native_key' => 'id',
             'foreign_mapper' => 'images',
             'foreign_key' => 'content_id',
@@ -103,15 +102,6 @@ abstract class ProductMapperBase extends Mapper
 
         $this->addRelation('ebay', [
             'type' => 'one_to_one',
-            'native_key' => 'id',
-            'foreign_mapper' => 'ebay_products',
-            'foreign_key' => 'product_id',
-            'load_strategy' => 'lazy',
-        ]);
-
-        $this->addRelation('cascade_ebay', [
-            'type' => 'one_to_one',
-            'cascade' => true,
             'native_key' => 'id',
             'foreign_mapper' => 'ebay_products',
             'foreign_key' => 'product_id',

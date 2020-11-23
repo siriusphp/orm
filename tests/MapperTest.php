@@ -18,16 +18,7 @@ class MapperTest extends BaseTestCase
     {
         parent::setUp();
 
-        $mapperConfig = MapperConfig::fromArray([
-            MapperConfig::TABLE                => 'products',
-            MapperConfig::TABLE                => 'products',
-            MapperConfig::ENTITY_CLASS         => ProductEntity::class,
-            MapperConfig::TABLE_ALIAS          => 'p',
-            MapperConfig::COLUMNS              => ['id', 'category_id', 'featured_image_id', 'sku', 'price'],
-            MapperConfig::COLUMN_ATTRIBUTE_MAP => ['price' => 'value'],
-            MapperConfig::CASTS                => ['value' => 'decimal:2']
-        ]);
-        $this->mapper = DynamicMapper::make($this->orm, $mapperConfig);
+        $this->mapper = $this->orm->get('products');
     }
 
     public function test_new_entity()

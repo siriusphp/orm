@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm;
 
 use Sirius\Orm\Behaviour\BehaviourInterface;
+use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\GenericHydrator;
@@ -136,7 +137,18 @@ class Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $entity);
     }
 
-    public function addRelation($name, $relation)
+    public function newCollection(array $datas): Collection
+    {
+        $entities = array_map([$this, 'newEntity'], $datas);
+
+        return new Collection($entities, $this->hydrator);
+    }
+
+    /**
+     * @param string $name
+     * @param array|Relation $relation
+     */
+    public function addRelation(string $name, $relation)
     {
         if (is_array($relation) || $relation instanceof Relation) {
             $this->relations[$name] = $relation;
@@ -148,12 +160,12 @@ class Mapper
         );
     }
 
-    public function hasRelation($name): bool
+    public function hasRelation(string $name): bool
     {
         return isset($this->relations[$name]);
     }
 
-    public function getRelation($name): Relation
+    public function getRelation(string $name): Relation
     {
         if ( ! $this->hasRelation($name)) {
             throw new \InvalidArgumentException("Relation named {$name} is not registered for this mapper");

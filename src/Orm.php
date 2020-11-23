@@ -5,6 +5,8 @@ namespace Sirius\Orm;
 
 use InvalidArgumentException;
 use Sirius\Orm\Contract\MapperLocatorInterface;
+use Sirius\Orm\Entity\CollectionCaster;
+use Sirius\Orm\Entity\EntityCaster;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
 use Sirius\Orm\Relation\RelationConfig;
@@ -71,6 +73,8 @@ class Orm
             throw new \InvalidArgumentException('The $mapper argument must be a Mapper object, 
                 a MapperConfig object, a callable or a string that can be used by the mapper locator');
         }
+
+        $this->addCastingMethodsForMapper($name);
 
         return $this;
     }
@@ -181,5 +185,11 @@ class Orm
         }
 
         return $mapper;
+    }
+
+    protected function addCastingMethodsForMapper(string $name)
+    {
+        $this->castingManager->register('entity_from_' . $name, new EntityCaster($this, $name));
+        $this->castingManager->register('collection_of_' . $name, new CollectionCaster($this, $name));
     }
 }

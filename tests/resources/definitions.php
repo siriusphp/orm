@@ -55,7 +55,6 @@ $orm->addMapper(
           ->addRelation('languages', OneToMany::make('product_languages')
                                               ->setForeignKey('content_id'))
           ->addRelation('images', OneToMany::make('images')
-                                           ->setCascade(true)
                                            ->setForeignKey('content_id')
                                            ->setForeignGuards(['content_type' => 'products'])) // @testing: one to many | relation guards
           ->addRelation('tags', ManyToMany::make('tags')// @testing: many to many
@@ -72,8 +71,6 @@ $orm->addMapper(
                                           ->addAggregate('tags_count', [RelationConfig::AGG_FUNCTION => 'count(tags.id)']))
           ->addRelation('category', ManyToOne::make('categories')) // @testing: many to one
           ->addRelation('ebay', OneToOne::make('ebay_products'))// @testing: one to one
-          ->addRelation('cascade_ebay', OneToOne::make('ebay_products')
-                                                ->setCascade(true))// @testing: one to one
         // behaviours
           ->addBehaviour(Timestamps::make('created_on', 'updated_on'))
           ->addBehaviour(SoftDelete::make('deleted_on'))

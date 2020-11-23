@@ -39,10 +39,10 @@ class OneToOneTest extends BaseTestCase
         $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1', 'price' => 5]);
         $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
 
-        $product = $this->productsMapper->find(1);
+        $product = $this->cascadeProductsMapper->find(1);
         $this->assertNotNull($product->ebay);
-        $this->assertTrue($this->productsMapper->delete($product, true));
-        $this->assertNull($this->productsMapper->find(1));
+        $this->assertTrue($this->cascadeProductsMapper->delete($product, true));
+        $this->assertNull($this->cascadeProductsMapper->find(1));
         $this->assertRowDeleted('tbl_ebay_products', 'id  = 2');
     }
 

@@ -7,20 +7,6 @@ class CastingManager
 {
     protected $casts = [];
 
-    /**
-     * @var CastingManager
-     */
-    protected static $instance;
-
-    public static function getInstance()
-    {
-        if ( ! static::$instance) {
-            static::$instance = new static;
-        }
-
-        return static::$instance;
-    }
-
     public function register(string $name, callable $func)
     {
         $this->casts[$name] = $func;

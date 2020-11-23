@@ -86,20 +86,6 @@ class BaseTestCase extends TestCase
 
     public function loadMappers()
     {
-        if ($this->useGeneratedMappers) {
-            $this->loadGeneratedMappers();
-
-            return;
-        }
-
-        $mappers = include(__DIR__ . '/resources/mappers.php');
-        foreach ($mappers as $name => $config) {
-            $this->orm->register($name, MapperConfig::fromArray($config));
-        }
-    }
-
-    protected function loadGeneratedMappers()
-    {
         $mappers           = ['products', 'cascade_products', 'ebay_products', 'categories', 'languages', 'images', 'tags', 'product_languages'];
         $connectionLocator = $this->connectionLocator;
 

@@ -7,49 +7,23 @@ namespace Sirius\Orm\Tests;
 use Sirius\Orm\DynamicMapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
+use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
 class OrmTest extends BaseTestCase
 {
-
-    public function test_lazy_mapper_config()
-    {
-        $mapperConfig = MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
-        ]);
-        $this->orm->register('products', $mapperConfig);
-
-        $this->assertTrue($this->orm->has('products'));
-        $this->assertInstanceOf(DynamicMapper::class, $this->orm->get('products'));
-    }
-
     public function test_lazy_mapper_factory()
     {
-        $mapperConfig      = MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
-        ]);
-        $this->orm->register('products', function () use ($mapperConfig) {
-            return DynamicMapper::make($this->orm, $mapperConfig);
+        $this->orm->register('products', function () {
+            return new ProductMapper($this->orm);
         });
 
         $this->assertTrue($this->orm->has('products'));
-        $this->assertInstanceOf(DynamicMapper::class, $this->orm->get('products'));
+        $this->assertInstanceOf(ProductMapper::class, $this->orm->get('products'));
     }
 
     public function test_mapper_instance()
     {
-        $mapperConfig = MapperConfig::fromArray([
-            MapperConfig::TABLE       => 'products',
-            MapperConfig::TABLE_ALIAS => 'p',
-            MapperConfig::COLUMNS     => ['id', 'category_id', 'featured_image_id', 'sku', 'price']
-        ]);
-        $mapper       = DynamicMapper::make($this->orm, $mapperConfig);
-        $this->orm->register('products', $mapper);
-
-        $this->assertInstanceOf(DynamicMapper::class, $this->orm->get('products'));
+        $this->assertInstanceOf(ProductMapper::class, $this->orm->get('products'));
     }
 
     public function test_exception_thrown_on_invalid_relation_type()

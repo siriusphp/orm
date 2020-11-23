@@ -38,6 +38,7 @@ FROM
 INNER JOIN (
     SELECT categories.* FROM categories
     ) AS category ON products.category_id = category.id
+WHERE deleted_on IS NULL    
 SQL;
 
         $this->assertSameStatement($statement, $query->getStatement());
