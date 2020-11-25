@@ -22,7 +22,8 @@ jobs:
       siriusorm_mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: sirius
+          MYSQL_USER: sirius
+          MYSQL_PASSWORD: sirius
           MYSQL_DATABASE: siriusorm
         ports:
           - 3306:3306
@@ -69,6 +70,7 @@ jobs:
     - name: Run test suite
       env:
         MYSQL_CONNECTION: 'mysql:host=127.0.0.1;dbname=siriusorm'
+        MYSQL_USER: 'sirius'
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit
