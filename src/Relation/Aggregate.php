@@ -65,6 +65,17 @@ class Aggregate
 
         $query->groupBy(...array_values($keys));
 
+        /**
+         * the query callback for the relation or for the aggregate might implement ORDER_BY
+         * and that would cause issues with MySQL's sql_mode=ONLY_FULL_GROUP_BY
+         */
+        $query->resetOrderBy();
+
+        /**
+         * just in case a query callback is setting limits
+         */
+        $query->resetLimit();
+
         return $query;
     }
 
