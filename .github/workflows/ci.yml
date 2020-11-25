@@ -22,7 +22,7 @@ jobs:
       siriusorm_mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_ROOT_PASSWORD: sirius
           MYSQL_DATABASE: siriusorm
         ports:
           - 3306:3306
