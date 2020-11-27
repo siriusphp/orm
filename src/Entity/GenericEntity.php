@@ -44,17 +44,6 @@ class GenericEntity implements EntityInterface
         return $this->set($name, $value);
     }
 
-    public function __isset($name)
-    {
-        return isset($this->attributes[$name]);
-    }
-
-    public function __unset($name)
-    {
-        unset($this->attributes[$name]);
-    }
-
-
     protected function castAttribute($name, $value)
     {
         $method = Str::methodName($name . ' attribute', 'cast');
@@ -67,8 +56,6 @@ class GenericEntity implements EntityInterface
 
     protected function set($attribute, $value = null)
     {
-        $this->preventChangesIfDeleted();
-
         $value = $this->castAttribute($attribute, $value);
         if ( ! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->markChanged($attribute);
@@ -79,10 +66,6 @@ class GenericEntity implements EntityInterface
 
     protected function get($attribute)
     {
-        if ( ! $attribute) {
-            return null;
-        }
-
         $this->maybeLazyLoad($attribute);
 
         return $this->attributes[$attribute] ?? null;
@@ -93,13 +76,6 @@ class GenericEntity implements EntityInterface
         $this->lazyLoaders[$attribute] = $lazyLoader;
 
         return $this;
-    }
-
-    protected function preventChangesIfDeleted()
-    {
-        if ($this->state == StateEnum::DELETED) {
-            throw new \BadMethodCallException('Entity was deleted, no further changes are allowed');
-        }
     }
 
     /**

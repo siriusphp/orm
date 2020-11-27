@@ -7,3 +7,5 @@ phpcs.phar
 couscous.phar
 tests/mysql_schema_created
 tests/sqlite_schema_created
+.tmp/
+tests/*_schema_created

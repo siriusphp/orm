@@ -50,8 +50,9 @@ return [
                 RelationConfig::THROUGH_NATIVE_COLUMN => 'tagable_id',
                 RelationConfig::THROUGH_GUARDS        => ['tagable_type' => 'products'],
                 RelationConfig::THROUGH_COLUMNS       => ['position' => 'position_in_product'],
-                RelationConfig::QUERY_CALLBACK       => function(Query $query) {
+                RelationConfig::QUERY_CALLBACK        => function (Query $query) {
                     $query->orderBy('position ASC');
+
                     return $query;
                 },
                 RelationConfig::AGGREGATES            => [

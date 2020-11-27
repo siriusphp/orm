@@ -89,7 +89,7 @@ class OneToMany extends Relation
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
         }
-        $this->foreignEntityHydrator->set($foreignEntity, $this->name, null);
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, null);
         $foreignEntity->setState($state);
     }
 

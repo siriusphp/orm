@@ -5,7 +5,6 @@ namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Mapper;
-use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToMany;
 use Sirius\Orm\Relation\RelationConfig;

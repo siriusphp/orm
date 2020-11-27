@@ -51,11 +51,11 @@ abstract class ProductBase extends GenericEntity
 
     protected function setDiscountedPriceAttribute($value)
     {
-        $this->price = $value / 0.9;
+        $this->value = $value / 0.9;
     }
 
     protected function getDiscountedPriceAttribute()
     {
-        return round($this->price * 0.9, 2);
+        return round($this->value * 0.9, 2);
     }
 }

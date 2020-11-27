@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use Sirius\Orm\DynamicMapper;
-use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
@@ -54,5 +52,12 @@ class OrmTest extends BaseTestCase
             return new \stdClass();
         });
         $this->orm->get('products');
+    }
+
+    public function test_register_using_instance()
+    {
+        $mapper = new ProductMapper($this->orm);
+        $this->orm->register('products', $mapper);
+        $this->assertEquals($mapper, $this->orm->get('products'));
     }
 }

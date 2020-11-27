@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests\DbTests\Base\Behaviour;
 
-use Sirius\Orm\Behaviour\Timestamps;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Tests\BaseTestCase;
 
@@ -31,8 +30,8 @@ class TimestampsTest extends BaseTestCase
     }
 
 
-
-    public function test_behaviour_is_removed() {
+    public function test_behaviour_is_removed()
+    {
         // create a clone so the ORM is not affected
         $mapper = $this->orm->get('products')->without('timestamps');
 

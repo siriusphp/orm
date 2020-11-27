@@ -174,12 +174,8 @@ class Mapper
         if (is_array($this->relations[$name])) {
             $this->relations[$name] = $this->orm->createRelation($this, $name, $this->relations[$name]);
         }
-        $relation = $this->relations[$name];
-        if ( ! $relation instanceof Relation) {
-            throw new \InvalidArgumentException("Relation named {$name} is not a proper Relation instance");
-        }
 
-        return $relation;
+        return $this->relations[$name];
     }
 
     public function getRelations(): array

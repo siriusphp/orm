@@ -45,6 +45,8 @@ class BaseTestCase extends TestCase
 
         if ($this->dbEngine == 'mysql') {
             $connection = Connection::new(getenv('MYSQL_CONNECTION'), getenv('MYSQL_USER'), getenv('MYSQL_PASS'));
+        } elseif ($this->dbEngine == 'postgres') {
+            $connection = Connection::new(getenv('POSTGRES_CONNECTION'), getenv('POSTGRES_USER'), getenv('POSTGRES_PASS'));
         } else {
             $connection = Connection::new('sqlite::memory:');
         }

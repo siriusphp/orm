@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Sirius\Orm\CastingManager;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Tests\Generated\Entity\Product;
@@ -22,8 +21,9 @@ class CastingManagerTest extends BaseTestCase
         $this->cm = $this->orm->getCastingManager();
     }
 
-    public function test_custom_cast() {
-        $this->cm->register('short_text', function($value, $limit = 100) {
+    public function test_custom_cast()
+    {
+        $this->cm->register('short_text', function ($value, $limit = 100) {
             return substr($value, 0, $limit);
         });
 
@@ -33,8 +33,8 @@ class CastingManagerTest extends BaseTestCase
     public function test_bool()
     {
         $this->assertFalse($this->cm->cast('bool', ''));
-        $this->assertFalse($this->cm->cast('bool',0));
-        $this->assertFalse($this->cm->cast('bool','0'));
+        $this->assertFalse($this->cm->cast('bool', 0));
+        $this->assertFalse($this->cm->cast('bool', '0'));
     }
 
     public function test_json()
@@ -87,24 +87,26 @@ class CastingManagerTest extends BaseTestCase
         ], $result);
     }
 
-    public function test_cast_product_entity() {
+    public function test_cast_product_entity()
+    {
         $result = $this->cm->cast('entity_from_products', [
-           'id' => 1,
-           'value' => 10,
+            'id'    => 1,
+            'value' => 10,
         ]);
 
         $this->assertInstanceOf(Product::class, $result);
     }
 
-    public function test_cast_product_collection() {
+    public function test_cast_product_collection()
+    {
         /** @var Collection $result */
         $result = $this->cm->cast('collection_of_products', [
             [
-                'id' => 1,
+                'id'    => 1,
                 'value' => 10,
             ],
             [
-                'id' => 2,
+                'id'    => 2,
                 'value' => 20,
             ]
         ]);

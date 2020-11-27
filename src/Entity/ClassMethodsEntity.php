@@ -48,8 +48,6 @@ class ClassMethodsEntity implements EntityInterface
 
     protected function set($attribute, $value = null)
     {
-        $this->preventChangesIfDeleted();
-
         if ($value instanceof LazyLoader) {
             $this->lazyLoaders[$attribute] = $value;
 
@@ -82,13 +80,6 @@ class ClassMethodsEntity implements EntityInterface
         $this->lazyLoaders[$attribute] = $lazyLoader;
 
         return $this;
-    }
-
-    protected function preventChangesIfDeleted()
-    {
-        if ($this->state == StateEnum::DELETED) {
-            throw new \BadMethodCallException('Entity was deleted, no further changes are allowed');
-        }
     }
 
     /**

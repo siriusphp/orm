@@ -29,11 +29,15 @@ class Collection extends ArrayCollection
 
     protected function ensureHydratedElement($element)
     {
-        if ( ! $element instanceof EntityInterface) {
+        if ($element instanceof EntityInterface) {
+            return $element;
+        }
+
+        if (is_array($element)) {
             return $this->hydrator->hydrate((array)$element);
         }
 
-        return $element;
+        throw new \InvalidArgumentException('You can only add arrays or entities to collections');
     }
 
     protected function getElementPK($element)
@@ -64,6 +68,8 @@ class Collection extends ArrayCollection
 
             return parent::add($element);
         }
+
+        return true;
     }
 
     public function remove($key)
@@ -82,12 +88,23 @@ class Collection extends ArrayCollection
         if ( ! $this->contains($element)) {
             return true;
         }
-        $removed = parent::removeElement($element);
+        $removed = parent::removeElement($this->findByPk($this->hydrator->getPk($element)));
         if ($removed) {
             $this->change('removed', $element);
         }
 
-        return $removed;
+        return true;
+    }
+
+    public function findByPk($pk)
+    {
+        foreach ($this as $element) {
+            if ($pk == $this->hydrator->getPk($element)) {
+                return $element;
+            }
+        }
+
+        return null;
     }
 
     public function pluck($names)
@@ -139,16 +156,12 @@ class Collection extends ArrayCollection
 
     protected function change($type, $element)
     {
-        foreach (array_keys($this->changes) as $t) {
-            /** @var ArrayCollection $changeCollection */
-            $changeCollection = $this->changes[$t];
-            if ($t == $type) {
-                if ( ! $changeCollection->contains($element)) {
-                    $changeCollection->add($element);
-                }
-            } else {
-                $this->removeElement($element);
-            }
-        }
+        $changeCollection = $this->changes[$type];
+        $changeCollection->add($element);
+    }
+
+    protected function createFrom(array $elements)
+    {
+        return new static($elements, $this->hydrator);
     }
 }

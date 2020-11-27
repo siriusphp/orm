@@ -20,15 +20,17 @@ class QueryTest extends BaseTestCase
         $this->mapper = $this->orm->get('products');
     }
 
-    public function test_exception_thrown_when_joining_with_invalid_relation() {
+    public function test_exception_thrown_when_joining_with_invalid_relation()
+    {
         $this->expectException(\InvalidArgumentException::class);
         $this->mapper->newQuery()->joinWith('undefined');
     }
 
-    public function test_joining_multiple_times_with_the_same_relation() {
+    public function test_joining_multiple_times_with_the_same_relation()
+    {
         $query = $this->mapper->newQuery()
-                     ->joinWith('category')
-                     ->joinWith('category');
+                              ->joinWith('category')
+                              ->joinWith('category');
 
         $statement = <<<SQL
 SELECT
@@ -74,12 +76,12 @@ SQL;
     public function test_where_field_in_relation()
     {
         $this->insertRow('categories', [
-            'id' => 1,
+            'id'   => 1,
             'name' => 'category'
         ]);
         $this->insertRow('tbl_products', [
             'category_id' => 1,
-            'sku' => 'sku_1'
+            'sku'         => 'sku_1'
         ]);
 
         $result = $this->mapper->newQuery()

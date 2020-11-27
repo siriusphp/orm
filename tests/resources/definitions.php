@@ -49,8 +49,8 @@ $orm->addMapper(
         // computed property
           ->addComputedProperty(ComputedProperty::make('discounted_price')
                                                 ->setType('float')
-                                                ->setGetterBody('return round($this->price * 0.9, 2);')
-                                                ->setSetterBody('$this->price = $value / 0.9;'))
+                                                ->setGetterBody('return round($this->value * 0.9, 2);')
+                                                ->setSetterBody('$this->value = $value / 0.9;'))
         // relations
           ->addRelation('languages', OneToMany::make('product_languages')
                                               ->setForeignKey('content_id'))
@@ -102,8 +102,8 @@ $orm->addMapper(
                                            ->setForeignKey('content_id')
                                            ->setForeignGuards(['content_type' => 'products'])) // @testing: one to many | relation guards
           ->addRelation('ebay', OneToOne::make('ebay_products')
-                                                ->setForeignKey('product_id')
-                                                ->setCascade(true))// @testing: one to one
+                                        ->setForeignKey('product_id')
+                                        ->setCascade(true))// @testing: one to one
         // behaviours
           ->addBehaviour(Timestamps::make('created_on', 'updated_on'))
           ->addBehaviour(SoftDelete::make('deleted_on'))
