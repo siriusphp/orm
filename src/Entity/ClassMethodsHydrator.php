@@ -104,11 +104,6 @@ class ClassMethodsHydrator implements HydratorInterface
         return $entity->{$method}($value);
     }
 
-    public function setLazy(EntityInterface $entity, $attribute, LazyLoader $lazyLoader)
-    {
-        $entity->set($entity, $attribute, $lazyLoader);
-    }
-
     /**
      * @param $entity
      *
