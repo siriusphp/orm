@@ -75,13 +75,6 @@ class ClassMethodsEntity implements EntityInterface
         return $this->attributes[$attribute] ?? null;
     }
 
-    public function setLazy($attribute, LazyLoader $lazyLoader)
-    {
-        $this->lazyLoaders[$attribute] = $lazyLoader;
-
-        return $this;
-    }
-
     /**
      * @param $attribute
      */

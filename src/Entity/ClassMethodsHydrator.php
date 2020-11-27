@@ -106,7 +106,7 @@ class ClassMethodsHydrator implements HydratorInterface
 
     public function setLazy(EntityInterface $entity, $attribute, LazyLoader $lazyLoader)
     {
-        $entity->setLazy($attribute, $lazyLoader);
+        $entity->set($entity, $attribute, $lazyLoader);
     }
 
     /**

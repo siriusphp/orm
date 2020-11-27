@@ -56,6 +56,11 @@ class GenericEntity implements EntityInterface
 
     protected function set($attribute, $value = null)
     {
+        if ($value instanceof LazyLoader) {
+            $this->lazyLoaders[$attribute] = $value;
+            return;
+        }
+
         $value = $this->castAttribute($attribute, $value);
         if ( ! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->markChanged($attribute);
@@ -69,13 +74,6 @@ class GenericEntity implements EntityInterface
         $this->maybeLazyLoad($attribute);
 
         return $this->attributes[$attribute] ?? null;
-    }
-
-    public function setLazy($attribute, LazyLoader $lazyLoader)
-    {
-        $this->lazyLoaders[$attribute] = $lazyLoader;
-
-        return $this;
     }
 
     /**
