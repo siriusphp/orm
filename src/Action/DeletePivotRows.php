@@ -51,6 +51,17 @@ class DeletePivotRows extends BaseAction
         $delete->from((string)$this->relation->getOption(RelationConfig::THROUGH_TABLE));
         $delete->whereAll($conditions, false);
 
+        $guards = $this->relation->getOption(RelationConfig::THROUGH_GUARDS);
+        if ($guards) {
+            foreach ($guards as $column => $value) {
+                if (is_int($column)) {
+                    $delete->where($value);
+                } else {
+                    $delete->where($column, $value);
+                }
+            }
+        }
+
         $delete->perform();
     }
 

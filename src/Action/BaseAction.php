@@ -120,18 +120,13 @@ abstract class BaseAction implements ActionInterface
         return $relations === true || in_array($relationName, $relations);
     }
 
-    protected function hasRelations() {
-        return $this->getOption('relations') != false &&
-               $this->getOption('relations') !== [];
-    }
-
     /**
      * Calls the relations and checks if they have to attach other actions
      * Usually used for deep save/delete
      */
     protected function addActionsForRelatedEntities()
     {
-        if (!$this->hasRelations() || ! $this->mapper) {
+        if (! $this->mapper) {
             return;
         }
 

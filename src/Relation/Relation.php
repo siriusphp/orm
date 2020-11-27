@@ -16,7 +16,6 @@ use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\QueryHelper;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
-use Sirius\Sql\Select;
 
 abstract class Relation
 {
@@ -284,7 +283,7 @@ abstract class Relation
         return isset($changes[$this->name]) && $changes[$this->name];
     }
 
-    protected function applyQueryCallback(Select $query)
+    protected function applyQueryCallback(Query $query)
     {
         $queryCallback = $this->getOption(RelationConfig::QUERY_CALLBACK);
         if ($queryCallback && is_callable($queryCallback)) {

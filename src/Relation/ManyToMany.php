@@ -64,6 +64,8 @@ class ManyToMany extends Relation
 
         $query = $this->applyForeignGuards($query);
 
+        $query = $this->applyThroughGuards($query);
+
         $query = $this->addPivotColumns($query);
 
         return $query;
@@ -201,7 +203,17 @@ class ManyToMany extends Relation
 
     protected function addActionOnDelete(BaseAction $action)
     {
-        $this->addActionOnSave($action);
+        $nativeEntity       = $action->getEntity();
+
+        // retrieve them again from the DB since the related collection might not have everything
+        // for example due to a relation query callback
+        $foreignEntities = $this->getQuery(new Tracker([$nativeEntity->toArray()]))
+                                ->get();
+
+        foreach ($foreignEntities as $entity) {
+            $deletePivotAction = new DeletePivotRows($this, $nativeEntity, $entity);
+            $action->append($deletePivotAction);
+        }
     }
 
     protected function addActionOnSave(BaseAction $action)
@@ -251,5 +263,15 @@ class ManyToMany extends Relation
                 'delete'
             ));
         }
+    }
+
+    private function applyThroughGuards(Query $query)
+    {
+        $guards = $this->getOption(RelationConfig::THROUGH_GUARDS);
+        if ($guards) {
+            $query->setGuards($guards);
+        }
+
+        return $query;
     }
 }

@@ -221,6 +221,17 @@ SQL;
         $this->assertEquals(1, $tag->position_in_product);
     }
 
+    public function test_delete_pivot_rows()
+    {
+        $this->populateDb();
+
+        $product = $this->productsMapper->find(1);
+        $this->productsMapper->delete($product);
+
+        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_type="products" and tagable_id=1');
+        $this->assertRowPresent('tbl_links_to_tags', 'tagable_type="categories" and tagable_id=1');
+    }
+
     protected function populateDb(): void
     {
         $this->insertRows('tags', ['id', 'name'], [
@@ -235,6 +246,7 @@ SQL;
             [1, 'products', 10, 1],
             [1, 'products', 20, 2],
             [2, 'products', 10, 1],
+            [1, 'categories', 10, 1],
         ]);
     }
 }
