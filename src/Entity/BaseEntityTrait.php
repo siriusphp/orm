@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
+use Sirius\Orm\Contract\LazyLoader;
+
 trait BaseEntityTrait
 {
     /**
@@ -14,6 +16,8 @@ trait BaseEntityTrait
      * @var array
      */
     protected $changed = [];
+
+    protected $lazyLoaders = [];
 
     /**
      * Marks an attribute as being changed
@@ -85,5 +89,19 @@ trait BaseEntityTrait
         }
 
         return $changes;
+    }
+
+    protected function maybeLazyLoad($attribute): void
+    {
+        if (isset($this->lazyLoaders[$attribute])) {
+            // preserve state
+            $state = $this->state;
+            /** @var LazyLoader $lazyLoader */
+            $lazyLoader = $this->lazyLoaders[$attribute];
+            $lazyLoader->getForEntity($this);
+            unset($this->changed[$attribute]);
+            unset($this->lazyLoaders[$attribute]);
+            $this->state = $state;
+        }
     }
 }

@@ -13,8 +13,6 @@ class GenericEntity implements EntityInterface
 
     protected $attributes = [];
 
-    protected $lazyLoaders = [];
-
 
     public function __construct(array $attributes = [], string $state = null)
     {
@@ -54,7 +52,7 @@ class GenericEntity implements EntityInterface
         return $value;
     }
 
-    protected function set($attribute, $value = null)
+    protected function set(string $attribute, $value = null)
     {
         if ($value instanceof LazyLoader) {
             $this->lazyLoaders[$attribute] = $value;
@@ -69,27 +67,10 @@ class GenericEntity implements EntityInterface
         $this->attributes[$attribute] = $value;
     }
 
-    protected function get($attribute)
+    protected function get(string $attribute)
     {
         $this->maybeLazyLoad($attribute);
 
         return $this->attributes[$attribute] ?? null;
-    }
-
-    /**
-     * @param $attribute
-     */
-    protected function maybeLazyLoad($attribute): void
-    {
-        if (isset($this->lazyLoaders[$attribute])) {
-            // preserve state
-            $state = $this->state;
-            /** @var LazyLoader $lazyLoader */
-            $lazyLoader = $this->lazyLoaders[$attribute];
-            $lazyLoader->getForEntity($this);
-            unset($this->changed[$attribute]);
-            unset($this->lazyLoaders[$attribute]);
-            $this->state = $state;
-        }
     }
 }

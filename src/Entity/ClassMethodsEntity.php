@@ -13,27 +13,12 @@ class ClassMethodsEntity implements EntityInterface
 
     protected $attributes = [];
 
-    protected $lazyLoaders = [];
-
     public function __construct(array $attributes, string $state = null)
     {
         foreach ($attributes as $attr => $value) {
             $this->set($attr, $value);
         }
         $this->setState($state);
-    }
-
-    public function __call($method, $args)
-    {
-        if (substr($method, 0, 3) === 'get') {
-            return $this->get(Str::underscore(substr($method, 3)));
-        }
-
-        if (substr($method, 0, 3) === 'set') {
-            return $this->set(Str::underscore(substr($method, 3)), $args[0]);
-        }
-
-        throw new \BadMethodCallException("Unknown {$method}() called on " . get_class($this));
     }
 
     protected function castAttribute($name, $value)
@@ -46,7 +31,7 @@ class ClassMethodsEntity implements EntityInterface
         return $value;
     }
 
-    protected function set($attribute, $value = null)
+    protected function set(string $attribute, $value = null)
     {
         if ($value instanceof LazyLoader) {
             $this->lazyLoaders[$attribute] = $value;
@@ -64,31 +49,10 @@ class ClassMethodsEntity implements EntityInterface
         return $this;
     }
 
-    protected function get($attribute)
+    protected function get(string $attribute)
     {
-        if ( ! $attribute) {
-            return null;
-        }
-
         $this->maybeLazyLoad($attribute);
 
         return $this->attributes[$attribute] ?? null;
-    }
-
-    /**
-     * @param $attribute
-     */
-    protected function maybeLazyLoad($attribute): void
-    {
-        if (isset($this->lazyLoaders[$attribute])) {
-            // preserve state
-            $state = $this->state;
-            /** @var LazyLoader $lazyLoader */
-            $lazyLoader = $this->lazyLoaders[$attribute];
-            $lazyLoader->getForEntity($this);
-            unset($this->changed[$attribute]);
-            unset($this->lazyLoaders[$attribute]);
-            $this->state = $state;
-        }
     }
 }
