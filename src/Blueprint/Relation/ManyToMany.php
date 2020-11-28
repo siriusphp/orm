@@ -37,7 +37,7 @@ class ManyToMany extends Relation
         return $this;
     }
 
-    public function setForeignMapper($foreignMapper)
+    public function setForeignMapper($foreignMapper): Relation
     {
         parent::setForeignMapper($foreignMapper);
         $this->maybeSetAdditionalProperties();

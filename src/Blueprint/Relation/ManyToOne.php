@@ -13,7 +13,7 @@ class ManyToOne extends Relation
 
     protected $foreignKey = 'id';
 
-    public function setForeignMapper($foreignMapper)
+    public function setForeignMapper($foreignMapper): Relation
     {
         if ($foreignMapper && ! $this->nativeKey) {
             $this->nativeKey = Inflector::singularize($foreignMapper) . '_id';

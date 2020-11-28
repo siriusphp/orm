@@ -244,7 +244,7 @@ class Mapper extends Base
         return $this;
     }
 
-    public function getTableAlias(): string
+    public function getTableAlias(): ?string
     {
         return $this->tableAlias;
     }

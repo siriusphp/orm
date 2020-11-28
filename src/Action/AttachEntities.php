@@ -69,6 +69,10 @@ class AttachEntities implements ActionInterface
         $this->maybeUpdatePivotRow();
     }
 
+    public function onSuccess()
+    {
+    }
+
     protected function maybeUpdatePivotRow()
     {
         if ( ! $this->relation instanceof ManyToMany) {
