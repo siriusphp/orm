@@ -41,7 +41,7 @@ jobs:
 
     - name: Verify MySQL connection
       run: |
-        while ! mysqladmin ping -h"127.0.0.1" -P3306 --silent; do
+        while ! mysqladmin ping -h"localhost" -P3306 --silent; do
           sleep 1
         done
 
@@ -70,8 +70,8 @@ jobs:
 
     - name: Run test suite
       env:
-        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;dbname=siriusorm'
-        MYSQL_USER: 'sirius'
+        MYSQL_CONNECTION: 'mysql:host=localhost;dbname=siriusorm'
+        MYSQL_USER: 'root'
         MYSQL_PASS: 'sirius'
       run: |
         mkdir -p build/logs
