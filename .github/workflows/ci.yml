@@ -70,7 +70,7 @@ jobs:
 
     - name: Run test suite
       env:
-        MYSQL_CONNECTION: 'mysql:host=siriusorm_mysql;dbname=siriusorm'
+        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;dbname=siriusorm'
         MYSQL_USER: 'sirius'
         MYSQL_PASS: 'sirius'
       run: |
