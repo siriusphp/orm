@@ -6,8 +6,6 @@ namespace Sirius\Orm\CodeGenerator;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Dumper;
 use Nette\PhpGenerator\PhpNamespace;
-use Sirius\Orm\Collection\Collection;
-use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Orm\Blueprint\Mapper;
 
 class EntityBaseGenerator
@@ -56,6 +54,15 @@ class EntityBaseGenerator
             $this->namespace->addUse(\Sirius\Orm\Entity\ClassMethodsEntity::class);
             $this->class->setExtends('ClassMethodsEntity');
         }
+
+        $constructor = $this->class->addMethod('__construct')
+                                   ->setBody('parent::__construct($attributes, $state);');
+        $constructor->addParameter('attributes')
+                    ->setType('array')
+                    ->setDefaultValue([]);
+        $constructor->addParameter('state')
+                    ->setType('string')
+                    ->setDefaultValue(null);
 
         $this->class = $this->mapper->getOrm()->applyObservers($this->mapper->getName() . '_base_entity', $this->class);
     }

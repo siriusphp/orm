@@ -7,6 +7,7 @@ use DateTime;
 use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Blueprint\Column;
 use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Blueprint\Relation;
 use Sirius\Orm\Helpers\Str;
 
 class ColumnObserver extends Base
@@ -76,14 +77,15 @@ class ColumnObserver extends Base
             $setter = $class->addMethod(Str::methodName($name, 'set'));
             $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
             $setter->addParameter('value')
-                   ->setNullable($this->column->getNullable());
+                    ->setType($type)
+                   ->setNullable($this->attributeIsNullable());
             $setter->addBody('$this->set(\'' . $name . '\', $value);');
 
             $getter = $class->addMethod(Str::methodName($name, 'get'));
             $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
             $getter->addBody('return $this->get(\'' . $name . '\');');
             $getter->setReturnType($type)
-                   ->setReturnNullable($this->column->getNullable());
+                   ->setReturnNullable($this->attributeIsNullable());
         }
 
         return $class;
@@ -152,5 +154,25 @@ class ColumnObserver extends Base
             Column::TYPE_DATETIME      => DateTime::class,
             Column::TYPE_TIMESTAMP     => DateTime::class,
         ];
+    }
+
+    /**
+     * @return bool
+     */
+    protected function attributeIsNullable(): bool
+    {
+        if ($this->column->getNullable() || $this->column->getAutoIncrement()) {
+            return true;
+        }
+
+        $relations = $this->column->getMapper()->getRelations();
+        /** @var Relation $relation */
+        foreach ($relations as $relation) {
+            if ($relation->getNativeKey() === $this->column->getName()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -3,14 +3,20 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint;
 
+use Closure;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\Parameter;
+use ReflectionFunction;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\RelationConfig;
 
 abstract class Relation extends Base
 {
     use MapperAwareTrait;
+
+    protected $observer;
+
+    protected $name;
 
     protected $type;
 
@@ -43,8 +49,12 @@ abstract class Relation extends Base
     {
         $errors = [];
 
+        if ( ! $this->name) {
+            $errors[] = "Unknown relation name";
+        }
+
         if ( ! $this->type) {
-            $errors[] = "Uknown relation type";
+            $errors[] = "Unknown relation type";
         }
 
         if ( ! $this->nativeKey) {
@@ -65,6 +75,15 @@ abstract class Relation extends Base
         }
 
         return $errors;
+    }
+
+    public function getObservers(): array
+    {
+        $observer = $this->getObserver()->with($this);
+
+        return [
+            $this->getMapper()->getName() . '_base_entity' => [$observer]
+        ];
     }
 
     public function getNativeKey(): string
@@ -139,12 +158,44 @@ abstract class Relation extends Base
         return $this;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): Relation
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getObserver(): \Sirius\Orm\CodeGenerator\Observer\Base
+    {
+        if ($this->observer) {
+            return $this->observer;
+        }
+
+        $class = get_class($this);
+        $observerClass = str_replace('\\Blueprint\\',
+            '\\CodeGenerator\\Observer\\',
+            $class) . 'Observer';
+
+        return new $observerClass();
+    }
+
+    public function setObserver(\Sirius\Orm\CodeGenerator\Observer\Base $observer): Relation
+    {
+        $this->observer = $observer;
+
+        return $this;
+    }
 
     public function toArray()
     {
         $result = [];
         foreach (get_object_vars($this) as $prop => $value) {
-            if (in_array($prop, ['mapper'])) {
+            if (in_array($prop, ['mapper', 'name'])) {
                 continue;
             }
 
@@ -156,7 +207,7 @@ abstract class Relation extends Base
                 $result[Str::underscore($prop)] = $value;
             }
             if (is_object($value) && is_callable($value)) {
-                /** @var \Closure $value */
+                /** @var Closure $value */
                 $result[Str::underscore($prop)] = new Literal($this->getClosureDump($value));
             }
         }
@@ -164,10 +215,10 @@ abstract class Relation extends Base
         return $result;
     }
 
-    protected function getClosureDump(\Closure $c)
+    protected function getClosureDump(Closure $c)
     {
         $closure = \Nette\PhpGenerator\Closure::from($c);
-        $r       = new \ReflectionFunction($c);
+        $r       = new ReflectionFunction($c);
         $body    = '';
         $lines   = file($r->getFileName());
         for ($l = $r->getStartLine(); $l < $r->getEndLine(); $l++) {

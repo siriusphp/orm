@@ -121,6 +121,11 @@ class Mapper extends Base
             $observers = array_merge_recursive($observers, $property->getObservers());
         }
 
+        /** @var Relation $relation */
+        foreach ($this->relations as $relation) {
+            $observers = array_merge_recursive($observers, $relation->getObservers());
+        }
+
         return $observers;
     }
 
@@ -341,6 +346,7 @@ class Mapper extends Base
         if ( ! $relation->getForeignMapper()) {
             $relation->setForeignMapper(Inflector::pluralize($name));
         }
+        $relation->setName($name);
         $this->relations[$name] = $relation;
 
         return $this;

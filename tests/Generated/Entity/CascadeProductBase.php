@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\Generated\Entity;
 
 use DateTime;
+use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\GenericEntity;
 
 /**
@@ -16,9 +17,19 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property DateTime|null $updated_on
  * @property DateTime|null $deleted_on
  * @property float|null $discounted_price
+ * @property Image[]|Collection $images
+ * @property EbayProduct|null $ebay
  */
 abstract class CascadeProductBase extends GenericEntity
 {
+    public function __construct(array $attributes = [], string $state = null)
+    {
+        parent::__construct($attributes, $state);
+        if (!isset($this->attributes['images'])) {
+            $this->attributes['images'] = new Collection;
+        }
+    }
+
     protected function castIdAttribute($value)
     {
         return $value === null ? $value : intval($value);
@@ -57,5 +68,19 @@ abstract class CascadeProductBase extends GenericEntity
     protected function getDiscountedPriceAttribute()
     {
         return round($this->price * 0.9, 2);
+    }
+
+    public function addImage(Image $value)
+    {
+        $this->attributes['images']->addElement($value);
+    }
+
+    protected function castEbayAttribute($value)
+    {
+        if ($value === null) {
+            return $value;
+        }
+
+        return $value instanceOf EbayProduct ? $value : new EbayProduct((array) $value);
     }
 }

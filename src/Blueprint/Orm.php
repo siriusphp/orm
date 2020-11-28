@@ -163,6 +163,11 @@ class Orm extends Base
         return $this->mappers;
     }
 
+    public function getMapper($name): ?Mapper
+    {
+        return $this->mappers[$name] ?? null;
+    }
+
     public function addMapper(Mapper $mapper): Orm
     {
         $mapper->setOrm($this);

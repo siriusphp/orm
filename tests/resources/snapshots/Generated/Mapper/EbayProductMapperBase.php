@@ -40,6 +40,13 @@ abstract class EbayProductMapperBase extends Mapper
 
     protected function initRelations()
     {
+        $this->addRelation('product', [
+            'type' => 'one_to_one',
+            'native_key' => 'product_id',
+            'foreign_mapper' => 'products',
+            'foreign_key' => 'id',
+            'load_strategy' => 'lazy',
+        ]);
     }
 
     public function find($pk, array $load = []): ?EbayProduct

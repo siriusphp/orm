@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests\Generated\Entity;
 
 use DateTime;
+use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Entity\GenericEntity;
 
 /**
@@ -16,9 +17,30 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property DateTime|null $updated_on
  * @property DateTime|null $deleted_on
  * @property float|null $discounted_price
+ * @property ProductLanguage[]|Collection $languages
+ * @property Image[]|Collection $images
+ * @property Tag[]|Collection $tags
+ * @property Category|null $category
+ * @property EbayProduct|null $ebay
  */
 abstract class ProductBase extends GenericEntity
 {
+    public function __construct(array $attributes = [], string $state = null)
+    {
+        parent::__construct($attributes, $state);
+        if (!isset($this->attributes['languages'])) {
+            $this->attributes['languages'] = new Collection;
+        }
+
+        if (!isset($this->attributes['images'])) {
+            $this->attributes['images'] = new Collection;
+        }
+
+        if (!isset($this->attributes['tags'])) {
+            $this->attributes['tags'] = new Collection;
+        }
+    }
+
     protected function castIdAttribute($value)
     {
         return $value === null ? $value : intval($value);
@@ -57,5 +79,38 @@ abstract class ProductBase extends GenericEntity
     protected function getDiscountedPriceAttribute()
     {
         return round($this->value * 0.9, 2);
+    }
+
+    public function addLanguage(ProductLanguage $value)
+    {
+        $this->attributes['languages']->addElement($value);
+    }
+
+    public function addImage(Image $value)
+    {
+        $this->attributes['images']->addElement($value);
+    }
+
+    public function addTag(Tag $value)
+    {
+        $this->attributes['tags']->addElement($value);
+    }
+
+    protected function castCategoryAttribute($value)
+    {
+        if ($value === null) {
+            return $value;
+        }
+
+        return $value instanceOf Category ? $value : new Category((array) $value);
+    }
+
+    protected function castEbayAttribute($value)
+    {
+        if ($value === null) {
+            return $value;
+        }
+
+        return $value instanceOf EbayProduct ? $value : new EbayProduct((array) $value);
     }
 }

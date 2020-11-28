@@ -155,18 +155,18 @@ class ManyToMany extends Relation
 
         $found = $result[$nativeId] ?? [];
 
-        if ( ! empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
-            /** @var Collection $collection */
-            $collection = $this->nativeEntityHydrator->get($nativeEntity, $this->name);
-            foreach ($found as $foreignEntity) {
-                if ( ! $collection->contains($foreignEntity)) {
-                    $collection->add($foreignEntity);
-                }
-            }
-        } else {
+//        if ( ! empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
+//            /** @var Collection $collection */
+//            $collection = $this->nativeEntityHydrator->get($nativeEntity, $this->name);
+//            foreach ($found as $foreignEntity) {
+//                if ( ! $collection->contains($foreignEntity)) {
+//                    $collection->add($foreignEntity);
+//                }
+//            }
+//        } else {
             $collection = new Collection($found, $this->foreignMapper->getHydrator());
             $this->nativeEntityHydrator->set($nativeEntity, $this->name, $collection);
-        }
+//        }
     }
 
     protected function entityHasRelationLoaded(EntityInterface $entity)

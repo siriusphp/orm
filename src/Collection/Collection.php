@@ -15,11 +15,11 @@ class Collection extends ArrayCollection
     ];
 
     /**
-     * @var HydratorInterface
+     * @var HydratorInterface|null
      */
     protected $hydrator;
 
-    public function __construct(array $elements = [], HydratorInterface $hydrator)
+    public function __construct(array $elements = [], HydratorInterface $hydrator = null)
     {
         parent::__construct($elements);
         $this->hydrator           = $hydrator;
@@ -29,6 +29,10 @@ class Collection extends ArrayCollection
 
     protected function ensureHydratedElement($element)
     {
+        if (!$this->hydrator) {
+            return $element;
+        }
+
         if ($element instanceof EntityInterface) {
             return $element;
         }

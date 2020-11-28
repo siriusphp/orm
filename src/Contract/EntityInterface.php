@@ -12,4 +12,6 @@ interface EntityInterface
     public function getChanges();
 
     public function toArray();
+
+    public function setLazy(string $name, LazyLoader $lazyLoader);
 }

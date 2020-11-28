@@ -53,6 +53,10 @@ trait BaseEntityTrait
         $this->state = $state;
     }
 
+    public function setLazy(string $name, LazyLoader $lazyLoader) {
+        $this->lazyLoaders[$name] = $lazyLoader;
+    }
+
     /**
      * Returns an array representation of the entity
      *

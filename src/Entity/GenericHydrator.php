@@ -97,6 +97,10 @@ class GenericHydrator implements HydratorInterface
      */
     public function set(EntityInterface $entity, $attribute, $value)
     {
+        if ($value instanceof LazyLoader) {
+            return $entity->setLazy($attribute, $value);
+        }
+
         return $entity->{$attribute} = $value;
     }
 

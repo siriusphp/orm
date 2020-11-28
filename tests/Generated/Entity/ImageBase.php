@@ -16,6 +16,11 @@ use Sirius\Orm\Entity\GenericEntity;
  */
 abstract class ImageBase extends GenericEntity
 {
+    public function __construct(array $attributes = [], string $state = null)
+    {
+        parent::__construct($attributes, $state);
+    }
+
     protected function castIdAttribute($value)
     {
         return $value === null ? $value : intval($value);

@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use Sirius\Orm\CodeGenerator\ClassGenerator;
 use Sirius\Orm\Blueprint\Behaviour\SoftDelete;
 use Sirius\Orm\Blueprint\Behaviour\Timestamps;
 use Sirius\Orm\Blueprint\Column;
@@ -12,6 +11,7 @@ use Sirius\Orm\Blueprint\Relation\ManyToMany;
 use Sirius\Orm\Blueprint\Relation\ManyToOne;
 use Sirius\Orm\Blueprint\Relation\OneToMany;
 use Sirius\Orm\Blueprint\Relation\OneToOne;
+use Sirius\Orm\CodeGenerator\ClassGenerator;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\RelationConfig;
 
@@ -115,9 +115,15 @@ $orm->addMapper(
           ->setEntityStyle(Mapper::ENTITY_STYLE_METHODS)
         // columns
           ->addAutoIncrementColumn()
-          ->addColumn(Column::bigInteger('product_id', true)->setIndex(true))
+          ->addColumn(Column::bigInteger('product_id', true)
+                            ->setIndex(true))
           ->addColumn(Column::decimal('price', 14, 2)->setDefault(0))
           ->addColumn(Column::bool('is_active')->setIndex(true))
+        // relations
+          ->addRelation('product', OneToOne::make('products')
+                                           ->setNativeKey('product_id')
+                                           ->setForeignKey('id')
+        )
 );
 
 $orm->addMapper(
