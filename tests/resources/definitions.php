@@ -2,16 +2,16 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Sirius\Orm\CodeGenerator\ClassGenerator;
-use Sirius\Orm\Definition\Behaviour\SoftDelete;
-use Sirius\Orm\Definition\Behaviour\Timestamps;
-use Sirius\Orm\Definition\Column;
-use Sirius\Orm\Definition\ComputedProperty;
-use Sirius\Orm\Definition\Mapper;
-use Sirius\Orm\Definition\Orm;
-use Sirius\Orm\Definition\Relation\ManyToMany;
-use Sirius\Orm\Definition\Relation\ManyToOne;
-use Sirius\Orm\Definition\Relation\OneToMany;
-use Sirius\Orm\Definition\Relation\OneToOne;
+use Sirius\Orm\Blueprint\Behaviour\SoftDelete;
+use Sirius\Orm\Blueprint\Behaviour\Timestamps;
+use Sirius\Orm\Blueprint\Column;
+use Sirius\Orm\Blueprint\ComputedProperty;
+use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Blueprint\Orm;
+use Sirius\Orm\Blueprint\Relation\ManyToMany;
+use Sirius\Orm\Blueprint\Relation\ManyToOne;
+use Sirius\Orm\Blueprint\Relation\OneToMany;
+use Sirius\Orm\Blueprint\Relation\OneToOne;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\RelationConfig;
 

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Definition\Relation;
+namespace Sirius\Orm\Blueprint\Relation;
 
-use Sirius\Orm\Definition\Mapper;
-use Sirius\Orm\Definition\Relation;
+use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Blueprint\Relation;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Relation\RelationConfig;
 

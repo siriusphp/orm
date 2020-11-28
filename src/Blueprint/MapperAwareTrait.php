@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Definition;
+namespace Sirius\Orm\Blueprint;
 
 trait MapperAwareTrait
 {

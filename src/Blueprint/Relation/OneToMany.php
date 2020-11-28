@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Definition\Relation;
+namespace Sirius\Orm\Blueprint\Relation;
 
-use Sirius\Orm\Definition\Relation;
+use Sirius\Orm\Blueprint\Relation;
 use Sirius\Orm\Relation\RelationConfig;
 
 class OneToMany extends OneToOne

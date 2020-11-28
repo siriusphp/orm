@@ -7,8 +7,8 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
-use Sirius\Orm\Definition\Mapper;
-use Sirius\Orm\Definition\Orm;
+use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Blueprint\Orm;
 
 class ClassGenerator
 {

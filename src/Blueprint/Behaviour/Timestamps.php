@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sirius\Orm\Definition\Behaviour;
+namespace Sirius\Orm\Blueprint\Behaviour;
 
 use Nette\PhpGenerator\ClassType;
-use Sirius\Orm\Definition\Behaviour;
-use Sirius\Orm\Definition\Column;
-use Sirius\Orm\Definition\Mapper;
+use Sirius\Orm\Blueprint\Behaviour;
+use Sirius\Orm\Blueprint\Column;
+use Sirius\Orm\Blueprint\Mapper;
 
 class Timestamps extends Behaviour
 {

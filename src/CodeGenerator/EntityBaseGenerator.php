@@ -8,7 +8,7 @@ use Nette\PhpGenerator\Dumper;
 use Nette\PhpGenerator\PhpNamespace;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
-use Sirius\Orm\Definition\Mapper;
+use Sirius\Orm\Blueprint\Mapper;
 
 class EntityBaseGenerator
 {
