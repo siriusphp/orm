@@ -27,7 +27,7 @@ jobs:
           MYSQL_DATABASE: siriusorm
           MYSQL_ROOT_PASSWORD: sirius
         ports:
-          - 13306:3306
+          - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -41,7 +41,7 @@ jobs:
 
     - name: Verify MySQL connection
       run: |
-        while ! mysqladmin ping -h"127.0.0.1" -P13306 --silent; do
+        while ! mysqladmin ping -h"127.0.0.1" -P3306 --silent; do
           sleep 1
         done
 
@@ -70,7 +70,7 @@ jobs:
 
     - name: Run test suite
       env:
-        MYSQL_CONNECTION: 'mysql:host=localhost;port=13306;dbname=siriusorm'
+        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;dbname=siriusorm'
         MYSQL_USER: 'root'
         MYSQL_PASS: 'sirius'
       run: |
