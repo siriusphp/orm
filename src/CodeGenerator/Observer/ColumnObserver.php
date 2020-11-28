@@ -43,11 +43,12 @@ class ColumnObserver extends Base
 
     public function observeMapperConfig(array $config)
     {
-        $config['columns'][]          = $this->column->getName();
+        $config['columns'][]                       = $this->column->getName();
         $config['casts'][$this->column->getName()] = $this->getAttributeCastForConfig();
         if ($this->column->getAttributeName() && $this->column->getAttributeName() != $this->column->getName()) {
             $config['columnAttributeMap'][$this->column->getName()] = $this->column->getAttributeName();
         }
+
         return $config;
     }
 
@@ -69,17 +70,20 @@ class ColumnObserver extends Base
         }
 
         if ($this->column->getMapper()->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            $type .= $this->column->getNullable() ? '|null' : '';
             $class->addComment(sprintf('@property %s $%s', $type, $name));
         } else {
             $setter = $class->addMethod(Str::methodName($name, 'set'));
             $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-            $setter->addParameter('value');
-            $setter->addBody('$this->set(\''. $name. '\', $value);');
+            $setter->addParameter('value')
+                   ->setNullable($this->column->getNullable());
+            $setter->addBody('$this->set(\'' . $name . '\', $value);');
 
             $getter = $class->addMethod(Str::methodName($name, 'get'));
             $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-            $getter->addBody('return $this->get(\''. $name. '\');');
-            $getter->setReturnType($type);
+            $getter->addBody('return $this->get(\'' . $name . '\');');
+            $getter->setReturnType($type)
+                   ->setReturnNullable($this->column->getNullable());
         }
 
         return $class;
@@ -121,7 +125,8 @@ class ColumnObserver extends Base
         return $map[$this->column->getType()] ?: 'mixed';
     }
 
-    private function getAttributeCastForConfig() {
+    private function getAttributeCastForConfig()
+    {
         if ($this->column->getAttributeCast()) {
             return $this->column->getAttributeCast();
         }

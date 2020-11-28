@@ -12,7 +12,7 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property int $imageable_id
  * @property string $path
  * @property array $title
- * @property array $description
+ * @property array|null $description
  */
 abstract class ImageBase extends GenericEntity
 {

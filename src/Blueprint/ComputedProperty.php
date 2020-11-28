@@ -17,7 +17,13 @@ class ComputedProperty extends Base
      */
     protected $type;
 
+    protected $nullable = true;
+
+    protected $setterComment;
+
     protected $setterBody;
+
+    protected $getterComment;
 
     protected $getterBody;
 
@@ -87,6 +93,43 @@ class ComputedProperty extends Base
 
         return $this;
     }
+
+    public function getSetterComment(): ?string
+    {
+        return $this->setterComment;
+    }
+
+    public function setSetterComment(string $setterComment = null): ComputedProperty
+    {
+        $this->setterComment = $setterComment;
+
+        return $this;
+    }
+
+    public function getGetterComment(): ?string
+    {
+        return $this->getterComment;
+    }
+
+    public function setGetterComment(string $getterComment = null): ComputedProperty
+    {
+        $this->getterComment = $getterComment;
+
+        return $this;
+    }
+
+    public function getNullable(): bool
+    {
+        return $this->nullable;
+    }
+
+    public function setNullable(bool $nullable): ComputedProperty
+    {
+        $this->nullable = $nullable;
+
+        return $this;
+    }
+
 
     /**
      * @return ComputedPropertyObserver

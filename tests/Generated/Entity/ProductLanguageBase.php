@@ -13,7 +13,7 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property string $lang
  * @property string $title
  * @property string $slug
- * @property string $description
+ * @property string|null $description
  */
 abstract class ProductLanguageBase extends GenericEntity
 {

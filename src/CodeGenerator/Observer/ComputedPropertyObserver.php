@@ -48,6 +48,7 @@ class ComputedPropertyObserver extends Base
         }
 
         if ($this->property->getMapper()->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+            $type .= $this->property->getNullable() ? '|null' : '';
             $class->addComment(sprintf('@property %s $%s', $type ?: 'mixed', $name));
 
             if (($body = $this->property->getSetterBody())) {
@@ -66,15 +67,20 @@ class ComputedPropertyObserver extends Base
             if (($body = $this->property->getSetterBody())) {
                 $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
                 $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-                $setter->addParameter('value');
-                $setter->addBody($body);
+                $setter->addParameter('value')
+                       ->setType($type)
+                       ->setNullable($this->property->getNullable());
+                $setter->setBody($body);
+                $setter->addComment($this->property->getSetterComment());
             }
 
             if (($body = $this->property->getGetterBody())) {
                 $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
                 $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-                $getter->addBody($body);
+                $getter->setBody($body);
                 $getter->setReturnType($type);
+                $getter->setReturnNullable($this->property->getNullable());
+                $getter->addComment($this->property->getGetterComment());
             }
         }
 

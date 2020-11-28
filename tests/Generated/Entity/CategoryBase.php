@@ -8,7 +8,7 @@ use Sirius\Orm\Entity\GenericEntity;
 
 /**
  * @property int $id
- * @property int $parent_id
+ * @property int|null $parent_id
  * @property int $position
  * @property string $name
  */

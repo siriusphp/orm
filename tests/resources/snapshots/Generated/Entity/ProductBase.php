@@ -12,10 +12,10 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property string $sku
  * @property float $value
  * @property array $attributes
- * @property DateTime $created_on
- * @property DateTime $updated_on
- * @property DateTime $deleted_on
- * @property float $discounted_price
+ * @property DateTime|null $created_on
+ * @property DateTime|null $updated_on
+ * @property DateTime|null $deleted_on
+ * @property float|null $discounted_price
  */
 abstract class ProductBase extends GenericEntity
 {
