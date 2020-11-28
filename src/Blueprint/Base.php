@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint;
 
-use Nette\PhpGenerator\ClassType;
-
 abstract class Base
 {
     public function isValid()

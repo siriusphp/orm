@@ -65,17 +65,6 @@ class DeletePivotRows extends BaseAction
         $delete->perform();
     }
 
-    public function revert()
-    {
-        // no change to the entity has to be performed
-        return;
-    }
-
-    public function onSuccess()
-    {
-        return;
-    }
-
     /**
      * Computes the conditions for the DELETE statement that will
      * remove the linked rows from the PIVOT table for a many-to-many relation

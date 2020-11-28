@@ -3,9 +3,13 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint;
 
-use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\CodeGenerator\Observer\ColumnObserver;
 
+/**
+ * Class used for defining columns for the mapper
+ * It contains specifications for the ORM but also for the database
+ * so, theoretically, can be used to generate migrations
+ */
 class Column extends Base
 {
     use MapperAwareTrait;
@@ -26,34 +30,95 @@ class Column extends Base
 
     protected $name;
 
+    /**
+     * Previous name of the column
+     * Usable by DB migration builders
+     * @var string
+     */
     protected $previousName;
 
+    /**
+     * This should be used in case a column does not have the same name as
+     * the name of the attribute in the entity
+     * @var string
+     */
     protected $attributeName;
 
+    /**
+     * @var string
+     */
     protected $attributeCast;
 
+    /**
+     * @var string
+     */
     protected $attributeType;
 
+    /**
+     * Indexed column, usable by DB migration builder
+     * @var bool
+     */
     protected $index = false;
 
+    /**
+     * Unique index column, usable by DB migration builder
+     * @var bool
+     */
     protected $unique = false;
 
+    /**
+     * Set column as auto incremented, usable by DB migration builder
+     * @var bool
+     */
     protected $autoIncrement = false;
 
+    /**
+     * For columns of type number
+     * @var bool
+     */
     protected $unsigned = false;
 
+    /**
+     * Default column value, usable by DB migration builder
+     * @var mixed
+     */
     protected $default;
 
+    /**
+     * The name of the column after which this is positioned,
+     * usable by DB migration builder
+     * @var string
+     */
     protected $after;
 
+    /**
+     * Type of the column (integer, date, string etc)
+     * @var string
+     */
     protected $type;
 
+    /**
+     * For decimal type columns
+     * @var int
+     */
     protected $digits = 14;
 
+    /**
+     * For decimal type columns
+     * @var int
+     */
     protected $precision = 2;
 
+    /**
+     * For varchar type columns
+     * @var int
+     */
     protected $length = 255;
 
+    /**
+     * Is the column nullable?
+     * @var bool
+     */
     protected $nullable = false;
 
     /**
@@ -151,7 +216,6 @@ class Column extends Base
                      ->setPrecision($precision);
     }
 
-
     public function getErrors(): array
     {
         $errors = [];
@@ -179,78 +243,50 @@ class Column extends Base
         ];
     }
 
-    /**
-     * @return mixed
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param mixed $name
-     *
-     * @return Column
-     */
-    public function setName($name)
+    public function setName(string $name): Column
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getPreviousName()
+    public function getPreviousName(): ?string
     {
         return $this->previousName;
     }
 
-    /**
-     * @param mixed $previousName
-     *
-     * @return Column
-     */
-    public function setPreviousName($previousName)
+    public function setPreviousName($previousName): Column
     {
         $this->previousName = $previousName;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAttributeName()
+    public function getAttributeName(): ?string
     {
         return $this->attributeName;
     }
 
-    /**
-     * @param mixed $attributeName
-     *
-     * @return Column
-     */
-    public function setAttributeName($attributeName)
+    public function setAttributeName(string $attributeName): Column
     {
         $this->attributeName = $attributeName;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getAttributeCast()
+    public function getAttributeCast(): ?string
     {
         return $this->attributeCast;
     }
 
     /**
-     * @param string $attributeCast
-     *
-     * @return Column
+     * Set the cast type (string/integer/decimal:2/etc) of the attribute.
+     * If not provided it is inferred from the column type
      */
     public function setAttributeCast(string $attributeCast): Column
     {
@@ -259,18 +295,14 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAttributeType()
+    public function getAttributeType(): ?string
     {
         return $this->attributeType;
     }
 
     /**
-     * @param string $attributeType
-     *
-     * @return Column
+     * Set the type of the attribute (int/float/string etc) for the entity.
+     * If not provided it is inferred from the column type
      */
     public function setAttributeType(string $attributeType): Column
     {
@@ -279,19 +311,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getIndex(): bool
     {
         return $this->index;
     }
 
-    /**
-     * @param bool $index
-     *
-     * @return Column
-     */
     public function setIndex(bool $index): Column
     {
         $this->index = $index;
@@ -299,19 +323,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getUnique(): bool
     {
         return $this->unique;
     }
 
-    /**
-     * @param bool $unique
-     *
-     * @return Column
-     */
     public function setUnique(bool $unique): Column
     {
         $this->unique = $unique;
@@ -319,19 +335,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getAutoIncrement(): bool
     {
         return $this->autoIncrement;
     }
 
-    /**
-     * @param bool $autoIncrement
-     *
-     * @return Column
-     */
     public function setAutoIncrement(bool $autoIncrement): Column
     {
         $this->autoIncrement = $autoIncrement;
@@ -339,19 +347,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getUnsigned(): bool
     {
         return $this->unsigned;
     }
 
-    /**
-     * @param bool $unsigned
-     *
-     * @return Column
-     */
     public function setUnsigned(bool $unsigned): Column
     {
         $this->unsigned = $unsigned;
@@ -359,19 +359,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function getDefault()
     {
         return $this->default;
     }
 
-    /**
-     * @param mixed $default
-     *
-     * @return Column
-     */
     public function setDefault($default)
     {
         $this->default = $default;
@@ -379,59 +371,35 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAfter()
+    public function getAfter(): ?string
     {
         return $this->after;
     }
 
-    /**
-     * @param mixed $after
-     *
-     * @return Column
-     */
-    public function setAfter($after)
+    public function setAfter(string $after): Column
     {
         $this->after = $after;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    /**
-     * @param mixed $type
-     *
-     * @return Column
-     */
-    public function setType($type)
+    public function setType(string $type): Column
     {
         $this->type = $type;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getDigits(): int
     {
         return $this->digits;
     }
 
-    /**
-     * @param int $digits
-     *
-     * @return Column
-     */
     public function setDigits(int $digits): Column
     {
         $this->digits = $digits;
@@ -439,19 +407,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getPrecision(): int
     {
         return $this->precision;
     }
 
-    /**
-     * @param int $precision
-     *
-     * @return Column
-     */
     public function setPrecision(int $precision): Column
     {
         $this->precision = $precision;
@@ -460,19 +420,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getLength(): int
     {
         return $this->length;
     }
 
-    /**
-     * @param int $length
-     *
-     * @return Column
-     */
     public function setLength(int $length): Column
     {
         $this->length = $length;
@@ -480,19 +432,11 @@ class Column extends Base
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getNullable(): bool
     {
         return $this->nullable;
     }
 
-    /**
-     * @param bool $nullable
-     *
-     * @return Column
-     */
     public function setNullable(bool $nullable): Column
     {
         $this->nullable = $nullable;

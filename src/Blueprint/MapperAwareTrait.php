@@ -10,11 +10,6 @@ trait MapperAwareTrait
      */
     protected $mapper;
 
-    /**
-     * @param Mapper $mapper
-     *
-     * @return self
-     */
     public function setMapper(Mapper $mapper): self
     {
         $this->mapper = $mapper;

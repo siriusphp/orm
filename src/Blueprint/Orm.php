@@ -95,9 +95,6 @@ class Orm extends Base
         return $object;
     }
 
-    /**
-     * @return string
-     */
     public function getMapperNamespace(): string
     {
         return $this->mapperNamespace;
@@ -105,10 +102,6 @@ class Orm extends Base
 
     /**
      * Set the default namespace for future mappers
-     *
-     * @param string $mapperNamespace
-     *
-     * @return Orm
      */
     public function setMapperNamespace(string $mapperNamespace): Orm
     {
@@ -124,10 +117,6 @@ class Orm extends Base
 
     /**
      * Set default destination for future mappers
-     *
-     * @param string $mapperDestination
-     *
-     * @return Orm
      */
     public function setMapperDestination(string $mapperDestination): Orm
     {
@@ -143,10 +132,6 @@ class Orm extends Base
 
     /**
      * Set default namespace for the entity classes to be be generated
-     *
-     * @param string $entityNamespace
-     *
-     * @return Orm
      */
     public function setEntityNamespace(string $entityNamespace): Orm
     {
@@ -155,9 +140,6 @@ class Orm extends Base
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getEntityDestination(): string
     {
         return $this->entityDestination;
@@ -165,10 +147,6 @@ class Orm extends Base
 
     /**
      * Set default destination for the entity classes to be be generated
-     *
-     * @param string $entityDestination
-     *
-     * @return Orm
      */
     public function setEntityDestination(string $entityDestination): Orm
     {
@@ -185,7 +163,7 @@ class Orm extends Base
         return $this->mappers;
     }
 
-    public function addMapper(Mapper $mapper): self
+    public function addMapper(Mapper $mapper): Orm
     {
         $mapper->setOrm($this);
         $this->mappers[$mapper->getName()] = $mapper;

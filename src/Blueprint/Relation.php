@@ -67,79 +67,47 @@ abstract class Relation extends Base
         return $errors;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getNativeKey()
+    public function getNativeKey(): string
     {
         return $this->nativeKey;
     }
 
-    /**
-     * @param mixed $nativeKey
-     *
-     * @return Relation
-     */
-    public function setNativeKey($nativeKey)
+    public function setNativeKey(string $nativeKey): Relation
     {
         $this->nativeKey = $nativeKey;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getForeignMapper()
+    public function getForeignMapper(): string
     {
         return $this->foreignMapper;
     }
 
-    /**
-     * @param mixed $foreignMapper
-     *
-     * @return Relation
-     */
-    public function setForeignMapper($foreignMapper)
+    public function setForeignMapper($foreignMapper): Relation
     {
         $this->foreignMapper = $foreignMapper;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getForeignKey()
+    public function getForeignKey(): string
     {
         return $this->foreignKey;
     }
 
-    /**
-     * @param mixed $foreignKey
-     *
-     * @return Relation
-     */
-    public function setForeignKey($foreignKey)
+    public function setForeignKey($foreignKey): Relation
     {
         $this->foreignKey = $foreignKey;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getLoadStrategy(): string
     {
         return $this->loadStrategy;
     }
 
-    /**
-     * @param string $loadStrategy
-     *
-     * @return Relation
-     */
     public function setLoadStrategy(string $loadStrategy): Relation
     {
         $this->loadStrategy = $loadStrategy;
@@ -147,19 +115,11 @@ abstract class Relation extends Base
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getForeignGuards(): array
     {
         return $this->foreignGuards;
     }
 
-    /**
-     * @param array $foreignGuards
-     *
-     * @return Relation
-     */
     public function setForeignGuards(array $foreignGuards): Relation
     {
         $this->foreignGuards = $foreignGuards;
@@ -167,20 +127,12 @@ abstract class Relation extends Base
         return $this;
     }
 
-    /**
-     * @return callable|null
-     */
-    public function getQueryCallback()
+    public function getQueryCallback(): ?callable
     {
         return $this->queryCallback;
     }
 
-    /**
-     * @param callable|null $queryCallback
-     *
-     * @return Relation
-     */
-    public function setQueryCallback(callable $queryCallback = null)
+    public function setQueryCallback(callable $queryCallback = null): Relation
     {
         $this->queryCallback = $queryCallback;
 
@@ -188,10 +140,10 @@ abstract class Relation extends Base
     }
 
 
-
-    public function toArray() {
+    public function toArray()
+    {
         $result = [];
-        foreach(get_object_vars($this) as $prop => $value) {
+        foreach (get_object_vars($this) as $prop => $value) {
             if (in_array($prop, ['mapper'])) {
                 continue;
             }
@@ -200,7 +152,7 @@ abstract class Relation extends Base
                 $value !== 0 &&
                 $value !== '' &&
                 $value !== [] &&
-                !is_object($value)) {
+                ! is_object($value)) {
                 $result[Str::underscore($prop)] = $value;
             }
             if (is_object($value) && is_callable($value)) {
@@ -212,12 +164,13 @@ abstract class Relation extends Base
         return $result;
     }
 
-    protected function getClosureDump(\Closure $c) {
+    protected function getClosureDump(\Closure $c)
+    {
         $closure = \Nette\PhpGenerator\Closure::from($c);
-        $r = new \ReflectionFunction($c);
-        $body = '';
-        $lines = file($r->getFileName());
-        for($l = $r->getStartLine(); $l < $r->getEndLine(); $l++) {
+        $r       = new \ReflectionFunction($c);
+        $body    = '';
+        $lines   = file($r->getFileName());
+        for ($l = $r->getStartLine(); $l < $r->getEndLine(); $l++) {
             $body .= trim($lines[$l], " \t");
         }
         // strip everything after the last }
@@ -233,6 +186,6 @@ abstract class Relation extends Base
             }
         }
 
-        return (string) $closure;
+        return (string)$closure;
     }
 }

@@ -5,10 +5,12 @@ namespace Sirius\Orm\Blueprint;
 
 use Nette\PhpGenerator\ClassType;
 
+/**
+ * This class is used to register methods for various classes
+ * (entity, mapper, query)
+ */
 class ClassMethod extends Base
 {
-    use MapperAwareTrait;
-
     protected $name;
 
     protected $visibility = ClassType::VISIBILITY_PUBLIC;
@@ -31,39 +33,28 @@ class ClassMethod extends Base
         $errors = [];
 
         if ( ! $this->name) {
-            $errors[] = 'Column requires a name';
+            $errors[] = 'Method requires a name';
         }
 
-        if (!in_array($this->visibility, [ClassType::VISIBILITY_PUBLIC, ClassType::VISIBILITY_PROTECTED])) {
+        if ( ! in_array($this->visibility, [ClassType::VISIBILITY_PUBLIC, ClassType::VISIBILITY_PROTECTED])) {
             $errors[] = 'Wrong method visilibity type. Only `public` and `protected` are allowed.';
         }
 
         return $errors;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return ClassMethod
-     */
-    public function setName($name)
+    public function setName(string $name): ClassMethod
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getParameters(): array
     {
         return $this->parameters;
@@ -72,43 +63,28 @@ class ClassMethod extends Base
     public function addParameter(string $name, string $type = null, $default = null)
     {
         $this->parameters[$name] = ['type' => $type, $default => $default];
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getReturnType()
+    public function getReturnType(): ?string
     {
         return $this->returnType;
     }
 
-    /**
-     * @param string|null $returnType
-     *
-     * @return ClassMethod
-     */
-    public function setReturnType($returnType = null)
+    public function setReturnType(string $returnType = null): ClassMethod
     {
         $this->returnType = $returnType;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getBody()
+    public function getBody(): string
     {
         return $this->body;
     }
 
-    /**
-     * @param string $body
-     *
-     * @return ClassMethod
-     */
-    public function setBody($body)
+    public function setBody(string $body): ClassMethod
     {
         $this->body = $body;
 
@@ -116,20 +92,11 @@ class ClassMethod extends Base
     }
 
 
-
-    /**
-     * @return string
-     */
     public function getVisibility(): string
     {
         return $this->visibility;
     }
 
-    /**
-     * @param string $visibility
-     *
-     * @return ClassMethod
-     */
     public function setVisibility(string $visibility): ClassMethod
     {
         $this->visibility = $visibility;
@@ -137,19 +104,11 @@ class ClassMethod extends Base
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getComments(): string
+    public function getComments(): ?string
     {
         return $this->comments;
     }
 
-    /**
-     * @param string $comments
-     *
-     * @return ClassMethod
-     */
     public function setComments(string $comments): ClassMethod
     {
         $this->comments = $comments;

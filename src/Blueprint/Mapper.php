@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint;
 
-use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\Str;
 
@@ -125,159 +124,95 @@ class Mapper extends Base
         return $observers;
     }
 
-    /**
-     * @return Orm
-     */
-    public function getOrm()
+    public function getOrm(): Orm
     {
         return $this->orm;
     }
 
-    /**
-     * @param mixed $orm
-     *
-     * @return Mapper
-     */
-    public function setOrm(Orm $orm)
+    public function setOrm(Orm $orm): Mapper
     {
         $this->orm = $orm;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getClassName()
+    public function getClassName(): string
     {
         return $this->className;
     }
 
-    /**
-     * @param mixed $className
-     *
-     * @return Mapper
-     */
-    public function setClassName($className)
+    public function setClassName(string $className): Mapper
     {
         $this->className = $className;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return $this->namespace ?: $this->orm->getMapperNamespace();
     }
 
-    /**
-     * @param mixed $namespace
-     *
-     * @return Mapper
-     */
-    public function setNamespace($namespace)
+    public function setNamespace(string $namespace): Mapper
     {
         $this->namespace = $namespace;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDestination()
+    public function getDestination(): string
     {
         return $this->destination ?: $this->orm->getMapperDestination();
     }
 
-    /**
-     * @param mixed $destination
-     *
-     * @return Mapper
-     */
-    public function setDestination($destination)
+    public function setDestination($destination): Mapper
     {
         $this->destination = $destination;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getEntityClass()
+    public function getEntityClass():string
     {
         return $this->entityClass;
     }
 
-    /**
-     * @param mixed $entityClass
-     *
-     * @return Mapper
-     */
-    public function setEntityClass($entityClass)
+    public function setEntityClass(string $entityClass): Mapper
     {
         $this->entityClass = $entityClass;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getEntityNamespace()
+    public function getEntityNamespace(): string
     {
         return $this->entityNamespace ?: $this->orm->getEntityNamespace();
     }
 
-    /**
-     * @param mixed $entityNamespace
-     *
-     * @return Mapper
-     */
-    public function setEntityNamespace($entityNamespace)
+    public function setEntityNamespace(string $entityNamespace): Mapper
     {
         $this->entityNamespace = $entityNamespace;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getEntityDestination()
+    public function getEntityDestination(): string
     {
         return $this->entityDestination ?: $this->orm->getEntityDestination();
     }
 
-    /**
-     * @param mixed $entityDestination
-     *
-     * @return Mapper
-     */
-    public function setEntityDestination($entityDestination)
+    public function setEntityDestination(string $entityDestination): Mapper
     {
         $this->entityDestination = $entityDestination;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getEntityStyle(): string
     {
         return $this->entityStyle;
     }
 
-    /**
-     * @param string $entityStyle
-     *
-     * @return Mapper
-     */
     public function setEntityStyle(string $entityStyle): Mapper
     {
         $this->entityStyle = $entityStyle;
@@ -285,19 +220,11 @@ class Mapper extends Base
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getPrimaryKey(): string
     {
         return $this->primaryKey;
     }
 
-    /**
-     * @param string $primaryKey
-     *
-     * @return Mapper
-     */
     public function setPrimaryKey(string $primaryKey): Mapper
     {
         $this->primaryKey = $primaryKey;
@@ -305,59 +232,35 @@ class Mapper extends Base
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
 
-    /**
-     * @param mixed $table
-     *
-     * @return Mapper
-     */
-    public function setTable($table)
+    public function setTable($table): Mapper
     {
         $this->table = $table;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTableAlias()
+    public function getTableAlias(): string
     {
         return $this->tableAlias;
     }
 
-    /**
-     * @param mixed $tableAlias
-     *
-     * @return Mapper
-     */
-    public function setTableAlias($tableAlias)
+    public function setTableAlias($tableAlias): Mapper
     {
         $this->tableAlias = $tableAlias;
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getColumns(): array
     {
         return $this->columns;
     }
 
-    /**
-     * @param array $columns
-     *
-     * @return Mapper
-     */
     public function setColumns(array $columns): Mapper
     {
         $this->columns = $columns;
@@ -365,19 +268,11 @@ class Mapper extends Base
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getDefaults(): array
     {
         return $this->defaults;
     }
 
-    /**
-     * @param array $defaults
-     *
-     * @return Mapper
-     */
     public function setDefaults(array $defaults): Mapper
     {
         $this->defaults = $defaults;
@@ -385,7 +280,7 @@ class Mapper extends Base
         return $this;
     }
 
-    public function addAutoIncrementColumn($name = 'id')
+    public function addAutoIncrementColumn($name = 'id'): Mapper
     {
         return $this->addColumn(
             Column::integer($name, true)
@@ -393,19 +288,11 @@ class Mapper extends Base
         );
     }
 
-    /**
-     * @return array
-     */
     public function getGuards(): array
     {
         return $this->guards;
     }
 
-    /**
-     * @param array $guards
-     *
-     * @return Mapper
-     */
     public function setGuards(array $guards): Mapper
     {
         $this->guards = $guards;
@@ -441,11 +328,14 @@ class Mapper extends Base
         return $this;
     }
 
-    public function addMethod() {
-        $this->mapperMethods[] = 1;
+    public function addMethod(ClassMethod $method): Mapper
+    {
+        $this->mapperMethods[$method->getName()] = $method;
+
+        return $this;
     }
 
-    public function addRelation($name, Relation $relation)
+    public function addRelation($name, Relation $relation): Mapper
     {
         $relation->setMapper($this);
         if ( ! $relation->getForeignMapper()) {
@@ -456,11 +346,12 @@ class Mapper extends Base
         return $this;
     }
 
-    public function getRelations() {
+    public function getRelations(): array
+    {
         return $this->relations;
     }
 
-    public function addComputedProperty(ComputedProperty $property)
+    public function addComputedProperty(ComputedProperty $property): Mapper
     {
         $property->setMapper($this);
         $this->computedProperties[$property->getName()] = $property;
@@ -468,12 +359,12 @@ class Mapper extends Base
         return $this;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name)
+    public function setName(string $name): Mapper
     {
         $this->name = $name;
 
