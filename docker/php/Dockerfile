@@ -121,8 +121,11 @@ RUN if [ ${INSTALL_XSL} = true ]; then \
 ARG INSTALL_PGSQL=false
 
 RUN if [ ${INSTALL_PGSQL} = true ]; then \
+    apt-get remove -y libpq5 \
+    && apt-get install -y libpq-dev \
     # Install the pgsql extension
-    docker-php-ext-install pgsql \
+    && docker-php-ext-install pgsql pdo_pgsql \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
 ;fi
 
 ###########################################################################
