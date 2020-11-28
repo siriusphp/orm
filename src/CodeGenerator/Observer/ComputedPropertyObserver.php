@@ -42,25 +42,31 @@ class ComputedPropertyObserver extends Base
         $name = $this->property->getName();
         $type = $this->property->getType();
 
-        if ($type && class_exists($type)) {
-            $class->getNamespace()->addUse($type);
-            $type = basename($type);
+        if (class_exists($type) || strpos($type, '\\') !== false) {
+            $class->getNamespace()->addUse($type, null, $alias);
+        } else {
+            $alias = $type;
         }
 
         if ($this->property->getMapper()->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            $type .= $this->property->getNullable() ? '|null' : '';
-            $class->addComment(sprintf('@property %s $%s', $type ?: 'mixed', $name));
+            $class->addComment(sprintf('@property %s $%s',
+                $alias ? $alias . ($this->property->getNullable() ? '|null' : '') : 'mixed',
+                $name));
 
             if (($body = $this->property->getSetterBody())) {
                 $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
                 $setter->setVisibility(ClassType::VISIBILITY_PROTECTED);
-                $setter->addParameter('value');
+                $setter->addParameter('value')
+                       ->setNullable($this->property->getNullable())
+                       ->setType($alias);
                 $setter->addBody($body);
             }
 
             if (($body = $this->property->getGetterBody())) {
                 $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
                 $getter->setVisibility(ClassType::VISIBILITY_PROTECTED);
+                $getter->setReturnType($alias);
+                $getter->setReturnNullable($this->property->getNullable());
                 $getter->addBody($body);
             }
         } else {

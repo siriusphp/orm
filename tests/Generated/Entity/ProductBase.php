@@ -71,12 +71,12 @@ abstract class ProductBase extends GenericEntity
         return !$value ? null : (($value instanceof DateTime) ? $value : new DateTime($value));
     }
 
-    protected function setDiscountedPriceAttribute($value)
+    protected function setDiscountedPriceAttribute(?float $value)
     {
         $this->value = $value / 0.9;
     }
 
-    protected function getDiscountedPriceAttribute()
+    protected function getDiscountedPriceAttribute(): ?float
     {
         return round($this->value * 0.9, 2);
     }
