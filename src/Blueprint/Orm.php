@@ -73,6 +73,28 @@ class Orm extends Base
         return $errors;
     }
 
+    public function getObservers(): array
+    {
+        $observers = [];
+        /** @var Mapper $mapper */
+        foreach ($this->mappers as $mapper) {
+            $observers = array_merge_recursive($observers, $mapper->getObservers());
+        }
+
+        return $observers;
+    }
+
+    public function applyObservers(string $key, $object)
+    {
+        $observers = $this->getObservers()[$key] ?? [];
+        /** @var \Sirius\Orm\CodeGenerator\Observer\Base $observer */
+        foreach ($observers as $observer) {
+            $object = $observer->observe($key, $object);
+        }
+
+        return $object;
+    }
+
     /**
      * @return string
      */

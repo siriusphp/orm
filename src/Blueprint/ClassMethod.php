@@ -157,27 +157,6 @@ class ClassMethod extends Base
         return $this;
     }
 
-    public function observeBaseEntityClass(ClassType $class): ClassType
-    {
-        $this->addMethodToClass($class);
-
-        return parent::observeBaseEntityClass($class);
-    }
-
-    public function observeBaseQueryClass(ClassType $class): ClassType
-    {
-        $this->addMethodToClass($class);
-
-        return parent::observeBaseQueryClass($class);
-    }
-
-    public function observeBaseMapperClass(ClassType $class): ClassType
-    {
-        $this->addMethodToClass($class);
-
-        return parent::observeBaseMapperClass($class);
-    }
-
     protected function addMethodToClass(ClassType $class)
     {
         $method = $class->addMethod($this->getName());

@@ -21,4 +21,9 @@ trait MapperAwareTrait
 
         return $this;
     }
+
+    public function getMapper(): Mapper
+    {
+        return $this->mapper;
+    }
 }

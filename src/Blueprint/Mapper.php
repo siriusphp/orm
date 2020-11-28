@@ -104,6 +104,27 @@ class Mapper extends Base
         return $errors;
     }
 
+    public function getObservers(): array
+    {
+        $observers = [];
+        /** @var Column $column */
+        foreach ($this->columns as $column) {
+            $observers = array_merge_recursive($observers, $column->getObservers());
+        }
+
+        /** @var Behaviour $behaviour */
+        foreach ($this->behaviours as $behaviour) {
+            $observers = array_merge_recursive($observers, $behaviour->getObservers());
+        }
+
+        /** @var ComputedProperty $property */
+        foreach ($this->computedProperties as $property) {
+            $observers = array_merge_recursive($observers, $property->getObservers());
+        }
+
+        return $observers;
+    }
+
     /**
      * @return Orm
      */
@@ -475,94 +496,6 @@ class Mapper extends Base
         }
 
         return $this;
-    }
-
-    public function observeMapperConfig(array $config): array
-    {
-        /** @var Column $column */
-        foreach ($this->getColumns() as $column) {
-            $config = $column->observeMapperConfig($config);
-        }
-
-        /** @var Behaviour $behaviour */
-        foreach ($this->behaviours as $behaviour) {
-            $config = $behaviour->observeMapperConfig($config);
-        }
-
-        /** @var Relation $relation */
-        foreach ($this->relations as $relation) {
-            $config = $relation->observeMapperConfig($config);
-        }
-
-        return parent::observeMapperConfig($config);
-    }
-
-    public function observeBaseMapperClass(ClassType $class): ClassType
-    {
-        /** @var Behaviour $behaviour */
-        foreach ($this->behaviours as $behaviour) {
-            $class = $behaviour->observeBaseMapperClass($class);
-        }
-        /** @var Relation $relation */
-        foreach ($this->relations as $relation) {
-            $class = $relation->observeBaseMapperClass($class);
-        }
-
-        /** @var ClassMethod $method */
-        foreach ($this->queryMethods as $method) {
-            $class = $method->observeBaseMapperClass($class);
-        }
-
-        return parent::observeBaseMapperClass($class);
-    }
-
-    public function observeBaseQueryClass(ClassType $class): ClassType
-    {
-        /** @var Behaviour $behaviour */
-        foreach ($this->behaviours as $behaviour) {
-            $class = $behaviour->observeBaseQueryClass($class);
-        }
-        /** @var Relation $relation */
-        foreach ($this->relations as $relation) {
-            $class = $relation->observeBaseQueryClass($class);
-        }
-
-        /** @var ClassMethod $method */
-        foreach ($this->queryMethods as $method) {
-            $class = $method->observeBaseQueryClass($class);
-        }
-
-        return parent::observeBaseMapperClass($class);
-    }
-
-    public function observeBaseEntityClass(ClassType $class): ClassType
-    {
-        /** @var Column $column */
-        foreach ($this->getColumns() as $column) {
-            $class = $column->observeBaseEntityClass($class);
-        }
-
-        /** @var ComputedProperty $column */
-        foreach ($this->computedProperties as $property) {
-            $class = $property->observeBaseEntityClass($class);
-        }
-
-        /** @var Behaviour $behaviour */
-        foreach ($this->behaviours as $behaviour) {
-            $class = $behaviour->observeBaseEntityClass($class);
-        }
-
-        /** @var Relation $relation */
-        foreach ($this->relations as $relation) {
-            $class = $relation->observeBaseEntityClass($class);
-        }
-
-        /** @var ClassMethod $method */
-        foreach ($this->queryMethods as $method) {
-            $class = $method->observeBaseEntityClass($class);
-        }
-
-        return parent::observeBaseEntityClass($class);
     }
 
     public function getQueryClass()

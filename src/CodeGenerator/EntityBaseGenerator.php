@@ -57,7 +57,7 @@ class EntityBaseGenerator
             $this->class->setExtends('ClassMethodsEntity');
         }
 
-        $this->class = $this->mapper->observeBaseEntityClass($this->class);
+        $this->class = $this->mapper->getOrm()->applyObservers($this->mapper->getName() . '_base_entity', $this->class);
     }
 
 }

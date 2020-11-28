@@ -3,28 +3,53 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint\Behaviour;
 
-use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Blueprint\Behaviour;
 use Sirius\Orm\Blueprint\Column;
 use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Blueprint\MapperAwareTrait;
+use Sirius\Orm\CodeGenerator\Observer\Behaviour\TimestampsObserver;
 
 class Timestamps extends Behaviour
 {
+    use MapperAwareTrait;
 
     protected $createdAtColumn = 'created_at';
 
     protected $updatedAtColumn = 'updated_at';
 
+    /**
+     * @var TimestampsObserver
+     */
+    protected $observer;
+
     static public function make($createdAtColumn = 'created_at', $updatedAtColumn = 'updated_at')
     {
         return (new static)
-                     ->setCreatedAtColumn($createdAtColumn)
-                     ->setUpdatedAtColumn($updatedAtColumn);
+            ->setCreatedAtColumn($createdAtColumn)
+            ->setUpdatedAtColumn($updatedAtColumn);
+    }
+
+    public function getObservers(): array
+    {
+        $observer = $this->getObserver()->with($this);
+
+        return [
+            $this->mapper->getName() . '_base_mapper' => [$observer],
+            $this->mapper->getName() . '_base_query'  => [$observer]
+        ];
     }
 
     function getName(): string
     {
         return 'timestamps';
+    }
+
+    /**
+     * @return string
+     */
+    public function getCreatedAtColumn(): string
+    {
+        return $this->createdAtColumn;
     }
 
     /**
@@ -37,6 +62,14 @@ class Timestamps extends Behaviour
         $this->createdAtColumn = $createdAtColumn;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdatedAtColumn(): string
+    {
+        return $this->updatedAtColumn;
     }
 
     /**
@@ -71,60 +104,24 @@ class Timestamps extends Behaviour
         return $this;
     }
 
-    public function observeBaseQueryClass(ClassType $class): ClassType
+    /**
+     * @return mixed
+     */
+    public function getObserver()
     {
-        $class->addProperty('createdAtColumn', $this->createdAtColumn)
-              ->setVisibility('protected');
-        $class->addProperty('updatedAtColumn', $this->updatedAtColumn)
-              ->setVisibility('protected');
-
-        // add methods
-        $class->addMethod('orderByFirstCreated')
-              ->setVisibility('public')
-              ->setBody('
-$this->orderBy($this->createdAtColumn . \' ASC\');
-
-return $this;            
-            ');
-        $class->addMethod('orderByLastCreated')
-              ->setVisibility('public')
-              ->setBody('
-$this->orderBy($this->createdAtColumn . \' DESC\');
-
-return $this;            
-            ');
-        $class->addMethod('orderByFirstUpdated')
-              ->setVisibility('public')
-              ->setBody('
-$this->orderBy($this->updatedAtColumn . \' ASC\');
-
-return $this;            
-            ');
-        $class->addMethod('orderByLastCreated')
-              ->setVisibility('public')
-              ->setBody('
-$this->orderBy($this->updatedAtColumn . \' DESC\');
-
-return $this;            
-            ');
-
-        return parent::observeBaseQueryClass($class);
+        return $this->observer ?? new TimestampsObserver();
     }
 
-    public function observeBaseMapperClass(ClassType $class): ClassType
+    /**
+     * @param mixed $observer
+     *
+     * @return Timestamps
+     */
+    public function setObserver($observer)
     {
-        $class->addProperty('createdAtColumn', $this->createdAtColumn)->setVisibility('protected');
-        $class->addProperty('updatedAtColumn', $this->updatedAtColumn)->setVisibility('protected');
+        $this->observer = $observer;
 
-        if ( ! $class->hasMethod('init')) {
-            $class->addMethod('init')->setVisibility('public')
-                  ->setBody('parent::init();' . PHP_EOL);
-        }
-        $class->getNamespace()->addUse(\Sirius\Orm\Behaviour\Timestamps::class);
-        $method = $class->getMethod('init');
-        $method->addBody(PHP_EOL . '$this->behaviours->add(new Timestamps($this->createdAtColumn, $this->updatedAtColumn));');
-
-        return parent::observeBaseMapperClass($class);
+        return $this;
     }
 
 }

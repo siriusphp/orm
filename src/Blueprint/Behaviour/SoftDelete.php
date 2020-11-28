@@ -3,14 +3,22 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint\Behaviour;
 
-use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Blueprint\Behaviour;
 use Sirius\Orm\Blueprint\Column;
 use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Blueprint\MapperAwareTrait;
+use Sirius\Orm\CodeGenerator\Observer\Behaviour\SoftDeleteObserver;
 
 class SoftDelete extends Behaviour
 {
+    use MapperAwareTrait;
+
     protected $deletedAtColumn = 'deleted_at';
+
+    /**
+     * @var SoftDeleteObserver
+     */
+    protected $observer;
 
     static function make($deletedAtColumn = 'deleted_at')
     {
@@ -20,6 +28,24 @@ class SoftDelete extends Behaviour
     function getName(): string
     {
         return 'soft_delete';
+    }
+
+    public function getObservers(): array
+    {
+        $observer = $this->getObserver()->with($this);
+
+        return [
+            $this->mapper->getName() . '_base_mapper' => [$observer],
+            $this->mapper->getName() . '_base_query'  => [$observer]
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeletedAtColumn(): string
+    {
+        return $this->deletedAtColumn;
     }
 
     /**
@@ -48,104 +74,25 @@ class SoftDelete extends Behaviour
         return $this;
     }
 
-    public function observeBaseMapperClass(ClassType $class): ClassType
+    /**
+     * @return SoftDeleteObserver
+     */
+    public function getObserver(): SoftDeleteObserver
     {
-        $class->getNamespace()->addUse(\Sirius\Orm\Action\SoftDelete::class, 'SoftDeleteAction');
-        $class->getNamespace()->addUse(\Sirius\Orm\Action\Delete::class, 'DeleteAction');
-        $class->getNamespace()->addUse(\Sirius\Orm\Action\Update::class, 'UpdateAction');
-        $class->addProperty('deletedAtColumn', $this->deletedAtColumn)
-              ->setVisibility('protected');
-
-        //
-        $method = $class->addMethod('newDeleteAction');
-        $method->addParameter('entity')->setType($this->mapper->getEntityClass());
-        $method->addParameter('options');
-        $method->setBody('
-$options = array_merge((array) $options, [\'deleted_at_column\' => $this->deletedAtColumn]);         
-$action = new SoftDeleteAction($this, $entity, $options);
-
-return $this->behaviours->apply($this, __FUNCTION__, $action);           
-            ');
-
-        $method = $class->addMethod('forceDelete');
-        $method->addParameter('entity')->setType($this->mapper->getEntityClass());
-        $method->addParameter('withRelations', false);
-        $method->setBody('
-$action = new DeleteAction($this, $entity, [\'relations\' => $withRelations]);
-
-$this->connectionLocator->lockToWrite(true);
-$this->getWriteConnection()->beginTransaction();
-try {
-    $action->run();
-    $this->getWriteConnection()->commit();
-
-    return true;
-} catch (\Exception $e) {
-    $this->getWriteConnection()->rollBack();
-    throw $e;
-}
-        ');
-
-        $method = $class->addMethod('restore')->setReturnType('bool');
-        $method->addParameter('pk');
-        $method->setBody('
-$entity = $this->newQuery()
-               ->withTrashed()
-               ->find($pk);
-
-if ( ! $entity) {
-    return false;
-}
-
-$this->getHydrator()->set($entity, $this->deletedAtColumn, null);
-$action = new UpdateAction($this, $entity);
-
-$this->connectionLocator->lockToWrite(true);
-$this->getWriteConnection()->beginTransaction();
-try {
-    $action->run();
-    $this->getWriteConnection()->commit();
-
-    return true;
-} catch (\Exception $e) {
-    $this->getWriteConnection()->rollBack();
-    throw $e;
-}
-        ');
-
-
-        return parent::observeBaseMapperClass($class);
+        return $this->observer ?? new SoftDeleteObserver();
     }
 
-    public function observeBaseQueryClass(ClassType $class): ClassType
+    /**
+     * @param SoftDeleteObserver $observer
+     *
+     * @return SoftDelete
+     */
+    public function setObserver(SoftDeleteObserver $observer): SoftDelete
     {
-        $class->addProperty('deletedAtColumn', $this->deletedAtColumn)
-              ->setVisibility('protected');
+        $this->observer = $observer;
 
-        // add guard
-        if ( ! $class->hasMethod('init')) {
-            $class->addMethod('init')
-                  ->setVisibility(ClassType::VISIBILITY_PROTECTED)
-                  ->setBody('parent::init();' . PHP_EOL);
-        }
-        $init = $class->getMethod('init');
-        $init->addBody('$this->guards[] = $this->deletedAtColumn . \' IS NULL\';' . PHP_EOL);
-
-        // add withTrashed()
-        $class->addMethod('withTrashed')
-              ->setVisibility(ClassType::VISIBILITY_PUBLIC)
-              ->setBody('
-$guards = [];
-foreach ($this->guards as $k => $v) {
-    if ($v != $this->deletedAtColumn . \' IS NULL\') {
-        $guards[$k] = $v;
+        return $this;
     }
-}
-$this->guards = $guards;
 
-return $this;
-            ');
 
-        return parent::observeBaseQueryClass($class);
-    }
 }

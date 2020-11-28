@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Blueprint;
 
-use DateTime;
 use Nette\PhpGenerator\ClassType;
-use Sirius\Orm\Helpers\Str;
+use Sirius\Orm\CodeGenerator\Observer\ColumnObserver;
 
 class Column extends Base
 {
@@ -56,6 +55,11 @@ class Column extends Base
     protected $length = 255;
 
     protected $nullable = false;
+
+    /**
+     * @var ColumnObserver
+     */
+    protected $observer;
 
     public static function make(string $name = null)
     {
@@ -165,6 +169,16 @@ class Column extends Base
         return $errors;
     }
 
+    public function getObservers(): array
+    {
+        $observer = $this->getObserver()->with($this);
+
+        return [
+            $this->mapper->getName() . '_mapper_config' => [$observer],
+            $this->mapper->getName() . '_base_entity'   => [$observer],
+        ];
+    }
+
     /**
      * @return mixed
      */
@@ -226,17 +240,11 @@ class Column extends Base
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getAttributeCast()
     {
-        if ($this->attributeCast) {
-            return $this->attributeCast;
-        }
-
-        $casts = $this->getColumnTypeCastMap();
-
-        return $casts[$this->getType()] ?: null;
+        return $this->attributeCast;
     }
 
     /**
@@ -492,104 +500,23 @@ class Column extends Base
         return $this;
     }
 
-    public function observeMapperConfig(array $config): array
+    /**
+     * @return ColumnObserver
+     */
+    public function getObserver(): ColumnObserver
     {
-        $config['columns'][]          = $this->getName();
-        $config['casts'][$this->name] = $this->getAttributeCast();
-        if ($this->getAttributeName() && $this->getAttributeName() != $this->getName()) {
-            $config['columnAttributeMap'][$this->getName()] = $this->getAttributeName();
-        }
-
-        return parent::observeMapperConfig($config);
+        return $this->observer ?: new ColumnObserver();
     }
 
-    private function getColumnTypeCastMap()
+    /**
+     * @param ColumnObserver $observer
+     *
+     * @return Column
+     */
+    public function setObserver(ColumnObserver $observer): Column
     {
-        return [
-            static::TYPE_BOOLEAN       => 'bool',
-            static::TYPE_VARCHAR       => 'string',
-            static::TYPE_TEXT          => 'string',
-            static::TYPE_JSON          => 'array',
-            static::TYPE_INTEGER       => 'int',
-            static::TYPE_BIG_INTEGER   => 'int',
-            static::TYPE_SMALL_INTEGER => 'int',
-            static::TYPE_TINY_INTEGER  => 'int',
-            static::TYPE_FLOAT         => 'float',
-            static::TYPE_DECIMAL       => 'float',
-            static::TYPE_DATE          => DateTime::class,
-            static::TYPE_DATETIME      => DateTime::class,
-            static::TYPE_TIMESTAMP     => DateTime::class,
-        ];
+        $this->observer = $observer;
+
+        return $this;
     }
-
-    public function observeBaseEntityClass(ClassType $class): ClassType
-    {
-        $name = $this->getAttributeName() ?: $this->getName();
-        $type = $this->getAttributeTypeForEntityClass();
-
-        if (class_exists($type)) {
-            $class->getNamespace()->addUse($type);
-            $type = basename($type);
-        }
-
-        if (($body = $this->getCastMethodBody($this->type))) {
-            $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'cast'));
-            $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);
-            $cast->addParameter('value');
-            $cast->addBody($body);
-        }
-
-        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            $class->addComment(sprintf('@property %s $%s', $type, $name));
-        } else {
-            $setter = $class->addMethod(Str::methodName($name, 'set'));
-            $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-            $setter->addParameter('value');
-            $setter->addBody('$this->set(\''. $name. '\', $value);');
-
-            $getter = $class->addMethod(Str::methodName($name, 'get'));
-            $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-            $getter->addBody('return $this->get(\''. $name. '\');');
-            $getter->setReturnType($type);
-        }
-
-        return parent::observeBaseEntityClass($class);
-    }
-
-    private function getAttributeTypeForEntityClass()
-    {
-        if ($this->getAttributeType()) {
-            return $this->getAttributeType();
-        }
-        $map = $this->getColumnTypeCastMap();
-
-        return $map[$this->getType()] ?: 'mixed';
-    }
-
-    private function getCastMethodBody(string $type)
-    {
-        switch ($type) {
-            case static::TYPE_FLOAT:
-                return 'return $value === null ? $value : floatval($value);';
-
-            case static::TYPE_JSON:
-                return 'return $value === null ? $value : (is_array($value) ? $value : \json_decode($value, true));';
-
-            case static::TYPE_INTEGER:
-            case static::TYPE_BIG_INTEGER:
-            case static::TYPE_SMALL_INTEGER:
-            case static::TYPE_TINY_INTEGER:
-                return 'return $value === null ? $value : intval($value);';
-
-            case static::TYPE_DECIMAL:
-                return 'return $value === null ? $value : round((float)$value, ' . $this->getPrecision() . ');';
-
-            case static::TYPE_DATETIME:
-                return 'return !$value ? null : (($value instanceof DateTime) ? $value : new DateTime($value));';
-
-            default:
-                return null;
-        }
-    }
-
 }

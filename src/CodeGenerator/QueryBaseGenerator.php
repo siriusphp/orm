@@ -58,7 +58,7 @@ class QueryBaseGenerator
         $this->addGetMethod();
         $this->addPaginateMethod();
 
-        $this->class = $this->mapper->observeBaseQueryClass($this->class);
+        $this->class = $this->mapper->getOrm()->applyObservers($this->mapper->getName() . '_base_query', $this->class);
     }
 
     private function addFirstMethod()

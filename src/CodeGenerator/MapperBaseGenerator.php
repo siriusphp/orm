@@ -75,7 +75,7 @@ class MapperBaseGenerator
             $this->class->addTrait($trait);
         }
 
-        $this->class = $this->mapper->observeBaseMapperClass($this->class);
+        $this->class = $this->mapper->getOrm()->applyObservers($this->mapper->getName() . '_base_mapper', $this->class);
     }
 
     protected function addInitMethod()
@@ -97,7 +97,7 @@ class MapperBaseGenerator
             'casts'              => []
         ];
 
-        $config = $this->mapper->observeMapperConfig($config);
+        $config = $this->mapper->getOrm()->applyObservers($this->mapper->getName() . '_mapper_config', $config);
 
         $body .= $this->dumper->dump($config);
 

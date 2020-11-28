@@ -17,6 +17,17 @@ abstract class Base
         return [];
     }
 
+    /**
+     * These are observer instances that will make changes to the
+     * code being generated
+     *
+     * @return array
+     */
+    public function getObservers(): array
+    {
+        return [];
+    }
+
     protected function getClassConstants()
     {
         $reflect = new \ReflectionClass(get_class($this));
@@ -27,23 +38,8 @@ abstract class Base
     public function getConstantByValue($val)
     {
         $constants = array_reverse($this->getClassConstants());
+
         return $constants[$val] ?? null;
-    }
-
-    public function observeMapperConfig(array $config):array {
-        return $config;
-    }
-
-    public function observeBaseMapperClass(ClassType $class): ClassType {
-        return $class;
-    }
-
-    public function observeBaseEntityClass(ClassType $class): ClassType {
-        return $class;
-    }
-
-    public function observeBaseQueryClass(ClassType $class): ClassType {
-        return $class;
     }
 }
 

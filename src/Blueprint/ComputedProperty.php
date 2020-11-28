@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Blueprint;
 
 use Nette\PhpGenerator\ClassType;
+use Sirius\Orm\CodeGenerator\Observer\ComputedPropertyObserver;
 use Sirius\Orm\Helpers\Str;
 
 class ComputedProperty extends Base
@@ -18,9 +19,23 @@ class ComputedProperty extends Base
 
     protected $getterBody;
 
+    /**
+     * @var ComputedPropertyObserver
+     */
+    protected $observer;
+
     static function make($name = '')
     {
         return (new static)->setName($name);
+    }
+
+    public function getObservers(): array
+    {
+        $observer = $this->getObserver()->with($this);
+
+        return [
+            $this->mapper->getName() . '_base_entity'   => [$observer],
+        ];
     }
 
     /**
@@ -103,48 +118,25 @@ class ComputedProperty extends Base
         return $this;
     }
 
-    public function observeBaseEntityClass(ClassType $class): ClassType
+    /**
+     * @return ComputedPropertyObserver
+     */
+    public function getObserver(): ComputedPropertyObserver
     {
-        $name = $this->getName();
-        $type = $this->getType();
-
-        if ($type && class_exists($type)) {
-            $class->getNamespace()->addUse($type);
-            $type = basename($type);
-        }
-
-        if ($this->mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            $class->addComment(sprintf('@property %s $%s', $type ?: 'mixed', $name));
-
-            if (($body = $this->getSetterBody())) {
-                $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
-                $setter->setVisibility(ClassType::VISIBILITY_PROTECTED);
-                $setter->addParameter('value');
-                $setter->addBody($body);
-            }
-
-            if (($body = $this->getGetterBody())) {
-                $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
-                $getter->setVisibility(ClassType::VISIBILITY_PROTECTED);
-                $getter->addBody($body);
-            }
-        } else {
-            if (($body = $this->getSetterBody())) {
-                $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
-                $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-                $setter->addParameter('value');
-                $setter->addBody($body);
-            }
-
-            if (($body = $this->getGetterBody())) {
-                $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
-                $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-                $getter->addBody($body);
-                $getter->setReturnType($type);
-            }
-        }
-
-        return parent::observeBaseEntityClass($class);
+        return $this->observer ?? new ComputedPropertyObserver();
     }
+
+    /**
+     * @param ComputedPropertyObserver $observer
+     *
+     * @return ComputedProperty
+     */
+    public function setObserver(ComputedPropertyObserver $observer): ComputedProperty
+    {
+        $this->observer = $observer;
+
+        return $this;
+    }
+
 
 }
