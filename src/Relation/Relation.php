@@ -157,7 +157,7 @@ abstract class Relation
     public function getQuery(Tracker $tracker)
     {
         $nativeKey = $this->options[RelationConfig::NATIVE_KEY];
-        $nativePks = $tracker->pluck($nativeKey);
+        $nativePks = $tracker->pluck($nativeKey, $this->nativeEntityHydrator);
 
         $query = $this->foreignMapper
             ->newQuery()

@@ -102,9 +102,13 @@ trait BaseEntityTrait
             $state = $this->state;
             /** @var LazyLoader $lazyLoader */
             $lazyLoader = $this->lazyLoaders[$attribute];
-            $lazyLoader->getForEntity($this);
-            unset($this->changed[$attribute]);
+            if ($lazyLoader instanceof LazyAggregate) {
+                $this->attributes[$attribute] = $lazyLoader->getForEntity($this);
+            } else {
+                $lazyLoader->getForEntity($this);
+            }
             unset($this->lazyLoaders[$attribute]);
+            unset($this->changed[$attribute]);
             $this->state = $state;
         }
     }

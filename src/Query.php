@@ -284,12 +284,22 @@ class Query extends Select
             }
             $aggregates = $relation->getAggregates();
             foreach ($aggregates as $aggName => $aggregate) {
-                /** @var $aggregate Aggregate */
+                /*
+                 * aggregates don't have setters so we can't use the hydrator to inject
+                 * the value using the old `attachAggregateToEntity()` method
+                 *
                 if (array_key_exists($aggName, $eagerLoad) || $aggregate->isEagerLoad()) {
                     $aggregate->attachAggregateToEntity($entity, $tracker->getAggregateResults($aggregate));
                 } elseif ($aggregate->isLazyLoad()) {
                     $aggregate->attachLazyAggregateToEntity($entity, $tracker);
                 }
+                */
+                /**
+                 * @todo implement a mechanism to inject aggregates via a LazyValue which extends lazy loader
+                 */
+
+                /** @var $aggregate Aggregate */
+                $aggregate->attachLazyAggregateToEntity($entity, $tracker);
             }
         }
     }

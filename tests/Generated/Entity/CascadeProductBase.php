@@ -75,7 +75,7 @@ abstract class CascadeProductBase extends GenericEntity
 
     public function addImage(Image $image)
     {
-        $this->get('images')->addElement($image);
+        $this->get('images')->add($image);
     }
 
     protected function castEbayAttribute($value)

@@ -40,4 +40,9 @@ class OneToMany extends OneToOne
 
         return $this;
     }
+
+    public function getAggregates(): array
+    {
+        return $this->aggregates;
+    }
 }

@@ -9,16 +9,20 @@ use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToOne;
 use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
+use Sirius\Orm\Tests\Generated\Entity\Category;
+use Sirius\Orm\Tests\Generated\Entity\Product;
+use Sirius\Orm\Tests\Generated\Mapper\CategoryMapper;
+use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
 class ManyToOneTest extends BaseTestCase
 {
 
     /**
-     * @var Mapper
+     * @var ProductMapper
      */
     protected $productsMapper;
     /**
-     * @var Mapper
+     * @var CategoryMapper
      */
     protected $categoriesMapper;
 
@@ -126,10 +130,10 @@ SQL;
         $category1 = $products[0]->category;
         $category2 = $products[1]->category;
         $this->assertNotNull($category1);
-        $this->assertEquals(20, $category1->id);
+        $this->assertEquals(20, $category1->getId());
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
-        $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
+        $this->assertSame($category1->getParent(), $category2->getParent()); // to ensure only one query was executed
         $this->assertExpectedQueries(3); // products + category + category parent
     }
 
@@ -145,10 +149,10 @@ SQL;
         $category1 = $products[0]->category;
         $category2 = $products[1]->category;
         $this->assertNotNull($category1);
-        $this->assertEquals(20, $category1->id);
+        $this->assertEquals(20, $category1->getId());
         $this->assertNotNull($category2);
         $this->assertSame($category1, $category2); // to ensure only one query was executed
-        $this->assertSame($category1->parent, $category2->parent); // to ensure only one query was executed
+        $this->assertSame($category1->getParent(), $category2->getParent()); // to ensure only one query was executed
         $this->assertExpectedQueries(3); // products + category + category parent
     }
 
@@ -168,7 +172,7 @@ SQL;
         $product->category = $category;
 
         $this->productsMapper->save($product, true);
-        $this->assertEquals($category->id, $product->category_id);
+        $this->assertEquals($category->getId(), $product->category_id);
     }
 
     public function test_save_with_relations()
@@ -180,27 +184,28 @@ SQL;
             ->first();
 
         $category       = $product->category;
-        $category->name = 'New category';
+        $category->setName('New category');
 
         $this->productsMapper->save($product, true);
-        $category = $this->categoriesMapper->find($category->id);
-        $this->assertEquals('New category', $category->name);
+        $category = $this->categoriesMapper->find($category->getId());
+        $this->assertEquals('New category', $category->getName());
     }
 
     public function test_save_without_relations()
     {
         $this->populateDb();
 
+        /** @var Product $product */
         $product = $this->productsMapper
             ->newQuery()
             ->first();
 
         $category       = $product->category;
-        $category->name = 'New category';
+        $category->setName('New category');
 
         $this->productsMapper->save($product, false);
-        $category = $this->categoriesMapper->find($category->id);
-        $this->assertEquals('Category', $category->name);
+        $category = $this->categoriesMapper->find($category->getId());
+        $this->assertEquals('Category', $category->getName());
     }
 
     protected function populateDb(): void

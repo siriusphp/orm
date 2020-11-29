@@ -26,6 +26,6 @@ class LazyAggregate implements LazyLoader
     public function getForEntity($entity)
     {
         $results = $this->tracker->getAggregateResults($this->aggregate);
-        $this->aggregate->attachAggregateToEntity($entity, $results);
+        return $this->aggregate->getForEntity($entity, $results);
     }
 }

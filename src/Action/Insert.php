@@ -38,7 +38,7 @@ class Insert extends Update
          * For example, on one-to-many relations when persisting the "parent",
          * the actions that persist the "children" have to know about the parent's ID
          */
-        $this->entityHydrator->setPk($this->entity, $connection->lastInsertId());
+        $this->entityHydrator->setPk($this->entity, (int) $connection->lastInsertId());
         $this->entity->setState(StateEnum::SYNCHRONIZED);
     }
 

@@ -20,6 +20,7 @@ use Sirius\Orm\Entity\GenericEntity;
  * @property ProductLanguage[]|Collection $languages
  * @property Image[]|Collection $images
  * @property Tag[]|Collection $tags
+ * @property mixed $tags_count
  * @property Category|null $category
  * @property EbayProduct|null $ebay
  */
@@ -92,17 +93,17 @@ abstract class ProductBase extends GenericEntity
 
     public function addLanguage(ProductLanguage $language)
     {
-        $this->get('languages')->addElement($language);
+        $this->get('languages')->add($language);
     }
 
     public function addImage(Image $image)
     {
-        $this->get('images')->addElement($image);
+        $this->get('images')->add($image);
     }
 
     public function addTag(Tag $tag)
     {
-        $this->get('tags')->addElement($tag);
+        $this->get('tags')->add($tag);
     }
 
     protected function castCategoryAttribute($value)

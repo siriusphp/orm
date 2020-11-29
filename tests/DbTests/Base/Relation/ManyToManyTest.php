@@ -168,9 +168,10 @@ SQL;
         $product  = $this->productsMapper->find(1, ['tags_count']);
         $product2 = $this->productsMapper->find(2, ['tags_count']);
 
-        $this->assertExpectedQueries(4);
+        $this->assertExpectedQueries(2);
         $this->assertEquals(2, $product->tags_count);
         $this->assertEquals(1, $product2->tags_count);
+        $this->assertExpectedQueries(4);
     }
 
     public function test_save_with_relations()

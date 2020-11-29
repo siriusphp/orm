@@ -166,13 +166,15 @@ $orm->addMapper(
 
 $orm->addMapper(
     Mapper::make('categories')
+        ->setEntityStyle(Mapper::ENTITY_STYLE_METHODS)
         // columns
           ->addAutoIncrementColumn()
           ->addColumn(Column::bigInteger('parent_id', true)->setNullable(true)->setIndex(true))
           ->addColumn(Column::integer('position', true)->setDefault(0))
           ->addColumn(Column::string('name')->setUnique(true))
         // relations
-          ->addRelation('parent', ManyToOne::make('categories')) // @testing: many to one
+          ->addRelation('parent', ManyToOne::make('categories')
+                                           ->setNativeKey('parent_id')) // @testing: many to one
           ->addRelation('children', OneToMany::make('categories')
                                              ->setForeignKey('parent_id')
                                              ->setCascade(true))  // @testing: one to many

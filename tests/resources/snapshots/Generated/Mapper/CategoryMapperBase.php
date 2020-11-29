@@ -7,7 +7,7 @@ namespace Sirius\Orm\Tests\Generated\Mapper;
 use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
-use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
@@ -32,7 +32,7 @@ abstract class CategoryMapperBase extends Mapper
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'parent_id' => 'int', 'position' => 'int', 'name' => 'string'],
         ]);
-        $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
+        $this->hydrator     = new ClassMethodsHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapper($this);
 
         $this->initRelations();
@@ -43,7 +43,7 @@ abstract class CategoryMapperBase extends Mapper
         $this->addRelation('parent', [
             'type' => 'many_to_one',
             'foreign_key' => 'id',
-            'native_key' => 'category_id',
+            'native_key' => 'parent_id',
             'foreign_mapper' => 'categories',
             'load_strategy' => 'lazy',
         ]);

@@ -85,16 +85,15 @@ class Aggregate
         $this->entityHydrator->set($entity, $this->name, $valueLoader);
     }
 
-    public function attachAggregateToEntity(EntityInterface $entity, array $results)
+    public function getForEntity(EntityInterface $entity, array $results)
     {
-        $found = null;
         foreach ($results as $row) {
             if ($this->entityMatchesRow($entity, $row)) {
-                $found = $row;
-                break;
+                return $row[$this->name] ?? null;
             }
         }
-        $this->entityHydrator->set($entity, $this->name, $found ? $found[$this->name] : null);
+
+        return null;
     }
 
     public function isLazyLoad()

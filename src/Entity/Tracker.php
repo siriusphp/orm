@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\Collection\Collection;
+use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Query;
 use Sirius\Orm\Relation\Aggregate;
@@ -39,7 +40,7 @@ class Tracker
     protected $relationResults = [];
 
     /**
-     * @var array 
+     * @var array
      */
     protected $aggregateResults = [];
 
@@ -106,11 +107,11 @@ class Tracker
         return $this->aggregateResults[$name];
     }
 
-    public function pluck($columns)
+    public function pluck($columns, HydratorInterface $hydrator)
     {
         $result = [];
         foreach ($this->rows as $row) {
-            $value = $this->getColumnsFromRow($row, $columns);
+            $value = $this->getColumnsFromRow($row, $columns, $hydrator);
             if ($value && ! in_array($value, $result)) {
                 $result[] = $value;
             }
@@ -119,15 +120,15 @@ class Tracker
         return $result;
     }
 
-    protected function getColumnsFromRow($row, $columns)
+    protected function getColumnsFromRow($row, $columns, HydratorInterface $hydrator)
     {
         if (is_array($columns) && count($columns) > 1) {
             $result = [];
             foreach ($columns as $column) {
-                if ($row instanceof GenericEntity) {
-                    $result[] = $row->{$column};
-                } else {
+                if (is_array($row)) {
                     $result[] = $row[$column] ?? null;
+                } else {
+                    $result[] = $hydrator->get($row, $column);
                 }
             }
 
@@ -136,7 +137,7 @@ class Tracker
 
         $column = is_array($columns) ? $columns[0] : $columns;
 
-        return $row instanceof GenericEntity ? $row->{$column} : ($row[$column] ?? null);
+        return is_object($row) ? $hydrator->get($row, $column) : ($row[$column] ?? null);
     }
 
     public function getLazyAggregate(Aggregate $aggregate)

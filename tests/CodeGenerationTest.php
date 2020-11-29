@@ -9,7 +9,7 @@ use Sirius\Orm\Blueprint\Orm;
 
 class CodeGenerationTest extends TestCase
 {
-    public function test_exception_thrown_when_joining_with_invalid_relation()
+    public function test_generated_code_matches_snapshot()
     {
         /** @var Orm $orm */
         $orm = include(__DIR__ . '/resources/definitions.php');

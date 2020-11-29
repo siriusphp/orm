@@ -35,7 +35,7 @@ class OneToMany extends Relation implements ToManyInterface
     public function getQuery(Tracker $tracker)
     {
         $nativeKey = $this->options[RelationConfig::NATIVE_KEY];
-        $nativePks = $tracker->pluck($nativeKey);
+        $nativePks = $tracker->pluck($nativeKey, $this->nativeEntityHydrator);
 
         $query = $this->foreignMapper
             ->newQuery()
@@ -90,7 +90,7 @@ class OneToMany extends Relation implements ToManyInterface
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
         }
-        $this->nativeEntityHydrator->set($nativeEntity, $this->name, null);
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, $this->getForeignMapper()->newCollection());
         $foreignEntity->setState($state);
     }
 

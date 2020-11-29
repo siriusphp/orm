@@ -5,22 +5,25 @@ namespace Sirius\Orm\Tests\DbTests\Base\Relation;
 
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Tests\BaseTestCase;
+use Sirius\Orm\Tests\Generated\Mapper\CascadeProductMapper;
+use Sirius\Orm\Tests\Generated\Mapper\EbayProductMapper;
+use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
 class OneToOneTest extends BaseTestCase
 {
 
     /**
-     * @var Mapper
+     * @var ProductMapper
      */
     protected $productsMapper;
 
     /**
-     * @var Mapper
+     * @var CascadeProductMapper
      */
     protected $cascadeProductsMapper;
 
     /**
-     * @var Mapper
+     * @var EbayProductMapper
      */
     protected $ebayProductsMapper;
 
@@ -78,7 +81,7 @@ class OneToOneTest extends BaseTestCase
 
         $product                 = $this->productsMapper->find(1);
         $product->sku            = 'sku_updated';
-        $product->category->name = 'updated_category';
+        $product->category->setName('updated_category');
         $product->ebay->setPrice(20);
 
         $this->assertTrue($this->productsMapper->save($product, true));
@@ -86,7 +89,7 @@ class OneToOneTest extends BaseTestCase
         $product = $this->productsMapper->find(1);
         $this->assertEquals('sku_updated', $product->sku);
         $this->assertEquals(20, $product->ebay->getPrice());
-        $this->assertEquals('updated_category', $product->category->name);
+        $this->assertEquals('updated_category', $product->category->getName());
     }
 
 
@@ -98,7 +101,7 @@ class OneToOneTest extends BaseTestCase
 
         $product                 = $this->productsMapper->find(1);
         $product->sku            = 'sku_updated';
-        $product->category->name = 'updated_category';
+        $product->category->setName('updated_category');
         $product->ebay->setPrice(20);
 
         $this->assertTrue($this->productsMapper->save($product, ['ebay']));
@@ -106,7 +109,7 @@ class OneToOneTest extends BaseTestCase
         $product = $this->productsMapper->find(1);
         $this->assertEquals('sku_updated', $product->sku);
         $this->assertEquals(20, $product->ebay->getPrice());
-        $this->assertEquals('category', $product->category->name);
+        $this->assertEquals('category', $product->category->getName());
     }
 
     public function test_save_without_relations()
@@ -117,7 +120,7 @@ class OneToOneTest extends BaseTestCase
 
         $product                 = $this->productsMapper->find(1);
         $product->sku            = 'sku_updated';
-        $product->category->name = 'updated_category';
+        $product->category->setName('updated_category');
         $product->ebay->setPrice(20);
 
         $this->assertTrue($this->productsMapper->save($product, false));
@@ -125,7 +128,7 @@ class OneToOneTest extends BaseTestCase
         $product = $this->productsMapper->find(1);
         $this->assertEquals('sku_updated', $product->sku);
         $this->assertEquals(10, $product->ebay->getPrice());
-        $this->assertEquals('category', $product->category->name);
+        $this->assertEquals('category', $product->category->getName());
     }
 
     public function test_join_with()

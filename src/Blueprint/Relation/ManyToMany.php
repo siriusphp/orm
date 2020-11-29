@@ -92,6 +92,11 @@ class ManyToMany extends Relation
         return $this;
     }
 
+    public function getAggregates(): array
+    {
+        return $this->aggregates;
+    }
+
     /**
      * @return mixed
      */

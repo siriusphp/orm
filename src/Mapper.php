@@ -137,7 +137,7 @@ class Mapper
         return $this->behaviours->apply($this, __FUNCTION__, $entity);
     }
 
-    public function newCollection(array $datas): Collection
+    public function newCollection(array $datas = []): Collection
     {
         $entities = array_map([$this, 'newEntity'], $datas);
 

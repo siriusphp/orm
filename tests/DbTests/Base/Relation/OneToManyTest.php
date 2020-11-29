@@ -123,7 +123,7 @@ SQL;
             ->first();
 
         $this->assertExpectedQueries(2); // category + children
-        $this->assertEquals(2, count($category->children));
+        $this->assertEquals(2, count($category->getChildren()));
     }
 
     public function test_lazy_load_executes_query_when_necessary()
@@ -135,7 +135,7 @@ SQL;
             ->first();
 
         $this->assertExpectedQueries(1); // category only
-        $this->assertEquals(2, count($category->children));
+        $this->assertEquals(2, count($category->getChildren()));
         $this->assertExpectedQueries(2); // category + products
     }
 
@@ -148,7 +148,7 @@ SQL;
             ->first();
 
         $this->assertTrue($this->categoryMapper->delete($category, true));
-        $this->assertNull($category->id);
+        $this->assertNull($category->getId());
         $this->assertRowDeleted('categories', 'id = 2');
         $this->assertRowDeleted('categories', 'id = 3');
         $this->assertRowDeleted('tbl_languages', 'content_id = 1');
@@ -163,7 +163,7 @@ SQL;
             ->first();
 
         $this->assertTrue($this->categoryMapper->delete($category, ['children']));
-        $this->assertNull($category->id);
+        $this->assertNull($category->getId());
         $this->assertRowDeleted('categories', 'id', 2);
         $this->assertRowDeleted('categories', 'id', 3);
         $this->assertRowPresent('tbl_languages', 'content_id = 1');
@@ -178,7 +178,7 @@ SQL;
             ->first();
 
         $this->assertTrue($this->categoryMapper->delete($category));
-        $this->assertNull($category->id);
+        $this->assertNull($category->getId());
         $this->assertRowPresent('categories', 'id', 2);
         $this->assertRowPresent('categories', 'id', 3);
         $this->assertRowPresent('tbl_languages', 'content_id', 1);
@@ -193,7 +193,7 @@ SQL;
             ->first();
 
         $this->assertTrue($this->categoryMapper->delete($category, false));
-        $this->assertNull($category->id);
+        $this->assertNull($category->getId());
         $this->assertRowPresent('categories', 'id', 2);
         $this->assertRowPresent('categories', 'id', 3);
         $this->assertRowPresent('tbl_languages', 'content_id', 1);
@@ -212,20 +212,17 @@ SQL;
         $child = $this->categoryMapper->newEntity([
             'name' => 'New child category'
         ]);
-        /** @var Collection $products */
-        $children = $category->children;
-        $children->add($child);
+        $category->addChild($child);
 
         $product = $this->productsMapper->newEntity([
             'sku' => 'New sku'
         ]);
-        /** @var Collection $products */
-        $products = $category->products;
+        $products = $category->getProducts();
         $products->add($product);
 
         $this->categoryMapper->save($category, true);
-        $this->assertEquals($category->id, $product->category_id);
-        $this->assertEquals($category->id, $child->parent_id);
+        $this->assertEquals($category->getId(), $product->category_id);
+        $this->assertEquals($category->getId(), $child->getParentId());
     }
 
     public function test_save_with_partial_relations()
@@ -236,10 +233,10 @@ SQL;
             ->newQuery()
             ->first();
 
-        $child       = $category->children[0];
+        $child       = $category->getChildren()->get(0);
         $child->name = 'child updated';
 
-        $product      = $category->products[0];
+        $product      = $category->getProducts()->get(0);
         $product->sku = 'sku_updated';
 
         $this->categoryMapper->save($category, ['products']);
@@ -247,8 +244,8 @@ SQL;
         $product = $this->productsMapper->find($product->id);
         $this->assertEquals('sku_updated', $product->sku);
 
-        $child = $this->categoryMapper->find($child->id);
-        $this->assertNotEquals('child updated', $child->name);
+        $child = $this->categoryMapper->find($child->getId());
+        $this->assertNotEquals('child updated', $child->getName());
     }
 
     public function test_save_without_relations()
@@ -258,8 +255,8 @@ SQL;
         $category = $this->categoryMapper
             ->find(1);
         /** @var Collection $products */
-        $products         = $category->products;
-        $products[0]->sku = 'sku_updated';
+        $products              = $category->getProducts();
+        $products->get(0)->sku = 'sku_updated';
 
         $this->categoryMapper->save($category, false);
         $product = $this->productsMapper->find($products[0]->id);
@@ -275,8 +272,8 @@ SQL;
             ->get()
             ->get(0);
 
-        $this->assertEquals(5, $category->lowest_price);
-        $this->assertEquals(10, $category->highest_price);
+        $this->assertEquals(5, $category->getLowestPrice());
+        $this->assertEquals(10, $category->getHighestPrice());
         $this->assertExpectedQueries(3);
     }
 

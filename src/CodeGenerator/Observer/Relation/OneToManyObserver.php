@@ -71,22 +71,25 @@ class OneToManyObserver extends Base implements ToManyInterface
             $getter = $class->addMethod(Str::methodName($name, 'get'));
             $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
             $getter->setBody('return $this->get(\'' . $name . '\');');
-            $getter->setReturnType('Collection')
-                   ->setReturnNullable(true);
+            $getter->setReturnType('Collection');
+            $getter->setComment(sprintf('@return Collection|%s[]', $type));
         }
 
         $singular = Inflector::singularize($name);
-        $adder = $class->addMethod(Str::methodName($singular, 'add'));
+        $adder    = $class->addMethod(Str::methodName($singular, 'add'));
         $adder->setVisibility(ClassType::VISIBILITY_PUBLIC);
         $adder->addParameter($singular)
-               ->setType($type);
-        $adder->setBody(sprintf('$this->get(\'%s\')->addElement($%s);', $name, $singular));
+              ->setType($type);
+        $adder->setBody(sprintf('$this->get(\'%s\')->add($%s);', $name, $singular));
+
+        $class = $this->addAggregates($class);
+
         return $class;
     }
 
     private function addAttributeToConstructor(ClassType $class)
     {
-        $name        = $this->relation->getName();
+        $name = $this->relation->getName();
 
         $constructor = $class->getMethod('__construct');
         $constructor->addBody(rtrim('
@@ -98,4 +101,23 @@ if (!isset($this->attributes[\'' . $name . '\'])) {
 }        
         '));
     }
+
+    private function addAggregates(ClassType $class)
+    {
+        $mapper        = $this->relation->getMapper();
+        $aggregates = $this->relation->getAggregates();
+
+        foreach ($aggregates as $name => $aggregate) {
+            if ($mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
+                $class->addComment(sprintf('@property mixed $%s', $name));
+            } else {
+                $getter = $class->addMethod(Str::methodName($name, 'get'));
+                $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
+                $getter->setBody('return $this->get(\'' . $name . '\');');
+            }
+        }
+
+        return $class;
+    }
+
 }
