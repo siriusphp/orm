@@ -68,18 +68,18 @@ abstract class CategoryBase extends GenericEntity
         return $value instanceOf Category ? $value : new Category((array) $value);
     }
 
-    public function addChild(Category $value)
+    public function addChild(Category $child)
     {
-        $this->attributes['children']->addElement($value);
+        $this->get('children')->addElement($child);
     }
 
-    public function addLanguage(Language $value)
+    public function addLanguage(Language $language)
     {
-        $this->attributes['languages']->addElement($value);
+        $this->get('languages')->addElement($language);
     }
 
-    public function addProduct(Product $value)
+    public function addProduct(Product $product)
     {
-        $this->attributes['products']->addElement($value);
+        $this->get('products')->addElement($product);
     }
 }

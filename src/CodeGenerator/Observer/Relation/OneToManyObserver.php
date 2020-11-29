@@ -59,14 +59,6 @@ class OneToManyObserver extends Base implements ToManyInterface
         $class->getNamespace()->addUse(Collection::class);
         $class->getNamespace()->addUse($type, null, $type);
 
-        $adder = $class->addMethod(Str::methodName(Inflector::singularize($name), 'add'));
-        $adder->setVisibility(ClassType::VISIBILITY_PUBLIC);
-        $adder->addParameter('value')
-              ->setType($type);
-        $adder->addBody('
-$this->attributes[\'' . $name . '\']->addElement($value);        
-        ');
-
         if ($mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
             $class->addComment(sprintf('@property %s[]|Collection $%s', $type, $name));
         } else {
@@ -74,15 +66,21 @@ $this->attributes[\'' . $name . '\']->addElement($value);
             $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
             $setter->addParameter('value')
                    ->setType('Collection');
-            $setter->addBody('$this->set(\'' . $name . '\', $value);');
+            $setter->setBody('$this->set(\'' . $name . '\', $value);');
 
             $getter = $class->addMethod(Str::methodName($name, 'get'));
             $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
-            $getter->addBody('return $this->get(\'' . $name . '\');');
+            $getter->setBody('return $this->get(\'' . $name . '\');');
             $getter->setReturnType('Collection')
                    ->setReturnNullable(true);
         }
 
+        $singular = Inflector::singularize($name);
+        $adder = $class->addMethod(Str::methodName($singular, 'add'));
+        $adder->setVisibility(ClassType::VISIBILITY_PUBLIC);
+        $adder->addParameter($singular)
+               ->setType($type);
+        $adder->setBody(sprintf('$this->get(\'%s\')->addElement($%s);', $name, $singular));
         return $class;
     }
 

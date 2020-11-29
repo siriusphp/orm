@@ -73,9 +73,9 @@ abstract class CascadeProductBase extends GenericEntity
         return round($this->price * 0.9, 2);
     }
 
-    public function addImage(Image $value)
+    public function addImage(Image $image)
     {
-        $this->attributes['images']->addElement($value);
+        $this->get('images')->addElement($image);
     }
 
     protected function castEbayAttribute($value)

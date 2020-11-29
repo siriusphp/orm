@@ -90,19 +90,19 @@ abstract class ProductBase extends GenericEntity
         return round($this->value * 0.9, 2);
     }
 
-    public function addLanguage(ProductLanguage $value)
+    public function addLanguage(ProductLanguage $language)
     {
-        $this->attributes['languages']->addElement($value);
+        $this->get('languages')->addElement($language);
     }
 
-    public function addImage(Image $value)
+    public function addImage(Image $image)
     {
-        $this->attributes['images']->addElement($value);
+        $this->get('images')->addElement($image);
     }
 
-    public function addTag(Tag $value)
+    public function addTag(Tag $tag)
     {
-        $this->attributes['tags']->addElement($value);
+        $this->get('tags')->addElement($tag);
     }
 
     protected function castCategoryAttribute($value)
