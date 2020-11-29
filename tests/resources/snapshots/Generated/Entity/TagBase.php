@@ -7,6 +7,7 @@ namespace Sirius\Orm\Tests\Generated\Entity;
 use Sirius\Orm\Entity\GenericEntity;
 
 /**
+ * @property mixed $position_in_product - unsed only for relations with products
  * @property int $id
  * @property string $name
  */

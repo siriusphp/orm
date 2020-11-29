@@ -45,6 +45,16 @@ class ManyToMany extends Relation
         return $this;
     }
 
+    public function getObservers(): array
+    {
+        $observer = $this->getObserver()->with($this);
+
+        return [
+            $this->getMapper()->getName() . '_base_entity'        => [$observer],
+            $this->getForeignMapper() . '_base_entity' => [$observer]
+        ];
+    }
+
     protected function maybeSetAdditionalProperties()
     {
         if ( ! $this->mapper || ! $this->foreignMapper) {
