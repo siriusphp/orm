@@ -5,12 +5,13 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\Relation\ToManyInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Query;
 
-class OneToMany extends Relation
+class OneToMany extends Relation implements ToManyInterface
 {
     use HasAggregates;
 

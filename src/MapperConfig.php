@@ -28,7 +28,6 @@ class MapperConfig
     const ENTITY_HYDRATOR = 'entityHydrator';
     const BEHAVIOURS = 'behaviours';
     const RELATIONS = 'relations';
-    const SCOPES = 'queryScopes';
     const GUARDS = 'guards';
 
     /**
@@ -93,13 +92,6 @@ class MapperConfig
      * @var array|Relation[]
      */
     protected $relations = [];
-
-    /**
-     * Query scopes are functions that can be called on the mapper queries
-     * Not recommended, but useful for runtime generated mappers
-     * @var array
-     */
-    protected $queryScopes = [];
 
     /**
      * List of column-value pairs that act as global filters
@@ -198,14 +190,6 @@ class MapperConfig
     public function getRelations(): array
     {
         return $this->relations;
-    }
-
-    /**
-     * @return array
-     */
-    public function getQueryScopes(): array
-    {
-        return $this->queryScopes;
     }
 
     /**

@@ -4,10 +4,11 @@ namespace Sirius\Orm\Relation;
 
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\Relation\ToOneInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 
-class OneToOne extends OneToMany
+class OneToOne extends OneToMany implements ToOneInterface
 {
     public function attachMatchesToEntity(EntityInterface $nativeEntity, array $result)
     {

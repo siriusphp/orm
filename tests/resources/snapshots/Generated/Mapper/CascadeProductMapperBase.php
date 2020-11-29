@@ -47,7 +47,7 @@ abstract class CascadeProductMapperBase extends Mapper
             ],
         ]);
         $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
-        $this->hydrator->setMapperConfig($this->mapperConfig);
+        $this->hydrator->setMapper($this);
 
         $this->initRelations();
         $this->behaviours->add(new Timestamps($this->createdAtColumn, $this->updatedAtColumn));

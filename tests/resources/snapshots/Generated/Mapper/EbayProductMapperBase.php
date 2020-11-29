@@ -33,7 +33,7 @@ abstract class EbayProductMapperBase extends Mapper
             'casts' => ['id' => 'int', 'product_id' => 'int', 'price' => 'decimal:2', 'is_active' => 'bool'],
         ]);
         $this->hydrator     = new ClassMethodsHydrator($this->orm->getCastingManager());
-        $this->hydrator->setMapperConfig($this->mapperConfig);
+        $this->hydrator->setMapper($this);
 
         $this->initRelations();
     }

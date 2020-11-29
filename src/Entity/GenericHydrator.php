@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\CastingManager;
-use Sirius\Orm\Contract\CastingManagerAwareInterface;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Contract\LazyLoader;
+use Sirius\Orm\Contract\Relation\ToManyInterface;
+use Sirius\Orm\Contract\Relation\ToOneInterface;
 use Sirius\Orm\Helpers\Arr;
+use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 
 class GenericHydrator implements HydratorInterface
@@ -19,25 +21,18 @@ class GenericHydrator implements HydratorInterface
     protected $castingManager;
 
     /**
-     * @var MapperConfig
+     * @var Mapper
      */
-    protected $mapperConfig;
+    protected $mapper;
 
     public function __construct(CastingManager $castingManager)
     {
         $this->castingManager = $castingManager;
     }
 
-    /**
-     * @param MapperConfig $mapperConfig
-     *
-     * @return GenericHydrator
-     */
-    public function setMapperConfig(MapperConfig $mapperConfig): GenericHydrator
+    public function setMapper(Mapper $mapper)
     {
-        $this->mapperConfig = $mapperConfig;
-
-        return $this;
+        $this->mapper = $mapper;
     }
 
     /**
@@ -47,13 +42,15 @@ class GenericHydrator implements HydratorInterface
      */
     public function hydrate(array $attributes = [])
     {
-        $attributes = Arr::renameKeys($attributes, $this->mapperConfig->getColumnAttributeMap());
+        $attributes = Arr::renameKeys($attributes, $this->getMapperConfig()->getColumnAttributeMap());
         if ($this->castingManager) {
             $attributes = $this->castingManager
-                ->castArray($attributes, $this->mapperConfig->getCasts());
+                ->castArray($attributes, $this->getMapperConfig()->getCasts());
         }
 
-        $class = $this->mapperConfig->getEntityClass() ?? GenericEntity::class;
+        $attributes = $this->compileRelations($attributes);
+
+        $class = $this->getMapperConfig()->getEntityClass() ?? GenericEntity::class;
 
         return new $class($attributes);
     }
@@ -67,14 +64,14 @@ class GenericHydrator implements HydratorInterface
     {
         $data = Arr::renameKeys(
             $entity->toArray(),
-            array_flip($this->mapperConfig->getColumnAttributeMap())
+            array_flip($this->getMapperConfig()->getColumnAttributeMap())
         );
         if ($this->castingManager) {
             $data = $this->castingManager
-                ->castArrayForDb($data, $this->mapperConfig->getCasts());
+                ->castArrayForDb($data, $this->getMapperConfig()->getCasts());
         }
 
-        return Arr::only($data, $this->mapperConfig->getColumns());
+        return Arr::only($data, $this->getMapperConfig()->getColumns());
     }
 
     /**
@@ -111,7 +108,7 @@ class GenericHydrator implements HydratorInterface
      */
     public function getPk($entity)
     {
-        return $this->get($entity, $this->mapperConfig->getPrimaryKey());
+        return $this->get($entity, $this->getMapperConfig()->getPrimaryKey());
     }
 
     /**
@@ -124,6 +121,34 @@ class GenericHydrator implements HydratorInterface
      */
     public function setPk($entity, $value)
     {
-        return $this->set($entity, $this->mapperConfig->getPrimaryKey(), $value);
+        return $this->set($entity, $this->getMapperConfig()->getPrimaryKey(), $value);
+    }
+
+    protected function compileRelations(array $attributes)
+    {
+        foreach ($this->mapper->getRelations() as $name) {
+            $relation = $this->mapper->getRelation($name);
+            if ($relation instanceof ToOneInterface &&
+                isset($attributes[$name]) &&
+                ! is_object($attributes[$name])) {
+                $attributes[$name] = $relation->getForeignMapper()->newEntity($attributes[$name]);
+            } elseif ($relation instanceof ToManyInterface &&
+                      ! $relation instanceof ToOneInterface
+                      && ( ! isset($attributes[$name]) || is_array($attributes[$name]))) {
+                /**
+                 * we also need to check against ToOneInterface because OneToOne relation extends
+                 * OneToMany which implements ToOneInterface
+                 * @todo remove this quirk
+                 */
+                $attributes[$name] = $relation->getForeignMapper()->newCollection($attributes[$name] ?? []);
+            }
+        }
+
+        return $attributes;
+    }
+
+    protected function getMapperConfig(): MapperConfig
+    {
+        return $this->mapper->getConfig();
     }
 }

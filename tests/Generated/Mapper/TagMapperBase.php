@@ -33,7 +33,7 @@ abstract class TagMapperBase extends Mapper
             'casts' => ['id' => 'int', 'name' => 'string'],
         ]);
         $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
-        $this->hydrator->setMapperConfig($this->mapperConfig);
+        $this->hydrator->setMapper($this);
 
         $this->initRelations();
     }

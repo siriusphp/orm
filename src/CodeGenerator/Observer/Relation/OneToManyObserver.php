@@ -9,10 +9,11 @@ use Sirius\Orm\Blueprint\Relation;
 use Sirius\Orm\Blueprint\Relation\OneToMany;
 use Sirius\Orm\CodeGenerator\Observer\Base;
 use Sirius\Orm\Collection\Collection;
+use Sirius\Orm\Contract\Relation\ToManyInterface;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\Str;
 
-class OneToManyObserver extends Base
+class OneToManyObserver extends Base implements ToManyInterface
 {
 
     /**
@@ -91,6 +92,9 @@ $this->attributes[\'' . $name . '\']->addElement($value);
 
         $constructor = $class->getMethod('__construct');
         $constructor->addBody(rtrim('
+// this is a fail-safe procedure that will be executed
+// only when you use `new Entity()` instead of `$mapper->newEntity()`
+// ALWAYS try to use `$mapper->newEntity()`
 if (!isset($this->attributes[\'' . $name . '\'])) {
     $this->attributes[\'' . $name . '\'] = new Collection;
 }        

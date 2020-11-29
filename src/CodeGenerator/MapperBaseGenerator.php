@@ -110,7 +110,7 @@ class MapperBaseGenerator
             $this->namespace->addUse(ClassMethodsHydrator::class);
             $body .= '$this->hydrator     = new ClassMethodsHydrator($this->orm->getCastingManager());' . PHP_EOL;
         }
-        $body .= '$this->hydrator->setMapperConfig($this->mapperConfig);' . PHP_EOL;
+        $body .= '$this->hydrator->setMapper($this);' . PHP_EOL;
 
         $body .= PHP_EOL;
 

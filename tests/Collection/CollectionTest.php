@@ -21,7 +21,7 @@ class CollectionTest extends BaseTestCase
     {
         parent::setUp();
         $hydrator = new GenericHydrator($this->orm->getCastingManager());
-        $hydrator->setMapperConfig($this->orm->get('products')->getConfig());
+        $hydrator->setMapper($this->orm->get('products'));
         $this->collection = new Collection([], $hydrator);
     }
 

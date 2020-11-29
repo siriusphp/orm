@@ -6,13 +6,14 @@ use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Action\DeletePivotRows;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\Relation\ToManyInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\QueryHelper;
 use Sirius\Orm\Query;
 
-class ManyToMany extends Relation
+class ManyToMany extends Relation implements ToManyInterface
 {
     use HasAggregates;
 

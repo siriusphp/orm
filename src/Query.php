@@ -79,7 +79,6 @@ class Query extends Select
         $this->primaryKey     = $mapperConfig->getPrimaryKey();
         $this->tableReference = $mapperConfig->getTableReference();
         $this->table          = $mapperConfig->getTableAlias(true);
-        $this->scopes         = $mapperConfig->getQueryScopes();
         $this->guards         = $mapperConfig->getGuards();
 
         $this->from($this->tableReference);

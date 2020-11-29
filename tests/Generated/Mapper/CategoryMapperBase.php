@@ -33,7 +33,7 @@ abstract class CategoryMapperBase extends Mapper
             'casts' => ['id' => 'int', 'parent_id' => 'int', 'position' => 'int', 'name' => 'string'],
         ]);
         $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
-        $this->hydrator->setMapperConfig($this->mapperConfig);
+        $this->hydrator->setMapper($this);
 
         $this->initRelations();
     }

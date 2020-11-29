@@ -5,9 +5,10 @@ namespace Sirius\Orm\CodeGenerator\Observer\Relation;
 
 use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Blueprint\Mapper;
+use Sirius\Orm\Contract\Relation\ToManyInterface;
 use Sirius\Orm\Helpers\Str;
 
-class ManyToManyObserver extends OneToManyObserver
+class ManyToManyObserver extends OneToManyObserver implements ToManyInterface
 {
     public function observe(string $key, $object)
     {

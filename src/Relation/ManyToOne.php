@@ -4,10 +4,11 @@ namespace Sirius\Orm\Relation;
 
 use Sirius\Orm\Action\BaseAction;
 use Sirius\Orm\Contract\EntityInterface;
+use Sirius\Orm\Contract\Relation\ToOneInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Query;
 
-class ManyToOne extends Relation
+class ManyToOne extends Relation implements ToOneInterface
 {
     protected function applyDefaults(): void
     {

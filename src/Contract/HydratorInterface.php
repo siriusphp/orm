@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Contract;
 
-use Sirius\Orm\CastingManager;
-use Sirius\Orm\MapperConfig;
+use Sirius\Orm\Mapper;
 
 interface HydratorInterface
 {
-    public function setMapperConfig(MapperConfig $mapperConfig);
+    public function setMapper(Mapper $mapper);
 
     public function hydrate(array $attributes = []);
 

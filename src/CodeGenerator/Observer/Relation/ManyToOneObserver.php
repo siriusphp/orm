@@ -9,9 +9,10 @@ use Sirius\Orm\Blueprint\Relation;
 use Sirius\Orm\Blueprint\Relation\ManyToMany;
 use Sirius\Orm\Blueprint\Relation\ManyToOne;
 use Sirius\Orm\CodeGenerator\Observer\Base;
+use Sirius\Orm\Contract\Relation\ToOneInterface;
 use Sirius\Orm\Helpers\Str;
 
-class ManyToOneObserver extends Base
+class ManyToOneObserver extends Base implements ToOneInterface
 {
 
     /**

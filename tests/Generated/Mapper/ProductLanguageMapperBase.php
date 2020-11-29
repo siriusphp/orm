@@ -41,7 +41,7 @@ abstract class ProductLanguageMapperBase extends Mapper
             ],
         ]);
         $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
-        $this->hydrator->setMapperConfig($this->mapperConfig);
+        $this->hydrator->setMapper($this);
 
         $this->initRelations();
     }
