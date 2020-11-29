@@ -68,6 +68,16 @@ abstract class EbayProductBase extends ClassMethodsEntity
         return $this->get('is_active');
     }
 
+    public function setExpectedProfit(float $value)
+    {
+        return $this->setPrice($value / 0.3);
+    }
+
+    public function getExpectedProfit(): float
+    {
+        return $this->price * 0.3;
+    }
+
     protected function castProductAttribute($value)
     {
         if ($value === null) {

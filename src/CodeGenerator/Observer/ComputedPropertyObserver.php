@@ -42,7 +42,7 @@ class ComputedPropertyObserver extends Base
         $name = $this->property->getName();
         $type = $this->property->getType();
 
-        if (class_exists($type) || strpos($type, '\\') !== false) {
+        if (is_string($type) && (class_exists($type) || strpos($type, '\\') !== false)) {
             $class->getNamespace()->addUse($type, null, $alias);
         } else {
             $alias = $type;
@@ -59,7 +59,8 @@ class ComputedPropertyObserver extends Base
                 $setter->addParameter('value')
                        ->setNullable($this->property->getNullable())
                        ->setType($alias);
-                $setter->addBody($body);
+                $setter->setBody($body);
+                $setter->setComment($this->property->getSetterComment());
             }
 
             if (($body = $this->property->getGetterBody())) {
@@ -67,26 +68,27 @@ class ComputedPropertyObserver extends Base
                 $getter->setVisibility(ClassType::VISIBILITY_PROTECTED);
                 $getter->setReturnType($alias);
                 $getter->setReturnNullable($this->property->getNullable());
-                $getter->addBody($body);
+                $getter->setBody($body);
+                $getter->setComment($this->property->getGetterComment());
             }
         } else {
             if (($body = $this->property->getSetterBody())) {
-                $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));
+                $setter = $class->addMethod(Str::methodName($name, 'set'));
                 $setter->setVisibility(ClassType::VISIBILITY_PUBLIC);
                 $setter->addParameter('value')
                        ->setType($type)
                        ->setNullable($this->property->getNullable());
                 $setter->setBody($body);
-                $setter->addComment($this->property->getSetterComment());
+                $setter->setComment($this->property->getSetterComment());
             }
 
             if (($body = $this->property->getGetterBody())) {
-                $getter = $class->addMethod(Str::methodName($name . ' Attribute', 'get'));
+                $getter = $class->addMethod(Str::methodName($name, 'get'));
                 $getter->setVisibility(ClassType::VISIBILITY_PUBLIC);
                 $getter->setBody($body);
                 $getter->setReturnType($type);
                 $getter->setReturnNullable($this->property->getNullable());
-                $getter->addComment($this->property->getGetterComment());
+                $getter->setComment($this->property->getGetterComment());
             }
         }
 

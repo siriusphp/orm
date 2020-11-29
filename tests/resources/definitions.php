@@ -119,6 +119,12 @@ $orm->addMapper(
                             ->setIndex(true))
           ->addColumn(Column::decimal('price', 14, 2)->setDefault(0))
           ->addColumn(Column::bool('is_active')->setIndex(true))
+        // computed property
+          ->addComputedProperty(ComputedProperty::make('expected_profit')
+                                                ->setType('float')
+                                                ->setNullable(false)
+                                                ->setSetterBody('return $this->setPrice($value / 0.3);')
+                                                ->setGetterBody('return $this->price * 0.3;'))
         // relations
           ->addRelation('product', OneToOne::make('products')
                                            ->setNativeKey('product_id')
