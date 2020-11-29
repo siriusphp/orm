@@ -13,9 +13,9 @@ interface HydratorInterface
 
     public function extract(EntityInterface $entity);
 
-    public function get(EntityInterface $entity, $attribute);
+    public function get(EntityInterface $entity, string $attribute);
 
-    public function set(EntityInterface $entity, $attribute, $value);
+    public function set(EntityInterface $entity, string $attribute, $value);
 
     public function getPk(EntityInterface $entity);
 
