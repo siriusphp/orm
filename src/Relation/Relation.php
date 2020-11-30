@@ -76,7 +76,7 @@ abstract class Relation
 
     protected function setOptionIfMissing($name, $value)
     {
-        if ( ! isset($this->options[$name])) {
+        if (! isset($this->options[$name])) {
             $this->options[$name] = $value;
         }
     }
@@ -115,7 +115,7 @@ abstract class Relation
 
     protected function getKeyColumn($name, $column)
     {
-        if ( ! is_array($column)) {
+        if (! is_array($column)) {
             return $name . '_' . $column;
         }
 
@@ -176,7 +176,7 @@ abstract class Relation
 
         foreach ($entities as $entity) {
             $entityId = $this->getEntityId($this->foreignMapper, $entity, array_values($this->keyPairs));
-            if ( ! isset($result[$entityId])) {
+            if (! isset($result[$entityId])) {
                 $result[$entityId] = [];
             }
             $result[$entityId][] = $entity;
@@ -223,7 +223,7 @@ abstract class Relation
      */
     protected function getRemainingRelations($relations)
     {
-        if ( ! is_array($relations)) {
+        if (! is_array($relations)) {
             return $relations;
         }
 
@@ -244,7 +244,7 @@ abstract class Relation
         if (is_array($guards)) {
             foreach ($guards as $col => $val) {
                 // guards that are strings (eg: 'deleted_at is null') can't be used as extra columns
-                if ( ! is_int($col)) {
+                if (! is_int($col)) {
                     $cols[$col] = $val;
                 }
             }

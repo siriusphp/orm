@@ -62,7 +62,7 @@ class Update extends Save
 
     public function revert()
     {
-        if ( ! $this->hasRun) {
+        if (! $this->hasRun) {
             return;
         }
         $this->entity->setState($this->entityState);

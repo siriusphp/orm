@@ -7,5 +7,4 @@ use Sirius\Orm\Contract\Relation\ToOneInterface;
 
 class OneToOneObserver extends ManyToOneObserver implements ToOneInterface
 {
-
 }

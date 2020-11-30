@@ -67,7 +67,7 @@ class Collection extends ArrayCollection
     public function add($element)
     {
         $element = $this->ensureHydratedElement($element);
-        if ( ! $this->contains($element)) {
+        if (! $this->contains($element)) {
             $this->change('added', $element);
 
             return parent::add($element);
@@ -89,7 +89,7 @@ class Collection extends ArrayCollection
     public function removeElement($element)
     {
         $element = $this->ensureHydratedElement($element);
-        if ( ! $this->contains($element)) {
+        if (! $this->contains($element)) {
             return true;
         }
         $removed = parent::removeElement($this->findByPk($this->hydrator->getPk($element)));
@@ -114,7 +114,7 @@ class Collection extends ArrayCollection
     public function pluck($names)
     {
         return $this->map(function ($item) use ($names) {
-            if ( ! is_array($names)) {
+            if (! is_array($names)) {
                 return $this->hydrator->get($item, $names);
             }
 

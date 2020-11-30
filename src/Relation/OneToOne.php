@@ -29,7 +29,7 @@ class OneToOne extends OneToMany implements ToOneInterface
         $relations          = $action->getOption('relations');
 
         // no cascade delete? treat it as a save
-        if ( ! $this->isCascade()) {
+        if (! $this->isCascade()) {
             $this->addActionOnSave($action);
         } elseif ($relations === true || in_array($this->name, (array)$relations)) {
             $nativeEntity       = $action->getEntity();
@@ -51,11 +51,11 @@ class OneToOne extends OneToMany implements ToOneInterface
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if ( ! $this->relationWasChanged($action->getEntity())) {
+        if (! $this->relationWasChanged($action->getEntity())) {
             return;
         }
 
-        if ( ! $action->includesRelation($this->name)) {
+        if (! $action->includesRelation($this->name)) {
             return;
         }
 

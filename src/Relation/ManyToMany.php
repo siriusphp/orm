@@ -22,28 +22,28 @@ class ManyToMany extends Relation implements ToManyInterface
         parent::applyDefaults();
 
         $foreignKey = $this->foreignMapper->getConfig()->getPrimaryKey();
-        if ( ! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
             $this->options[RelationConfig::FOREIGN_KEY] = $foreignKey;
         }
 
         $nativeKey = $this->foreignMapper->getConfig()->getPrimaryKey();
-        if ( ! isset($this->options[RelationConfig::NATIVE_KEY])) {
+        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if ( ! isset($this->options[RelationConfig::THROUGH_TABLE])) {
+        if (! isset($this->options[RelationConfig::THROUGH_TABLE])) {
             $tables = [$this->foreignMapper->getConfig()->getTable(), $this->nativeMapper->getConfig()->getTable()];
             sort($tables);
             $this->options[RelationConfig::THROUGH_TABLE] = implode('_', $tables);
         }
 
-        if ( ! isset($this->options[RelationConfig::THROUGH_NATIVE_COLUMN])) {
+        if (! isset($this->options[RelationConfig::THROUGH_NATIVE_COLUMN])) {
             $prefix = Inflector::singularize($this->nativeMapper->getConfig()->getTableAlias(true));
 
             $this->options[RelationConfig::THROUGH_NATIVE_COLUMN] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
-        if ( ! isset($this->options[RelationConfig::THROUGH_FOREIGN_COLUMN])) {
+        if (! isset($this->options[RelationConfig::THROUGH_FOREIGN_COLUMN])) {
             $prefix = Inflector::singularize($this->foreignMapper->getConfig()->getTableAlias(true));
 
             $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN] = $this->getKeyColumn($prefix, $foreignKey);
@@ -96,7 +96,7 @@ class ManyToMany extends Relation implements ToManyInterface
         $throughAlias = $this->getOption(RelationConfig::THROUGH_TABLE_ALIAS);
         $throughName  = $throughAlias ?? $through;
 
-        if ( ! empty($throughColumns)) {
+        if (! empty($throughColumns)) {
             foreach ($throughColumns as $col => $alias) {
                 $query->columns("{$throughName}.{$col} AS {$alias}");
             }
@@ -165,8 +165,8 @@ class ManyToMany extends Relation implements ToManyInterface
 //                }
 //            }
 //        } else {
-            $collection = new Collection($found, $this->foreignMapper->getHydrator());
-            $this->nativeEntityHydrator->set($nativeEntity, $this->name, $collection);
+        $collection = new Collection($found, $this->foreignMapper->getHydrator());
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, $collection);
 //        }
     }
 
@@ -216,7 +216,7 @@ class ManyToMany extends Relation implements ToManyInterface
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if ( ! $action->includesRelation($this->name)) {
+        if (! $action->includesRelation($this->name)) {
             return;
         }
 
@@ -224,7 +224,7 @@ class ManyToMany extends Relation implements ToManyInterface
 
         /** @var Collection $foreignEntities */
         $foreignEntities = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
-        if ( ! $foreignEntities || !$foreignEntities instanceof Collection || $foreignEntities->isEmpty()) {
+        if (! $foreignEntities || !$foreignEntities instanceof Collection || $foreignEntities->isEmpty()) {
             return;
         }
 
@@ -232,7 +232,7 @@ class ManyToMany extends Relation implements ToManyInterface
 
         // save the entities still in the collection
         foreach ($foreignEntities as $foreignEntity) {
-            if ( ! empty($foreignEntity->getChanges())) {
+            if (! empty($foreignEntity->getChanges())) {
                 $saveAction = $this->foreignMapper
                     ->newSaveAction($foreignEntity, [
                         'relations' => $remainingRelations

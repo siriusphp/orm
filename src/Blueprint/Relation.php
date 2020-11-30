@@ -49,28 +49,28 @@ abstract class Relation extends Base
     {
         $errors = [];
 
-        if ( ! $this->name) {
+        if (! $this->name) {
             $errors[] = "Unknown relation name";
         }
 
-        if ( ! $this->type) {
+        if (! $this->type) {
             $errors[] = "Unknown relation type";
         }
 
-        if ( ! $this->nativeKey) {
+        if (! $this->nativeKey) {
             $errors[] = "Missing native key column";
         }
 
-        if ( ! $this->foreignMapper) {
+        if (! $this->foreignMapper) {
             $errors[] = "Missing foreign mapper name";
         }
 
-        if ( ! $this->foreignKey) {
+        if (! $this->foreignKey) {
             $errors[] = "Missing foreign key";
         }
 
         $strategies = [RelationConfig::LOAD_LAZY, RelationConfig::LOAD_EAGER, RelationConfig::LOAD_NONE];
-        if ( ! in_array($this->loadStrategy, $strategies)) {
+        if (! in_array($this->loadStrategy, $strategies)) {
             $errors[] = sprintf("Relation loading strategy is not valid (allowed values: %s)", implode(', ', $strategies));
         }
 
@@ -177,9 +177,11 @@ abstract class Relation extends Base
         }
 
         $class = get_class($this);
-        $observerClass = str_replace('\\Blueprint\\',
+        $observerClass = str_replace(
+            '\\Blueprint\\',
             '\\CodeGenerator\\Observer\\',
-            $class) . 'Observer';
+            $class
+        ) . 'Observer';
 
         return new $observerClass();
     }

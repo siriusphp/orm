@@ -40,7 +40,8 @@ class OneToManyObserver extends Base implements ToManyInterface
 
     public function __toString()
     {
-        return sprintf('Observer for relation %s for mapper %s',
+        return sprintf(
+            'Observer for relation %s for mapper %s',
             $this->relation->getName(),
             $this->relation->getMapper()->getName()
         );
@@ -119,5 +120,4 @@ if (!isset($this->attributes[\'' . $name . '\'])) {
 
         return $class;
     }
-
 }

@@ -8,7 +8,6 @@ use Sirius\Orm\Helpers\Str;
 
 class Behaviours
 {
-
     protected $list = [];
 
     public function add(BehaviourInterface $behaviour)

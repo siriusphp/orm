@@ -140,7 +140,7 @@ class MapperConfig
      */
     public function getTableAlias($fallbackToTable = false)
     {
-        return ( ! $this->tableAlias && $fallbackToTable) ? $this->table : $this->tableAlias;
+        return (! $this->tableAlias && $fallbackToTable) ? $this->table : $this->tableAlias;
     }
 
     /**
@@ -202,7 +202,7 @@ class MapperConfig
 
     public function getTableReference()
     {
-        if ( ! $this->tableReference) {
+        if (! $this->tableReference) {
             $this->tableReference = QueryHelper::reference($this->table, $this->tableAlias);
         }
 

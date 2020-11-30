@@ -15,7 +15,7 @@ class SoftDelete extends Delete
     protected function execute()
     {
         $entityId = $this->entityHydrator->getPk($this->entity);
-        if ( ! $entityId) {
+        if (! $entityId) {
             return;
         }
 

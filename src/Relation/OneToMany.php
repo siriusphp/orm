@@ -18,11 +18,11 @@ class OneToMany extends Relation implements ToManyInterface
     protected function applyDefaults(): void
     {
         $nativeKey = $this->nativeMapper->getConfig()->getPrimaryKey();
-        if ( ! isset($this->options[RelationConfig::NATIVE_KEY])) {
+        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if ( ! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
             $prefix                                     = Inflector::singularize($this->nativeMapper->getConfig()->getTable());
             $this->options[RelationConfig::FOREIGN_KEY] = $this->getKeyColumn($prefix, $nativeKey);
         }
@@ -99,7 +99,7 @@ class OneToMany extends Relation implements ToManyInterface
         $relations          = $action->getOption('relations');
 
         // no cascade delete? treat as save so we can process the changes
-        if ( ! $this->isCascade()) {
+        if (! $this->isCascade()) {
             $this->addActionOnSave($action);
         } elseif ($relations === true || in_array($this->name, (array)$relations)) {
             $nativeEntity       = $action->getEntity();
@@ -121,11 +121,11 @@ class OneToMany extends Relation implements ToManyInterface
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if ( ! $this->relationWasChanged($action->getEntity())) {
+        if (! $this->relationWasChanged($action->getEntity())) {
             return;
         }
 
-        if ( ! $action->includesRelation($this->name)) {
+        if (! $action->includesRelation($this->name)) {
             return;
         }
 
@@ -138,7 +138,7 @@ class OneToMany extends Relation implements ToManyInterface
 
         // save the entities still in the collection
         foreach ($foreignEntities as $foreignEntity) {
-            if ( ! empty($foreignEntity->getChanges())) {
+            if (! empty($foreignEntity->getChanges())) {
                 $saveAction = $this->foreignMapper
                     ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
                 $saveAction->addColumns($this->getExtraColumnsForAction());

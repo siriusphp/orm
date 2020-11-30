@@ -220,11 +220,11 @@ class Column extends Base
     {
         $errors = [];
 
-        if ( ! $this->name) {
+        if (! $this->name) {
             $errors[] = 'Column requires a name';
         }
 
-        if ( ! $this->type) {
+        if (! $this->type) {
             $errors[] = 'Column requires a type';
         } elseif (($type = $this->getConstantByValue($this->type)) && substr($type, 0, 5) !== 'TYPE_') {
             $errors[] = sprintf('Column does not have a valid type (%s)', $this->type);

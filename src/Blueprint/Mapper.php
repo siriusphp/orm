@@ -68,30 +68,30 @@ class Mapper extends Base
     {
         $errors = [];
 
-        if ( ! $this->table) {
+        if (! $this->table) {
             $errors[] = 'Missing table property';
         }
 
-        if ( ! $this->className) {
+        if (! $this->className) {
             $errors[] = 'Missing class name property';
         }
 
         if ($this->destination) {
-            if ( ! is_dir($this->destination)) {
+            if (! is_dir($this->destination)) {
                 $errors[] = sprintf('%s is not a valid directory', $this->destination);
-            } elseif ( ! is_writable($this->destination)) {
+            } elseif (! is_writable($this->destination)) {
                 $errors[] = sprintf('%s is not writable', $this->destination);
             }
         }
 
-        if ( ! $this->entityClass) {
+        if (! $this->entityClass) {
             $errors[] = 'Missing entity class name property';
         }
 
         if ($this->entityDestination) {
-            if ( ! is_dir($this->entityDestination)) {
+            if (! is_dir($this->entityDestination)) {
                 $errors[] = sprintf('%s is not a valid directory', $this->entityDestination);
-            } elseif ( ! is_writable($this->entityDestination)) {
+            } elseif (! is_writable($this->entityDestination)) {
                 $errors[] = sprintf('%s is not writable', $this->entityDestination);
             }
         }
@@ -343,7 +343,7 @@ class Mapper extends Base
     public function addRelation($name, Relation $relation): Mapper
     {
         $relation->setMapper($this);
-        if ( ! $relation->getForeignMapper()) {
+        if (! $relation->getForeignMapper()) {
             $relation->setForeignMapper(Inflector::pluralize($name));
         }
         $relation->setName($name);
@@ -376,7 +376,7 @@ class Mapper extends Base
 
         $singular = Inflector::singularize($name);
 
-        if ( ! $this->table) {
+        if (! $this->table) {
             $this->setTable($name);
         }
 
@@ -384,11 +384,11 @@ class Mapper extends Base
             $this->setTableAlias($name);
         }
 
-        if ( ! $this->className) {
+        if (! $this->className) {
             $this->setClassName(Str::className($singular) . 'Mapper');
         }
 
-        if ( ! $this->entityClass) {
+        if (! $this->entityClass) {
             $this->setEntityClass(Str::className($singular));
         }
 

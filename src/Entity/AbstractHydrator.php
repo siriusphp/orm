@@ -84,7 +84,7 @@ abstract class AbstractHydrator implements HydratorInterface
                 $attributes[$name] = $relation->getForeignMapper()->newEntity($attributes[$name]);
             } elseif ($relation instanceof ToManyInterface &&
                       ! $relation instanceof ToOneInterface
-                      && ( ! isset($attributes[$name]) || is_array($attributes[$name]))) {
+                      && (! isset($attributes[$name]) || is_array($attributes[$name]))) {
                 /**
                  * we also need to check against ToOneInterface because OneToOne relation extends
                  * OneToMany which implements ToOneInterface

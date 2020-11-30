@@ -5,5 +5,4 @@ namespace Sirius\Orm\Action;
 
 class Save extends BaseAction
 {
-
 }

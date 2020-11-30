@@ -88,5 +88,4 @@ class QueryBaseGenerator
         $method->setBody('return parent::paginate($perPage, $page);');
         $method->addComment(sprintf('@return PaginatedCollection|%s[]', $this->mapper->getEntityClass()));
     }
-
 }

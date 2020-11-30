@@ -22,7 +22,7 @@ class Timestamps extends Behaviour
      */
     protected $observer;
 
-    static public function make($createdAtColumn = 'created_at', $updatedAtColumn = 'updated_at')
+    public static function make($createdAtColumn = 'created_at', $updatedAtColumn = 'updated_at')
     {
         return (new static)
             ->setCreatedAtColumn($createdAtColumn)
@@ -39,7 +39,7 @@ class Timestamps extends Behaviour
         ];
     }
 
-    function getName(): string
+    public function getName(): string
     {
         return 'timestamps';
     }
@@ -123,5 +123,4 @@ class Timestamps extends Behaviour
 
         return $this;
     }
-
 }

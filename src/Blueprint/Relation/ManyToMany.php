@@ -57,11 +57,11 @@ class ManyToMany extends Relation
 
     protected function maybeSetAdditionalProperties()
     {
-        if ( ! $this->mapper || ! $this->foreignMapper) {
+        if (! $this->mapper || ! $this->foreignMapper) {
             return;
         }
 
-        if ( ! $this->throughTable) {
+        if (! $this->throughTable) {
             $tablePrefix = $this->mapper->getTableAlias() ?
                 str_replace($this->mapper->getTable(), '', $this->mapper->getTableAlias())
                 : '';
@@ -76,11 +76,11 @@ class ManyToMany extends Relation
             }
         }
 
-        if ( ! $this->throughNativeColumn) {
+        if (! $this->throughNativeColumn) {
             $this->throughNativeColumn = Inflector::singularize($this->mapper->getName()) . '_id';
         }
 
-        if ( ! $this->throughForeignColumn) {
+        if (! $this->throughForeignColumn) {
             $this->throughForeignColumn = Inflector::singularize($this->foreignMapper) . '_id';
         }
     }
@@ -220,6 +220,4 @@ class ManyToMany extends Relation
 
         return $this;
     }
-
-
 }

@@ -19,7 +19,7 @@ abstract class Base
 
     /**
      * This is for loggin/debugging purposes
-     * 
+     *
      * @return string
      */
     abstract public function __toString();

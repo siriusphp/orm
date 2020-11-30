@@ -40,7 +40,7 @@ class ClassMethodsEntity implements EntityInterface
         }
 
         $value = $this->castAttribute($attribute, $value);
-        if ( ! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
+        if (! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->markChanged($attribute);
             $this->state = StateEnum::CHANGED;
         }

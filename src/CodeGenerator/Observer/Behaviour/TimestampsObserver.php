@@ -37,9 +37,11 @@ class TimestampsObserver extends Base
 
     public function __toString()
     {
-        return sprintf('Observer for behaviour %s of mapper %s',
+        return sprintf(
+            'Observer for behaviour %s of mapper %s',
             $this->behaviour->getName(),
-            $this->behaviour->getMapper()->getName());
+            $this->behaviour->getMapper()->getName()
+        );
     }
 
     public function observeBaseMapperClass(ClassType $class): ClassType
@@ -49,7 +51,7 @@ class TimestampsObserver extends Base
         $class->addProperty('updatedAtColumn', $this->behaviour->getUpdatedAtColumn())
               ->setVisibility('protected');
 
-        if ( ! $class->hasMethod('init')) {
+        if (! $class->hasMethod('init')) {
             $class->addMethod('init')->setVisibility('public')
                   ->setBody('parent::init();' . PHP_EOL);
         }

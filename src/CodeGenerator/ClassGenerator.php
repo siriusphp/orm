@@ -97,7 +97,6 @@ class ClassGenerator
                           . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
-
     }
 
     private function generateBaseQueryClass(Mapper $mapper)
@@ -174,6 +173,5 @@ class ClassGenerator
                           . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
                           . $this->classPrinter->printClass($class)
         ];
-
     }
 }

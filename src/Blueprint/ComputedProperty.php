@@ -32,7 +32,7 @@ class ComputedProperty extends Base
      */
     protected $observer;
 
-    static function make($name = '')
+    public static function make($name = '')
     {
         return (new static)->setName($name);
     }

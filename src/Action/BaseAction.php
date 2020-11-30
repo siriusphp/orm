@@ -114,7 +114,8 @@ abstract class BaseAction implements ActionInterface
         return $this->options[$name] ?? null;
     }
 
-    public function includesRelation($relationName) {
+    public function includesRelation($relationName)
+    {
         $relations = (array) $this->getOption('relations');
 
         return $relations === true || in_array($relationName, $relations);
@@ -246,5 +247,4 @@ abstract class BaseAction implements ActionInterface
     {
         throw new \BadMethodCallException(sprintf('%s must implement `execute()`', get_class($this)));
     }
-
 }

@@ -20,12 +20,12 @@ class SoftDelete extends Behaviour
      */
     protected $observer;
 
-    static function make($deletedAtColumn = 'deleted_at')
+    public static function make($deletedAtColumn = 'deleted_at')
     {
         return (new static)->setDeletedAtColumn($deletedAtColumn);
     }
 
-    function getName(): string
+    public function getName(): string
     {
         return 'soft_delete';
     }
@@ -93,6 +93,4 @@ class SoftDelete extends Behaviour
 
         return $this;
     }
-
-
 }

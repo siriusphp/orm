@@ -167,7 +167,7 @@ class Mapper
 
     public function getRelation(string $name): Relation
     {
-        if ( ! $this->hasRelation($name)) {
+        if (! $this->hasRelation($name)) {
             throw new \InvalidArgumentException("Relation named {$name} is not registered for this mapper");
         }
 

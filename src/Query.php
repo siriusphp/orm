@@ -90,7 +90,6 @@ class Query extends Select
 
     protected function init()
     {
-
     }
 
     public function __call(string $method, array $params)
@@ -139,7 +138,7 @@ class Query extends Select
             return $this;
         }
 
-        if ( ! $this->mapper->hasRelation($name)) {
+        if (! $this->mapper->hasRelation($name)) {
             throw new \InvalidArgumentException(
                 sprintf("Relation %s, not defined for %s", $name, $this->mapper->getConfig()->getTable())
             );
@@ -202,7 +201,7 @@ class Query extends Select
         }
 
         $receivedTracker = ! ! $tracker;
-        if ( ! $tracker) {
+        if (! $tracker) {
             $receivedTracker = false;
             $tracker         = new Tracker([$data]);
         }
@@ -212,7 +211,7 @@ class Query extends Select
         $this->injectAggregates($entity, $tracker, $load);
         $entity->setState(StateEnum::SYNCHRONIZED);
 
-        if ( ! $receivedTracker) {
+        if (! $receivedTracker) {
             $tracker->replaceRows([$entity]);
         }
 
@@ -263,7 +262,7 @@ class Query extends Select
             $queryCallback = $eagerLoad[$name] ?? null;
             $nextLoad      = Arr::getChildren($eagerLoad, $name);
 
-            if ( ! $tracker->hasRelation($name)) {
+            if (! $tracker->hasRelation($name)) {
                 $tracker->setRelation($name, $relation, $queryCallback, $nextLoad);
             }
 
@@ -279,7 +278,7 @@ class Query extends Select
     {
         foreach ($this->mapper->getRelations() as $name) {
             $relation = $this->mapper->getRelation($name);
-            if ( ! method_exists($relation, 'getAggregates')) {
+            if (! method_exists($relation, 'getAggregates')) {
                 continue;
             }
             $aggregates = $relation->getAggregates();
@@ -315,7 +314,7 @@ class Query extends Select
      */
     public function chunk(int $size, callable $callback, int $limit = 100000)
     {
-        if ( ! $this->orderBy->build()) {
+        if (! $this->orderBy->build()) {
             $this->orderBy(...(array)$this->mapper->getConfig()->getPrimaryKey());
         }
 
@@ -386,7 +385,6 @@ class Query extends Select
 
     protected function applyGuards()
     {
-
         if (empty($this->guards)) {
             return;
         }

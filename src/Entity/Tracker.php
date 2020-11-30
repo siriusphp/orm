@@ -63,7 +63,7 @@ class Tracker
     {
         $this->relations[$name]        = $relation;
         $this->relationCallback[$name] = $callback;
-        if ( ! empty($nextLoad)) {
+        if (! empty($nextLoad)) {
             $this->relationNextLoad[$name] = $nextLoad;
         }
     }
@@ -75,7 +75,7 @@ class Tracker
 
     public function getResultsForRelation($name)
     {
-        if ( ! isset($this->relations[$name])) {
+        if (! isset($this->relations[$name])) {
             return [];
         }
 
@@ -143,7 +143,7 @@ class Tracker
     public function getLazyAggregate(Aggregate $aggregate)
     {
         $name = $aggregate->getName();
-        if ( ! isset($this->lazyAggregates[$name])) {
+        if (! isset($this->lazyAggregates[$name])) {
             $this->lazyAggregates[$name] = new LazyAggregate($this, $aggregate);
         }
 
@@ -153,7 +153,7 @@ class Tracker
     public function getLazyRelation(Relation $relation)
     {
         $name = $relation->getOption('name');
-        if ( ! isset($this->lazyRelations[$name])) {
+        if (! isset($this->lazyRelations[$name])) {
             $this->lazyRelations[$name] = new LazyRelation($this, $relation);
         }
 

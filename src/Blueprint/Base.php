@@ -40,5 +40,3 @@ abstract class Base
         return $constants[$val] ?? null;
     }
 }
-
-

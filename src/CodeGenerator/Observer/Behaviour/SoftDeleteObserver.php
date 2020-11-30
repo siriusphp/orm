@@ -38,9 +38,11 @@ class SoftDeleteObserver extends Base
 
     public function __toString()
     {
-        return sprintf('Observer for behaviour %s of mapper %s',
+        return sprintf(
+            'Observer for behaviour %s of mapper %s',
             $this->behaviour->getName(),
-            $this->behaviour->getMapper()->getName());
+            $this->behaviour->getMapper()->getName()
+        );
     }
 
 
@@ -119,7 +121,7 @@ try {
               ->setVisibility('protected');
 
         // add guard
-        if ( ! $class->hasMethod('init')) {
+        if (! $class->hasMethod('init')) {
             $class->addMethod('init')
                   ->setVisibility(ClassType::VISIBILITY_PROTECTED)
                   ->setBody('parent::init();' . PHP_EOL);

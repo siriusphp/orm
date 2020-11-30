@@ -15,11 +15,11 @@ class ManyToOne extends Relation implements ToOneInterface
         parent::applyDefaults();
 
         $foreignKey = $this->foreignMapper->getConfig()->getPrimaryKey();
-        if ( ! isset($this->options[RelationConfig::FOREIGN_KEY])) {
+        if (! isset($this->options[RelationConfig::FOREIGN_KEY])) {
             $this->options[RelationConfig::FOREIGN_KEY] = $foreignKey;
         }
 
-        if ( ! isset($this->options[RelationConfig::NATIVE_KEY])) {
+        if (! isset($this->options[RelationConfig::NATIVE_KEY])) {
             $nativeKey                                 = $this->getKeyColumn($this->name, $foreignKey);
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
@@ -103,11 +103,11 @@ class ManyToOne extends Relation implements ToOneInterface
 
     protected function addActionOnSave(BaseAction $action)
     {
-        if ( ! $this->relationWasChanged($action->getEntity())) {
+        if (! $this->relationWasChanged($action->getEntity())) {
             return;
         }
 
-        if ( ! $action->includesRelation($this->name)) {
+        if (! $action->includesRelation($this->name)) {
             return;
         }
 

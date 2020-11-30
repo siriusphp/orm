@@ -44,7 +44,7 @@ class Insert extends Update
 
     public function revert()
     {
-        if ( ! $this->hasRun) {
+        if (! $this->hasRun) {
             return;
         }
         $this->entityHydrator->setPk($this->entity, $this->entityId);

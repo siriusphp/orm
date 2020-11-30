@@ -39,27 +39,27 @@ class Orm extends Base
     {
         $errors = [];
 
-        if ( ! $this->entityNamespace) {
+        if (! $this->entityNamespace) {
             $errors[] = 'Missing entity namespace property';
         }
 
-        if ( ! $this->entityDestination) {
+        if (! $this->entityDestination) {
             $errors[] = 'Missing entity destination property';
-        } elseif ( ! is_dir($this->entityDestination)) {
+        } elseif (! is_dir($this->entityDestination)) {
             $errors[] = sprintf('%s is not a valid directory', $this->entityDestination);
-        } elseif ( ! is_writable($this->entityDestination)) {
+        } elseif (! is_writable($this->entityDestination)) {
             $errors[] = sprintf('%s is not writable', $this->entityDestination);
         }
 
-        if ( ! $this->mapperNamespace) {
+        if (! $this->mapperNamespace) {
             $errors[] = 'Missing mapper namespace property';
         }
 
-        if ( ! $this->mapperDestination) {
+        if (! $this->mapperDestination) {
             $errors[] = 'Missing entity destination property';
-        } elseif ( ! is_dir($this->mapperDestination)) {
+        } elseif (! is_dir($this->mapperDestination)) {
             $errors[] = sprintf('%s is not a valid directory', $this->mapperDestination);
-        } elseif ( ! is_writable($this->mapperDestination)) {
+        } elseif (! is_writable($this->mapperDestination)) {
             $errors[] = sprintf('%s is not writable', $this->mapperDestination);
         }
 
@@ -176,5 +176,3 @@ class Orm extends Base
         return $this;
     }
 }
-
-

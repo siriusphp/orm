@@ -26,7 +26,7 @@ class Arr
             if (strpos($key, $separator)) {
                 $parents = static::getParents($key, $separator);
                 foreach ($parents as $parent) {
-                    if ( ! isset($arr[$parent])) {
+                    if (! isset($arr[$parent])) {
                         $arr[$parent] = null;
                     }
                 }

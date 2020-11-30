@@ -94,7 +94,8 @@ class CastingManager
         return round((float)$value, (int)$digits);
     }
 
-    public function array($value) {
+    public function array($value)
+    {
         if ($value === null) {
             return null;
         }
@@ -107,7 +108,7 @@ class CastingManager
 
     public function json($value)
     {
-        if ( ! $value) {
+        if (! $value) {
             return new \ArrayObject();
         }
         if (is_array($value)) {
@@ -125,7 +126,7 @@ class CastingManager
     // phpcs:ignore
     public function json_for_db($value)
     {
-        if ( ! $value) {
+        if (! $value) {
             return null;
         }
         if (is_array($value)) {

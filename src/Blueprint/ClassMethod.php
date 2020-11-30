@@ -32,11 +32,11 @@ class ClassMethod extends Base
     {
         $errors = [];
 
-        if ( ! $this->name) {
+        if (! $this->name) {
             $errors[] = 'Method requires a name';
         }
 
-        if ( ! in_array($this->visibility, [ClassType::VISIBILITY_PUBLIC, ClassType::VISIBILITY_PROTECTED])) {
+        if (! in_array($this->visibility, [ClassType::VISIBILITY_PUBLIC, ClassType::VISIBILITY_PROTECTED])) {
             $errors[] = 'Wrong method visilibity type. Only `public` and `protected` are allowed.';
         }
 
@@ -137,5 +137,4 @@ class ClassMethod extends Base
             $param->setType($details['type']);
         }
     }
-
 }

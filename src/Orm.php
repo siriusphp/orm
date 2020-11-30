@@ -105,7 +105,7 @@ class Orm
             unset($this->lazyMappers[$name]);
         }
 
-        if ( ! isset($this->mappers[$name]) || ! $this->mappers[$name]) {
+        if (! isset($this->mappers[$name]) || ! $this->mappers[$name]) {
             throw new InvalidArgumentException(sprintf('Mapper named %s is not registered', $name));
         }
 
@@ -138,14 +138,14 @@ class Orm
     {
         $foreignMapper = $options[RelationConfig::FOREIGN_MAPPER];
         if ($this->has($foreignMapper)) {
-            if ( ! $foreignMapper instanceof Mapper) {
+            if (! $foreignMapper instanceof Mapper) {
                 $foreignMapper = $this->get($foreignMapper);
             }
         }
         $type          = $options[RelationConfig::TYPE];
         $relationClass = 'Sirius\\Orm\\Relation\\' . Str::className($type);
 
-        if ( ! class_exists($relationClass)) {
+        if (! class_exists($relationClass)) {
             throw new InvalidArgumentException("{$relationClass} does not exist");
         }
 

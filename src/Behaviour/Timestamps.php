@@ -45,7 +45,7 @@ class Timestamps implements BehaviourInterface
             $mapper->getHydrator()->set($action->getEntity(), $this->updateColumn, $now);
         }
         if ($action instanceof Update && $this->updateColumn) {
-            if ( ! empty($action->getEntity()->getChanges())) {
+            if (! empty($action->getEntity()->getChanges())) {
                 $action->addColumns([$this->updateColumn => $now]);
                 $mapper->getHydrator()->set($action->getEntity(), $this->updateColumn, $now);
             }

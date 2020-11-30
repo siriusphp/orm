@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
-
 use Sirius\Orm\Orm;
 
 class CollectionCaster

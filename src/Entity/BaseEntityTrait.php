@@ -53,7 +53,8 @@ trait BaseEntityTrait
         $this->state = $state;
     }
 
-    public function setLazy(string $name, LazyLoader $lazyLoader) {
+    public function setLazy(string $name, LazyLoader $lazyLoader)
+    {
         $this->lazyLoaders[$name] = $lazyLoader;
     }
 
@@ -86,7 +87,7 @@ trait BaseEntityTrait
         $changes = $this->changed;
         foreach ($this->attributes as $name => $value) {
             if (is_object($value) && method_exists($value, 'getChanges')) {
-                if ( ! empty($value->getChanges())) {
+                if (! empty($value->getChanges())) {
                     $changes[$name] = true;
                 }
             }

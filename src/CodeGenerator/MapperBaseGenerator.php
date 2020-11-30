@@ -155,8 +155,6 @@ class MapperBaseGenerator
                               ->setReturnType($this->mapper->getQueryClass());
         $method->addBody(sprintf('$query = new %s($this->getReadConnection(), $this);', $this->mapper->getQueryClass()));
         $method->addBody('return $this->behaviours->apply($this, __FUNCTION__, $query);');
-
-
     }
 
     protected function addSaveMethod()

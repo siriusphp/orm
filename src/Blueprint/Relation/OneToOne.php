@@ -46,5 +46,4 @@ class OneToOne extends Relation
 
         return parent::setMapper($mapper);
     }
-
 }

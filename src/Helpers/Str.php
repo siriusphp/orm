@@ -15,7 +15,7 @@ class Str
 
     public static function underscore(string $str): string
     {
-        if ( ! isset(static::$cache['underscore'][$str])) {
+        if (! isset(static::$cache['underscore'][$str])) {
             $str = preg_replace("/([A-Z]+)/", ' $1', $str);
             $str = strtolower($str);
             $str = preg_replace("/[^a-z0-9]+/", ' ', $str);
@@ -29,7 +29,7 @@ class Str
     public static function methodName(string $str, string $verb): string
     {
         $key = $verb . $str;
-        if ( ! isset(static::$cache['methodName'][$key])) {
+        if (! isset(static::$cache['methodName'][$key])) {
             static::$cache['methodName'][$key] = strtolower($verb) . static::className($str);
         }
 
@@ -38,7 +38,7 @@ class Str
 
     public static function variableName(string $str): string
     {
-        if ( ! isset(static::$cache['variableName'][$str])) {
+        if (! isset(static::$cache['variableName'][$str])) {
             $class = static::className($str);
 
             static::$cache['variableName'][$str] = strtolower(substr($class, 0, 1)) . substr($class, 1);
@@ -49,7 +49,7 @@ class Str
 
     public static function className(string $str): string
     {
-        if ( ! isset(static::$cache['className'][$str])) {
+        if (! isset(static::$cache['className'][$str])) {
             $str = strtolower($str);
             $str = preg_replace("/[^a-z0-9]+/", ' ', $str);
             $str = ucwords($str);

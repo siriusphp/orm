@@ -75,7 +75,7 @@ class AttachEntities implements ActionInterface
 
     protected function maybeUpdatePivotRow()
     {
-        if ( ! $this->relation instanceof ManyToMany) {
+        if (! $this->relation instanceof ManyToMany) {
             return;
         }
 
@@ -95,7 +95,7 @@ class AttachEntities implements ActionInterface
             $delete->where($throughForeignColumns[$k], $foreignKey[$k]);
         }
         foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
-            if ( ! is_int($col)) {
+            if (! is_int($col)) {
                 $delete->where($col, $value);
             } else {
                 $delete->where($value);
@@ -115,7 +115,7 @@ class AttachEntities implements ActionInterface
         }
 
         foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
-            if ( ! is_int($col)) {
+            if (! is_int($col)) {
                 $insertColumns[$col] = $value;
             }
         }

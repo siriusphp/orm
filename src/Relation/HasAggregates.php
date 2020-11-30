@@ -15,7 +15,7 @@ trait HasAggregates
 
         $aggregates     = [];
         $aggregatesList = $this->getOption(RelationConfig::AGGREGATES);
-        if ( ! is_array($aggregatesList) || empty($aggregatesList)) {
+        if (! is_array($aggregatesList) || empty($aggregatesList)) {
             $this->aggregates = $aggregates;
 
             return;

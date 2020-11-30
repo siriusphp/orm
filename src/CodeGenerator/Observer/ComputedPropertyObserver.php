@@ -49,9 +49,11 @@ class ComputedPropertyObserver extends Base
         }
 
         if ($this->property->getMapper()->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
-            $class->addComment(sprintf('@property %s $%s',
+            $class->addComment(sprintf(
+                '@property %s $%s',
                 $alias ? $alias . ($this->property->getNullable() ? '|null' : '') : 'mixed',
-                $name));
+                $name
+            ));
 
             if (($body = $this->property->getSetterBody())) {
                 $setter = $class->addMethod(Str::methodName($name . ' Attribute', 'set'));

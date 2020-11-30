@@ -39,7 +39,8 @@ class ManyToOneObserver extends Base implements ToOneInterface
 
     public function __toString()
     {
-        return sprintf('Observer for relation %s for mapper %s',
+        return sprintf(
+            'Observer for relation %s for mapper %s',
             $this->relation->getName(),
             $this->relation->getMapper()->getName()
         );

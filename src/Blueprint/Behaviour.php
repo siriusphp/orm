@@ -16,7 +16,7 @@ abstract class Behaviour extends Base
      *
      * @return string
      */
-    abstract function getName(): string;
+    abstract public function getName(): string;
 
     abstract public function setMapper(Mapper $mapper);
 }
