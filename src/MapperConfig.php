@@ -25,9 +25,6 @@ class MapperConfig
     const COLUMN_ATTRIBUTE_MAP = 'columnAttributeMap';
     const CASTS = 'casts';
     const ATTRIBUTE_DEFAULTS = 'attributeDefaults';
-    const ENTITY_HYDRATOR = 'entityHydrator';
-    const BEHAVIOURS = 'behaviours';
-    const RELATIONS = 'relations';
     const GUARDS = 'guards';
 
     /**
@@ -79,19 +76,6 @@ class MapperConfig
      * @var array
      */
     protected $attributeDefaults = [];
-
-    /**
-     * List of behaviours to be attached to the mapper
-     * @var array[BehaviourInterface]
-     */
-    protected $behaviours = [];
-
-    /**
-     * List of relations of the configured mapper
-     * (key = name of relation, value = relation instance)
-     * @var array|Relation[]
-     */
-    protected $relations = [];
 
     /**
      * List of column-value pairs that act as global filters
@@ -174,22 +158,6 @@ class MapperConfig
     public function getAttributeDefaults(): array
     {
         return $this->attributeDefaults;
-    }
-
-    /**
-     * @return BehaviourInterface[]
-     */
-    public function getBehaviours(): array
-    {
-        return $this->behaviours;
-    }
-
-    /**
-     * @return array|Relation[]
-     */
-    public function getRelations(): array
-    {
-        return $this->relations;
     }
 
     /**

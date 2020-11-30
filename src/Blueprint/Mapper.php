@@ -100,6 +100,16 @@ class Mapper extends Base
             $errors[] = 'Missing columns definitions';
         }
 
+        /** @var Column $column */
+        foreach ($this->columns as $column) {
+            $errors = array_merge($errors, $column->getErrors());
+        }
+
+        /** @var Relation $relation */
+        foreach ($this->relations as $relation) {
+            $errors = array_merge($errors, $relation->getErrors());
+        }
+
         return $errors;
     }
 

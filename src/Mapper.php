@@ -139,7 +139,11 @@ class Mapper
 
     public function newCollection(array $datas = []): Collection
     {
-        $entities = array_map([$this, 'newEntity'], $datas);
+        $entities = [];
+        foreach ($datas as $data) {
+            // if $data is an entity or some other object, keep it as is
+            $entities[] = (is_array($data)) ? $this->newEntity($data) : $data;
+        }
 
         return new Collection($entities, $this->hydrator);
     }

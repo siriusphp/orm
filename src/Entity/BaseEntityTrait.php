@@ -55,6 +55,10 @@ trait BaseEntityTrait
 
     public function setLazy(string $name, LazyLoader $lazyLoader)
     {
+        if ($lazyLoader instanceof LazyValue) {
+            $this->attributes[$name] = $lazyLoader->getForEntity($this);
+            return;
+        }
         $this->lazyLoaders[$name] = $lazyLoader;
     }
 
@@ -103,7 +107,7 @@ trait BaseEntityTrait
             $state = $this->state;
             /** @var LazyLoader $lazyLoader */
             $lazyLoader = $this->lazyLoaders[$attribute];
-            if ($lazyLoader instanceof LazyAggregate) {
+            if ($lazyLoader instanceof LazyValue) {
                 $this->attributes[$attribute] = $lazyLoader->getForEntity($this);
             } else {
                 $lazyLoader->getForEntity($this);

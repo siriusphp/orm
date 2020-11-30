@@ -156,24 +156,8 @@ class ManyToMany extends Relation implements ToManyInterface
 
         $found = $result[$nativeId] ?? [];
 
-//        if ( ! empty($found) && $this->entityHasRelationLoaded($nativeEntity)) {
-//            /** @var Collection $collection */
-//            $collection = $this->nativeEntityHydrator->get($nativeEntity, $this->name);
-//            foreach ($found as $foreignEntity) {
-//                if ( ! $collection->contains($foreignEntity)) {
-//                    $collection->add($foreignEntity);
-//                }
-//            }
-//        } else {
-        $collection = new Collection($found, $this->foreignMapper->getHydrator());
+        $collection = $this->foreignMapper->newCollection($found);
         $this->nativeEntityHydrator->set($nativeEntity, $this->name, $collection);
-//        }
-    }
-
-    protected function entityHasRelationLoaded(EntityInterface $entity)
-    {
-        // lazy loaded relations are not included in `toArray()`
-        return array_key_exists($this->name, $entity->toArray());
     }
 
     public function attachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)

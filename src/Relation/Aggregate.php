@@ -6,6 +6,7 @@ namespace Sirius\Orm\Relation;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\LazyAggregate;
+use Sirius\Orm\Entity\LazyValue;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Query;
 
@@ -85,15 +86,17 @@ class Aggregate
         $this->entityHydrator->set($entity, $this->name, $valueLoader);
     }
 
-    public function getForEntity(EntityInterface $entity, array $results)
+    public function attachAggregateToEntity(EntityInterface $entity, array $results)
     {
+        $value = null;
         foreach ($results as $row) {
             if ($this->entityMatchesRow($entity, $row)) {
-                return $row[$this->name] ?? null;
+                $value = $row[$this->name] ?? null;
             }
         }
-
-        return null;
+        // we have to do this because some properties may be read only (ie: there is no setter)
+        // using a LazyValue is the only way for the hydrator to inject a value
+        $this->entityHydrator->set($entity, $this->name, new LazyValue($value));
     }
 
     public function isLazyLoad()

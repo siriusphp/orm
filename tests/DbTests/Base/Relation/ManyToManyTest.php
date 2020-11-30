@@ -161,12 +161,25 @@ SQL;
         $this->assertExpectedQueries(2); // products + tags
     }
 
-    public function test_aggregates()
+    public function test_aggregates_eager_loaded()
     {
         $this->populateDb();
 
         $product  = $this->productsMapper->find(1, ['tags_count']);
         $product2 = $this->productsMapper->find(2, ['tags_count']);
+
+        $this->assertExpectedQueries(4);
+        $this->assertEquals(2, $product->tags_count);
+        $this->assertEquals(1, $product2->tags_count);
+        $this->assertExpectedQueries(4);
+    }
+
+    public function test_aggregates_lazy_loaded()
+    {
+        $this->populateDb();
+
+        $product  = $this->productsMapper->find(1);
+        $product2 = $this->productsMapper->find(2);
 
         $this->assertExpectedQueries(2);
         $this->assertEquals(2, $product->tags_count);
