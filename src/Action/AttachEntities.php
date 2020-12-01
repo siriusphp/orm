@@ -53,13 +53,6 @@ class AttachEntities implements ActionInterface
         $this->actionType    = $actionType;
     }
 
-    public function revert()
-    {
-        /**
-         * @todo restore previous values
-         */
-    }
-
     public function run()
     {
         /**

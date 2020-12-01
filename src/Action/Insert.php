@@ -41,13 +41,4 @@ class Insert extends Update
         $this->entityHydrator->setPk($this->entity, (int) $connection->lastInsertId());
         $this->entity->setState(StateEnum::SYNCHRONIZED);
     }
-
-    public function revert()
-    {
-        if (! $this->hasRun) {
-            return;
-        }
-        $this->entityHydrator->setPk($this->entity, $this->entityId);
-        $this->entity->setState($this->entityState);
-    }
 }

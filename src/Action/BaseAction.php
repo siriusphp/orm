@@ -212,28 +212,6 @@ abstract class BaseAction implements ActionInterface
     /**
      * @inheritDoc
      */
-    public function revert()
-    {
-        return;
-    }
-
-    /**
-     * Executes the `revert()` method on all actions that were successful
-     *
-     * @param array $executed
-     *
-     * @see BaseAction::run() The catch exception block
-     */
-    protected function undo(array $executed)
-    {
-        foreach ($executed as $action) {
-            $action->revert();
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function onSuccess()
     {
         return;

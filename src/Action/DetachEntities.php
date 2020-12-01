@@ -5,13 +5,6 @@ namespace Sirius\Orm\Action;
 
 class DetachEntities extends AttachEntities
 {
-    public function revert()
-    {
-        /**
-         * @todo restore previous values
-         */
-    }
-
     public function run()
     {
         /**

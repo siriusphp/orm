@@ -27,22 +27,6 @@ class UpdateTest extends BaseTestCase
         $this->assertEquals(StateEnum::SYNCHRONIZED, $product->getState());
     }
 
-    public function test_entity_is_reverted_on_exception()
-    {
-        // create a clone so the ORM is not affected
-        $mapper = $this->orm->get('products')->without();
-        $mapper->use(new ThrowExceptionBehaviour());
-
-        $this->insertRow('tbl_products', ['id' => 1, 'sku' => 'sku_1']);
-
-        $product      = $mapper->find(1);
-        $product->sku = 'sku_2';
-
-        $this->expectException(\Exception::class);
-        $mapper->save($product);
-        $this->assertEquals(StateEnum::CHANGED, $product->getState());
-    }
-
     public function test_column_is_mapped_to_attribute()
     {
         $mapper = $this->orm->get('products');

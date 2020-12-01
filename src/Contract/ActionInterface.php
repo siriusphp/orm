@@ -6,13 +6,6 @@ namespace Sirius\Orm\Contract;
 interface ActionInterface
 {
     /**
-     * Executed in case the action fails to run successfully
-     *
-     * @return mixed
-     */
-    public function revert();
-
-    /**
      * Called by external objects
      * Can executed other actions that are registered before/after
      * Should be written inside a try/catch block

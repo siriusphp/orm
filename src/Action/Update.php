@@ -60,14 +60,6 @@ class Update extends Save
         }
     }
 
-    public function revert()
-    {
-        if (! $this->hasRun) {
-            return;
-        }
-        $this->entity->setState($this->entityState);
-    }
-
     public function onSuccess()
     {
         foreach ($this->extraColumns as $col => $value) {

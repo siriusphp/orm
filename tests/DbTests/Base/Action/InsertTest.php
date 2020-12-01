@@ -22,21 +22,4 @@ class InsertTest extends BaseTestCase
         $product = $mapper->find($product->id);
         $this->assertEquals('sku_1', $product->sku);
     }
-
-    public function test_entity_is_reverted_on_exception_thrown()
-    {
-        // create a clone so the ORM is not affected
-        $mapper = $this->orm->get('products')->without();
-        $mapper->use(new \Sirius\Orm\Tests\DbTests\Base\Behaviour\ThrowExceptionBehaviour());
-
-        $this->expectException(\Exception::class);
-
-        $product = $mapper->newEntity(['title' => 'Product 1']);
-
-        $this->assertNull($product->id);
-
-        $mapper->save($product);
-
-        $this->assertNull($product->id);
-    }
 }
