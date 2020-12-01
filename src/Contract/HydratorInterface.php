@@ -11,6 +11,8 @@ interface HydratorInterface
 
     public function hydrate(array $attributes = []);
 
+    public function hydrateToArray(array $attributes = []): array;
+
     public function extract(EntityInterface $entity);
 
     public function get(EntityInterface $entity, string $attribute);

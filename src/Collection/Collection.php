@@ -3,11 +3,17 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Collection;
 
+use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Selectable;
+use Exception;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
+use Sirius\Orm\Entity\StateEnum;
+use Traversable;
 
-class Collection extends ArrayCollection
+class Collection implements \Doctrine\Common\Collections\Collection, Selectable
 {
     protected $changes = [
         'removed' => [],
@@ -19,17 +25,22 @@ class Collection extends ArrayCollection
      */
     protected $hydrator;
 
+    /**
+     * @var ArrayCollection
+     */
+    protected $collection;
+
     public function __construct(array $elements = [], HydratorInterface $hydrator = null)
     {
-        parent::__construct($elements);
         $this->hydrator           = $hydrator;
+        $this->collection         = new ArrayCollection($elements);
         $this->changes['removed'] = new ArrayCollection();
         $this->changes['added']   = new ArrayCollection();
     }
 
     protected function ensureHydratedElement($element)
     {
-        if (!$this->hydrator) {
+        if (! $this->hydrator) {
             return $element;
         }
 
@@ -46,7 +57,7 @@ class Collection extends ArrayCollection
 
     protected function getElementPK($element)
     {
-        return $this->hydrator->getPk($element);
+        return $this->hydrator ? $this->hydrator->getPk($element) : null;
     }
 
     public function contains($element)
@@ -70,7 +81,7 @@ class Collection extends ArrayCollection
         if (! $this->contains($element)) {
             $this->change('added', $element);
 
-            return parent::add($element);
+            return $this->collection->add($element);
         }
 
         return true;
@@ -78,10 +89,12 @@ class Collection extends ArrayCollection
 
     public function remove($key)
     {
-        $removed = parent::remove($key);
+        $removed = $this->collection->remove($key);
         if ($removed) {
             $this->change('removed', $removed);
         }
+
+        $this->collection = new ArrayCollection($this->collection->getValues());
 
         return $removed;
     }
@@ -92,10 +105,11 @@ class Collection extends ArrayCollection
         if (! $this->contains($element)) {
             return true;
         }
-        $removed = parent::removeElement($this->findByPk($this->hydrator->getPk($element)));
+        $removed = $this->collection->removeElement($this->findByPk($this->hydrator->getPk($element)));
         if ($removed) {
             $this->change('removed', $element);
         }
+        $this->collection = new ArrayCollection($this->collection->getValues());
 
         return true;
     }
@@ -158,14 +172,147 @@ class Collection extends ArrayCollection
         return $result;
     }
 
+    public function setState($state)
+    {
+        if ($state == StateEnum::SYNCHRONIZED) {
+            $this->changes['removed'] = new ArrayCollection();
+            $this->changes['added']   = new ArrayCollection();
+        }
+    }
+
     protected function change($type, $element)
     {
         $changeCollection = $this->changes[$type];
         $changeCollection->add($element);
     }
 
-    protected function createFrom(array $elements)
+    public function clear()
     {
-        return new static($elements, $this->hydrator);
+        $this->collection->clear();
+    }
+
+    public function isEmpty()
+    {
+        return $this->collection->isEmpty();
+    }
+
+    public function containsKey($key)
+    {
+        return $this->collection->containsKey($key);
+    }
+
+    public function get($key)
+    {
+        return $this->collection->get($key);
+    }
+
+    public function getKeys()
+    {
+        return $this->collection->getKeys();
+    }
+
+    public function getValues()
+    {
+        return $this->collection->getValues();
+    }
+
+    public function set($key, $value)
+    {
+        $this->collection->set($key, $value);
+    }
+
+    public function first()
+    {
+        return $this->collection->first();
+    }
+
+    public function last()
+    {
+        return $this->collection->last();
+    }
+
+    public function key()
+    {
+        return $this->collection->key();
+    }
+
+    public function current()
+    {
+        return $this->collection->current();
+    }
+
+    public function next()
+    {
+        return $this->collection->next();
+    }
+
+    public function exists(Closure $p)
+    {
+        return $this->collection->exists($p);
+    }
+
+    public function filter(Closure $p)
+    {
+        return $this->collection->filter($p);
+    }
+
+    public function forAll(Closure $p)
+    {
+        return $this->collection->forAll($p);
+    }
+
+    public function map(Closure $func)
+    {
+        return $this->collection->map($func);
+    }
+
+    public function partition(Closure $p)
+    {
+        return $this->collection->partition($p);
+    }
+
+    public function indexOf($element)
+    {
+        return $this->collection->indexOf($element);
+    }
+
+    public function slice($offset, $length = null)
+    {
+        return $this->collection->slice($offset, $length);
+    }
+
+    public function getIterator()
+    {
+        return $this->collection->getIterator();
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->collection->offsetExists($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->collection->offsetGet($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->collection->offsetSet($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->collection->offsetUnset($offset);
+    }
+
+    public function count()
+    {
+        return $this->collection->count();
+    }
+
+    public function matching(Criteria $criteria)
+    {
+        return $this->collection->matching($criteria);
     }
 }

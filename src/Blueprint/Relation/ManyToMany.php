@@ -50,8 +50,9 @@ class ManyToMany extends Relation
         $observer = $this->getObserver()->with($this);
 
         return [
-            $this->getMapper()->getName() . '_base_entity'        => [$observer],
-            $this->getForeignMapper() . '_base_entity' => [$observer]
+            $this->getMapper()->getName() . '_base_entity' => [$observer],
+            $this->getForeignMapper() . '_base_entity'     => [$observer],
+            $this->getForeignMapper() . '_mapper_config'   => [$observer],
         ];
     }
 

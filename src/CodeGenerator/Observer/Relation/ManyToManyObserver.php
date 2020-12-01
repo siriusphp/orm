@@ -7,6 +7,7 @@ use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Blueprint\Mapper;
 use Sirius\Orm\Contract\Relation\ToManyInterface;
 use Sirius\Orm\Helpers\Str;
+use Sirius\Orm\MapperConfig;
 
 class ManyToManyObserver extends OneToManyObserver implements ToManyInterface
 {
@@ -14,6 +15,9 @@ class ManyToManyObserver extends OneToManyObserver implements ToManyInterface
     {
         if ($key === $this->relation->getForeignMapper() . '_base_entity') {
             return $this->observeLinkedBaseEntity($object);
+        }
+        if ($key === $this->relation->getForeignMapper() . '_mapper_config') {
+            return $this->observeLinkedMapperConfig($object);
         }
 
         return parent::observe($key, $object);
@@ -45,5 +49,15 @@ class ManyToManyObserver extends OneToManyObserver implements ToManyInterface
         }
 
         return $class;
+    }
+
+    private function observeLinkedMapperConfig(array $config)
+    {
+        $config[MapperConfig::PIVOT_ATTRIBUTES] = array_merge(
+            $config[MapperConfig::PIVOT_ATTRIBUTES] ?? [],
+            array_values($this->relation->getThroughColumns() ?? [])
+        );
+
+        return $config;
     }
 }

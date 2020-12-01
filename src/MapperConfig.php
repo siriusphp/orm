@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm;
 
-use Sirius\Orm\Behaviour\BehaviourInterface;
 use Sirius\Orm\Entity\GenericEntity;
 use Sirius\Orm\Helpers\QueryHelper;
-use Sirius\Orm\Relation\Relation;
 
 /**
  * Class MapperConfig
@@ -24,6 +22,7 @@ class MapperConfig
     const COLUMNS = 'columns';
     const COLUMN_ATTRIBUTE_MAP = 'columnAttributeMap';
     const CASTS = 'casts';
+    const PIVOT_ATTRIBUTES = 'pivotAttributes';
     const ATTRIBUTE_DEFAULTS = 'attributeDefaults';
     const GUARDS = 'guards';
 
@@ -70,6 +69,13 @@ class MapperConfig
      * @var array
      */
     protected $columnAttributeMap = [];
+
+    /**
+     * Attributes that might come from THROUGH_COLUMNS
+     * in many-to-many relations
+     * @var array
+     */
+    protected $pivotAttributes = [];
 
     /**
      * Default attributes
@@ -127,42 +133,43 @@ class MapperConfig
         return (! $this->tableAlias && $fallbackToTable) ? $this->table : $this->tableAlias;
     }
 
-    /**
-     * @return array
-     */
     public function getColumns(): array
     {
         return $this->columns;
     }
 
-    /**
-     * @return array
-     */
+    public function getPivotAttributes(): array
+    {
+        return $this->pivotAttributes;
+    }
+
+
+    public function getAttributeNames(): array
+    {
+        $columns = array_combine($this->columns, $this->columns);
+        foreach ($this->getColumnAttributeMap() as $col => $attr) {
+            $columns[$col] = $attr;
+        }
+
+        return array_merge(array_values($columns), $this->getPivotAttributes());
+    }
+
     public function getCasts(): array
     {
         return $this->casts;
     }
 
-    /**
-     * @return array
-     */
     public function getColumnAttributeMap(): array
     {
         return $this->columnAttributeMap;
     }
 
 
-    /**
-     * @return array
-     */
     public function getAttributeDefaults(): array
     {
         return $this->attributeDefaults;
     }
 
-    /**
-     * @return array
-     */
     public function getGuards(): array
     {
         return $this->guards;

@@ -10,16 +10,18 @@ use Sirius\Orm\Query;
 use Sirius\Orm\Relation\OneToMany;
 use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
+use Sirius\Orm\Tests\Generated\Mapper\CategoryMapper;
+use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
 class OneToManyTest extends BaseTestCase
 {
 
     /**
-     * @var Mapper
+     * @var CategoryMapper
      */
     protected $categoryMapper;
     /**
-     * @var Mapper
+     * @var ProductMapper
      */
     protected $productsMapper;
 
@@ -246,6 +248,32 @@ SQL;
 
         $child = $this->categoryMapper->find($child->getId());
         $this->assertNotEquals('child updated', $child->getName());
+    }
+
+    public function test_save_with_relations_after_patching()
+    {
+        $this->populateDb();
+
+        $category = $this->categoryMapper
+            ->newQuery()
+            ->first();
+
+        $this->categoryMapper->patch($category, [
+            'products' => [
+                // change one
+                ['id' => 1, 'sku' => 'changed_sku'],
+                // add one
+                ['id' => null, 'sku' => 'new_sku'],
+                // omit one so it gets detached
+            ]
+        ]);
+
+        $this->categoryMapper->save($category, true);
+
+        $products = $this->productsMapper->where('category_id', $category->getId())->get();
+
+        $this->assertEquals(2, $products->count());
+        $this->assertEquals(['changed_sku', 'new_sku'], $products->pluck('sku'));
     }
 
     public function test_save_without_relations()

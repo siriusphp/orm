@@ -31,6 +31,7 @@ abstract class TagMapperBase extends Mapper
             'columns' => ['id', 'name'],
             'columnAttributeMap' => [],
             'casts' => ['id' => 'int', 'name' => 'string'],
+            'pivotAttributes' => ['position_in_product'],
         ]);
         $this->hydrator     = new GenericHydrator($this->orm->getCastingManager());
         $this->hydrator->setMapper($this);

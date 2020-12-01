@@ -10,6 +10,7 @@ use Sirius\Orm\Entity\GenericEntity;
 
 /**
  * @property int $id
+ * @property int $category_id
  * @property string $sku
  * @property float $value
  * @property array $attributes
@@ -52,6 +53,11 @@ abstract class ProductBase extends GenericEntity
     }
 
     protected function castIdAttribute($value)
+    {
+        return $value === null ? $value : intval($value);
+    }
+
+    protected function castCategoryIdAttribute($value)
     {
         return $value === null ? $value : intval($value);
     }

@@ -9,16 +9,17 @@ use Sirius\Orm\Query;
 use Sirius\Orm\Relation\ManyToMany;
 use Sirius\Orm\Relation\RelationConfig;
 use Sirius\Orm\Tests\BaseTestCase;
+use Sirius\Orm\Tests\Generated\Mapper\ProductMapper;
 
 class ManyToManyTest extends BaseTestCase
 {
 
     /**
-     * @var Mapper
+     * @var ProductMapper
      */
     protected $productsMapper;
     /**
-     * @var Mapper
+     * @var TagMapper
      */
     protected $tagsMapper;
 
@@ -212,6 +213,31 @@ SQL;
         $this->assertNotNull($updatedTag);
         $this->assertEquals('New tag', $updatedTag->name);
         $this->assertEquals(3, $updatedTag->position_in_product);
+    }
+
+    public function test_save_with_relations_after_patching()
+    {
+        $this->populateDb();
+
+        $product = $this->productsMapper
+            ->newQuery()
+            ->first();
+
+        $product = $this->productsMapper->patch($product, [
+            'tags' => [
+                // change one
+                ['id' => 10, 'position_in_product' => 5, 'name' => 'tag_changed'],
+                // insert one
+                ['id' => null, 'position_in_product' => 1, 'name' => 'new_tag'],
+                // omit one so the pivot row gets
+            ]
+        ]);
+
+        $this->productsMapper->save($product, true);
+
+        $this->assertEquals(2, $product->tags->count());
+        $this->assertEquals(['tag_changed', 'new_tag'], $product->tags->pluck('name'));
+        $this->assertEquals([5, 1], $product->tags->pluck('position_in_product'));
     }
 
     public function test_save_without_relations()

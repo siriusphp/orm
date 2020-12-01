@@ -170,17 +170,9 @@ class ManyToMany extends Relation implements ToManyInterface
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $state = $foreignEntity->getState();
-
-        $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
         }
-        //$this->foreignEntityHydrator->set($foreignEntity, $this->name, null);
-
-        $this->nativeEntityHydrator->get($nativeEntity, $this->name, $this->getForeignMapper()->newCollection());
-
-        $foreignEntity->setState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -233,17 +225,8 @@ class ManyToMany extends Relation implements ToManyInterface
 
         // save entities that were removed but NOT deleted
         foreach ($changes['removed'] as $foreignEntity) {
-            $saveAction = $this->foreignMapper
-                ->newSaveAction($foreignEntity, [
-                    'relations' => $remainingRelations
-                ])
-                ->addColumns($this->getExtraColumnsForAction());
-            $action->prepend($saveAction);
-            $action->append($this->newSyncAction(
-                $action->getEntity(),
-                $foreignEntity,
-                'delete'
-            ));
+            $deletePivotAction = new DeletePivotRows($this, $action->getEntity(), $foreignEntity);
+            $action->append($deletePivotAction);
         }
     }
 

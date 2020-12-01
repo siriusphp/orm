@@ -16,7 +16,9 @@ class ClassMethodsEntity implements EntityInterface
     public function __construct(array $attributes, string $state = null)
     {
         foreach ($attributes as $attr => $value) {
-            $this->set($attr, $value);
+            if (is_string($attr)) {
+                $this->set($attr, $value);
+            }
         }
         $this->setState($state);
     }
@@ -39,6 +41,7 @@ class ClassMethodsEntity implements EntityInterface
             return $this;
         }
 
+        unset($this->lazyLoaders[$attribute]);
         $value = $this->castAttribute($attribute, $value);
         if (! isset($this->attributes[$attribute]) || $value != $this->attributes[$attribute]) {
             $this->markChanged($attribute);

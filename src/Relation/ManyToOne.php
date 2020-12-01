@@ -76,16 +76,8 @@ class ManyToOne extends Relation implements ToOneInterface
         $this->nativeEntityHydrator->set($nativeEntity, $this->name, $foreignEntity);
     }
 
-    public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
+    public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity = null)
     {
-        if ($nativeEntity->getState() == StateEnum::DELETED) {
-            return;
-        }
-
-        // required for DELETED entities that throw errors if they are changed
-        $state = $foreignEntity->getState();
-        $foreignEntity->setState(StateEnum::SYNCHRONIZED);
-
         $nativeKey = (array)$this->getOption(RelationConfig::NATIVE_KEY);
 
         foreach ($nativeKey as $k => $col) {
@@ -93,7 +85,6 @@ class ManyToOne extends Relation implements ToOneInterface
         }
 
         $this->nativeEntityHydrator->set($nativeEntity, $this->name, null);
-        $foreignEntity->setState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -119,6 +110,9 @@ class ManyToOne extends Relation implements ToOneInterface
             $saveAction->addColumns($this->getExtraColumnsForAction());
             $action->prepend($saveAction);
             $action->prepend($this->newSyncAction($action->getEntity(), $foreignEntity, 'save'));
+        } else {
+            $this->detachEntities($action->getEntity(), null);
+            $action->addColumns([$this->getOption('native_key') => null]);
         }
     }
 }

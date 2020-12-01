@@ -5,7 +5,6 @@ namespace Sirius\Orm\Entity;
 
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\LazyLoader;
-use Sirius\Orm\Helpers\Arr;
 use Sirius\Orm\Helpers\Str;
 
 class ClassMethodsHydrator extends AbstractHydrator
@@ -17,13 +16,7 @@ class ClassMethodsHydrator extends AbstractHydrator
      */
     public function hydrate(array $attributes = [])
     {
-        $attributes = Arr::renameKeys($attributes, $this->getMapperConfig()->getColumnAttributeMap());
-        if ($this->castingManager) {
-            $attributes = $this->castingManager
-                ->castArray($attributes, $this->getMapperConfig()->getCasts());
-        }
-
-        $attributes = $this->compileRelations($attributes);
+        $attributes = $this->hydrateToArray($attributes);
 
         $class = $this->getMapperConfig()->getEntityClass() ?? ClassMethodsEntity::class;
 

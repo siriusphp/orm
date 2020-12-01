@@ -191,6 +191,35 @@ SQL;
         $this->assertEquals('New category', $category->getName());
     }
 
+    public function test_save_with_relations_after_patching()
+    {
+        $this->populateDb();
+
+        $product = $this->productsMapper
+            ->newQuery()
+            ->first();
+
+        $this->productsMapper->patch($product, [
+           'category' => ['name' => 'New category']
+        ]);
+
+        $this->productsMapper->save($product, true);
+
+        $product = $this->productsMapper->find($product->id);
+
+        $this->assertEquals('New category', $product->category->getName());
+
+        // remove the property
+        $this->productsMapper->patch($product, [
+            'category' => null
+        ]);
+        $this->productsMapper->save($product, true);
+
+        $product = $this->productsMapper->find($product->id);
+
+        $this->assertNull($product->category);
+    }
+
     public function test_save_without_relations()
     {
         $this->populateDb();

@@ -40,6 +40,7 @@ $orm->addMapper(
           ->setTableAlias('products')
         // columns
           ->addAutoIncrementColumn()
+          ->addColumn(Column::integer('category_id', true))
           ->addColumn(Column::varchar('sku')->setUnique(true))
           ->addColumn(Column::decimal('price', 14, 2)
                             ->setAttributeName('value')

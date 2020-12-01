@@ -3,15 +3,8 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
-use Sirius\Orm\CastingManager;
 use Sirius\Orm\Contract\EntityInterface;
-use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Contract\LazyLoader;
-use Sirius\Orm\Contract\Relation\ToManyInterface;
-use Sirius\Orm\Contract\Relation\ToOneInterface;
-use Sirius\Orm\Helpers\Arr;
-use Sirius\Orm\Mapper;
-use Sirius\Orm\MapperConfig;
 
 class GenericHydrator extends AbstractHydrator
 {
@@ -23,13 +16,7 @@ class GenericHydrator extends AbstractHydrator
      */
     public function hydrate(array $attributes = [])
     {
-        $attributes = Arr::renameKeys($attributes, $this->getMapperConfig()->getColumnAttributeMap());
-        if ($this->castingManager) {
-            $attributes = $this->castingManager
-                ->castArray($attributes, $this->getMapperConfig()->getCasts());
-        }
-
-        $attributes = $this->compileRelations($attributes);
+        $attributes = $this->hydrateToArray($attributes);
 
         $class = $this->getMapperConfig()->getEntityClass() ?? GenericEntity::class;
 

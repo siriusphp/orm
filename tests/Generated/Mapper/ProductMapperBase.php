@@ -34,10 +34,11 @@ abstract class ProductMapperBase extends Mapper
             'table' => 'tbl_products',
             'tableAlias' => 'products',
             'guards' => [],
-            'columns' => ['id', 'sku', 'price', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
+            'columns' => ['id', 'category_id', 'sku', 'price', 'attributes', 'created_on', 'updated_on', 'deleted_on'],
             'columnAttributeMap' => ['price' => 'value'],
             'casts' => [
                 'id' => 'int',
+                'category_id' => 'int',
                 'sku' => 'string',
                 'price' => 'decimal:2',
                 'attributes' => 'array',

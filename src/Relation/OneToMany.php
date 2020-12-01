@@ -85,13 +85,10 @@ class OneToMany extends Relation implements ToManyInterface
 
     public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity)
     {
-        $state = $foreignEntity->getState();
-        $foreignEntity->setState(StateEnum::SYNCHRONIZED);
         foreach ($this->keyPairs as $nativeCol => $foreignCol) {
             $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
         }
         $this->nativeEntityHydrator->set($nativeEntity, $this->name, $this->getForeignMapper()->newCollection());
-        $foreignEntity->setState($state);
     }
 
     protected function addActionOnDelete(BaseAction $action)
@@ -149,6 +146,7 @@ class OneToMany extends Relation implements ToManyInterface
 
         // save entities that were removed but NOT deleted
         foreach ($changes['removed'] as $foreignEntity) {
+            $this->detachEntities($action->getEntity(), $foreignEntity);
             $saveAction = $this->foreignMapper
                 ->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
             $saveAction->addColumns($this->getExtraColumnsForAction());

@@ -74,23 +74,38 @@ abstract class AbstractHydrator implements HydratorInterface
         return $this->set($entity, $this->getMapperConfig()->getPrimaryKey(), $value);
     }
 
+    public function hydrateToArray(array $attributes= []): array
+    {
+        $attributes = Arr::renameKeys($attributes, $this->getMapperConfig()->getColumnAttributeMap());
+        if ($this->castingManager) {
+            $attributes = $this->castingManager
+                ->castArray($attributes, $this->getMapperConfig()->getCasts());
+        }
+
+        return $this->compileRelations($attributes);
+    }
+
     protected function compileRelations(array $attributes)
     {
         foreach ($this->mapper->getRelations() as $name) {
             $relation = $this->mapper->getRelation($name);
-            if ($relation instanceof ToOneInterface &&
-                isset($attributes[$name]) &&
-                ! is_object($attributes[$name])) {
+            if ($relation instanceof ToOneInterface
+                && isset($attributes[$name])
+                && ! is_object($attributes[$name])) {
                 $attributes[$name] = $relation->getForeignMapper()->newEntity($attributes[$name]);
-            } elseif ($relation instanceof ToManyInterface &&
-                      ! $relation instanceof ToOneInterface
-                      && (! isset($attributes[$name]) || is_array($attributes[$name]))) {
+            } elseif ($relation instanceof ToManyInterface
+                      && ! $relation instanceof ToOneInterface) {
                 /**
-                 * we also need to check against ToOneInterface because OneToOne relation extends
+                 * here we need to check against ToOneInterface as well
+                 * because OneToOne relation extends
                  * OneToMany which implements ToOneInterface
                  * @todo remove this quirk
                  */
-                $attributes[$name] = $relation->getForeignMapper()->newCollection($attributes[$name] ?? []);
+                if (isset($attributes[$name]) && is_array($attributes[$name])) {
+                    $attributes[$name] = $relation->getForeignMapper()->newCollection($attributes[$name]);
+                } else {
+                    $attributes[$name] = new LazyValue($relation->getForeignMapper()->newCollection([]));
+                }
             }
         }
 

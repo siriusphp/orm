@@ -75,13 +75,11 @@ class OneToOneTest extends BaseTestCase
 
     public function test_save_with_all_relations()
     {
-        $this->insertRow('categories', ['id' => 1, 'name' => 'category']);
         $this->insertRow('tbl_products', ['id' => 1, 'category_id' => 1, 'sku' => 'sku_1', 'price' => 5]);
         $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
 
         $product                 = $this->productsMapper->find(1);
         $product->sku            = 'sku_updated';
-        $product->category->setName('updated_category');
         $product->ebay->setPrice(20);
 
         $this->assertTrue($this->productsMapper->save($product, true));
@@ -89,7 +87,25 @@ class OneToOneTest extends BaseTestCase
         $product = $this->productsMapper->find(1);
         $this->assertEquals('sku_updated', $product->sku);
         $this->assertEquals(20, $product->ebay->getPrice());
-        $this->assertEquals('updated_category', $product->category->getName());
+    }
+
+    public function test_save_with_relations_after_patching()
+    {
+        $this->insertRow('tbl_products', ['id' => 1, 'category_id' => 1, 'sku' => 'sku_1', 'price' => 5]);
+        $this->insertRow('tbl_ebay_products', ['id' => 2, 'product_id' => 1, 'price' => 10]);
+
+        $product                 = $this->productsMapper->find(1);
+        $this->productsMapper->patch($product, [
+            'sku' => 'sku_updated',
+            'ebay' => [
+                'price' => 20
+            ]
+        ]);
+        $this->assertTrue($this->productsMapper->save($product, true));
+
+        $product = $this->productsMapper->find(1);
+        $this->assertEquals('sku_updated', $product->sku);
+        $this->assertEquals(20, $product->ebay->getPrice());
     }
 
 

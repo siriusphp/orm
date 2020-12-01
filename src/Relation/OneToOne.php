@@ -49,6 +49,16 @@ class OneToOne extends OneToMany implements ToOneInterface
         }
     }
 
+    public function detachEntities(EntityInterface $nativeEntity, EntityInterface $foreignEntity = null)
+    {
+        if ($foreignEntity) {
+            foreach ($this->keyPairs as $nativeCol => $foreignCol) {
+                $this->foreignEntityHydrator->set($foreignEntity, $foreignCol, null);
+            }
+        }
+        $this->nativeEntityHydrator->set($nativeEntity, $this->name, null);
+    }
+
     protected function addActionOnSave(BaseAction $action)
     {
         if (! $this->relationWasChanged($action->getEntity())) {

@@ -8,6 +8,7 @@ use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\GenericHydrator;
+use Sirius\Orm\Entity\Patcher;
 use Sirius\Orm\Relation\Relation;
 
 /**
@@ -121,11 +122,6 @@ class Mapper
         $this->mapperConfig->addQueryScope($scope, $callback);
     }
 
-    /**
-     * @param $data
-     *
-     * @return EntityInterface
-     */
     public function newEntity(array $data): EntityInterface
     {
         $entity = $this->getHydrator()
@@ -146,6 +142,11 @@ class Mapper
         }
 
         return new Collection($entities, $this->hydrator);
+    }
+
+    public function patch($entity, array $data)
+    {
+        return (new Patcher($this))($entity, $data);
     }
 
     /**

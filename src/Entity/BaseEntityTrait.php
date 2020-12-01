@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Entity;
 
+use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Contract\LazyLoader;
 
 trait BaseEntityTrait
@@ -49,6 +50,12 @@ trait BaseEntityTrait
         // and fields in the database are the same
         if ($state == StateEnum::SYNCHRONIZED) {
             $this->changed = [];
+        }
+        // sync related collections
+        foreach ($this->attributes as $attr => $value) {
+            if ($value instanceof Collection) {
+                $value->setState($state);
+            }
         }
         $this->state = $state;
     }
