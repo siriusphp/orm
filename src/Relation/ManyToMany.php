@@ -192,6 +192,10 @@ class ManyToMany extends Relation implements ToManyInterface
 
     protected function addActionOnSave(BaseAction $action)
     {
+        if (! $this->relationWasChanged($action->getEntity())) {
+            return;
+        }
+
         if (! $action->includesRelation($this->name)) {
             return;
         }

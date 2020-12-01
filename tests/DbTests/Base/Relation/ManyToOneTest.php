@@ -209,11 +209,16 @@ SQL;
 
         $this->assertEquals('New category', $product->category->getName());
 
+        $queries = $this->getQueryCount();
+
         // remove the property
         $this->productsMapper->patch($product, [
             'category' => null
         ]);
         $this->productsMapper->save($product, true);
+
+        // one query for updating the product
+        $this->assertExpectedQueries($queries + 1, 1);
 
         $product = $this->productsMapper->find($product->id);
 

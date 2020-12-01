@@ -101,7 +101,13 @@ class OneToOneTest extends BaseTestCase
                 'price' => 20
             ]
         ]);
+
+        $queries = $this->getQueryCount();
+
         $this->assertTrue($this->productsMapper->save($product, true));
+
+        // one query for product + one query for ebay
+        $this->assertExpectedQueries($queries + 2, 1);
 
         $product = $this->productsMapper->find(1);
         $this->assertEquals('sku_updated', $product->sku);

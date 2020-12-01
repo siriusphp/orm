@@ -233,7 +233,13 @@ SQL;
             ]
         ]);
 
+        $queries = $this->getQueryCount();
+
         $this->productsMapper->save($product, true);
+
+        // 1 insert into tags + 1 update to tags, 3 deletes for pivot table + 2 inserts into pivot table
+        // +1 for the products (which only updates the updated on column)
+        $this->assertExpectedQueries($queries + 8, 1);
 
         $this->assertEquals(2, $product->tags->count());
         $this->assertEquals(['tag_changed', 'new_tag'], $product->tags->pluck('name'));

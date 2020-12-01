@@ -125,9 +125,9 @@ class BaseTestCase extends TestCase
         $this->connection->perform($insert->getStatement(), $insert->getBindValues());
     }
 
-    public function assertExpectedQueries($expected)
+    public function assertExpectedQueries($expected, $transactionsCount = 0)
     {
-        $this->assertEquals($expected, count($this->connectionLocator->getQueries()));
+        $this->assertEquals($expected + $transactionsCount * 2, $this->getQueryCount());
     }
 
     public function assertRowDeleted($table, ...$conditions)
@@ -171,5 +171,13 @@ class BaseTestCase extends TestCase
         $str = str_replace(' )', ')', $str);
 
         return $str;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getQueryCount(): int
+    {
+        return count($this->connectionLocator->getQueries());
     }
 }

@@ -75,7 +75,7 @@ class OneToOne extends OneToMany implements ToOneInterface
 
             $saveAction = $this->foreignMapper->newSaveAction($foreignEntity, ['relations' => $remainingRelations]);
             $saveAction->addColumns($this->getExtraColumnsForAction());
-            $action->prepend($saveAction);
+            $action->append($saveAction);
             $action->append($this->newSyncAction($action->getEntity(), $foreignEntity, 'save'));
         }
     }

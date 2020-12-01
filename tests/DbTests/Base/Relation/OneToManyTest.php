@@ -268,7 +268,12 @@ SQL;
             ]
         ]);
 
+        $queries = $this->getQueryCount();
+
         $this->categoryMapper->save($category, true);
+
+        // 2 product update queries + 1 product insert query
+        $this->assertExpectedQueries($queries + 3, 1);
 
         $products = $this->productsMapper->where('category_id', $category->getId())->get();
 
