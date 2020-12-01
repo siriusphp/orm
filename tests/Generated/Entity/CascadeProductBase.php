@@ -25,12 +25,6 @@ abstract class CascadeProductBase extends GenericEntity
     public function __construct(array $attributes = [], string $state = null)
     {
         parent::__construct($attributes, $state);
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['images'])) {
-            $this->attributes['images'] = new Collection;
-        }
     }
 
     protected function castIdAttribute($value)

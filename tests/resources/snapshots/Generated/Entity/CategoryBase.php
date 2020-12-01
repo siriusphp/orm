@@ -12,26 +12,6 @@ abstract class CategoryBase extends ClassMethodsEntity
     public function __construct(array $attributes = [], string $state = null)
     {
         parent::__construct($attributes, $state);
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['children'])) {
-            $this->attributes['children'] = new Collection;
-        }
-
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['languages'])) {
-            $this->attributes['languages'] = new Collection;
-        }
-
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['products'])) {
-            $this->attributes['products'] = new Collection;
-        }
     }
 
     protected function castIdAttribute($value)

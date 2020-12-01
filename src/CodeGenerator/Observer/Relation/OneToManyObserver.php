@@ -93,14 +93,14 @@ class OneToManyObserver extends Base implements ToManyInterface
         $name = $this->relation->getName();
 
         $constructor = $class->getMethod('__construct');
-        $constructor->addBody(rtrim('
-// this is a fail-safe procedure that will be executed
-// only when you use `new Entity()` instead of `$mapper->newEntity()`
-// ALWAYS try to use `$mapper->newEntity()`
-if (!isset($this->attributes[\'' . $name . '\'])) {
-    $this->attributes[\'' . $name . '\'] = new Collection;
-}        
-        '));
+//        $constructor->addBody(rtrim('
+//// this is a fail-safe procedure that will be executed
+//// only when you use `new Entity()` instead of `$mapper->newEntity()`
+//// ALWAYS try to use `$mapper->newEntity()`
+//if (!isset($this->attributes[\'' . $name . '\'])) {
+//    $this->attributes[\'' . $name . '\'] = new Collection;
+//}
+//        '));
     }
 
     private function addAggregates(ClassType $class)

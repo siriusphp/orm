@@ -10,6 +10,7 @@ use Sirius\Orm\Entity\GenericEntity;
 
 /**
  * @property int $id
+ * @property int $category_id
  * @property string $sku
  * @property float $value
  * @property array $attributes
@@ -29,29 +30,14 @@ abstract class ProductBase extends GenericEntity
     public function __construct(array $attributes = [], string $state = null)
     {
         parent::__construct($attributes, $state);
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['languages'])) {
-            $this->attributes['languages'] = new Collection;
-        }
-
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['images'])) {
-            $this->attributes['images'] = new Collection;
-        }
-
-        // this is a fail-safe procedure that will be executed
-        // only when you use `new Entity()` instead of `$mapper->newEntity()`
-        // ALWAYS try to use `$mapper->newEntity()`
-        if (!isset($this->attributes['tags'])) {
-            $this->attributes['tags'] = new Collection;
-        }
     }
 
     protected function castIdAttribute($value)
+    {
+        return $value === null ? $value : intval($value);
+    }
+
+    protected function castCategoryIdAttribute($value)
     {
         return $value === null ? $value : intval($value);
     }
