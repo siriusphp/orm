@@ -26,6 +26,48 @@ class QueryTest extends BaseTestCase
         $this->mapper->newQuery()->joinWith('undefined');
     }
 
+    public function test_applyFilters() {
+        $query = $this->mapper->newQuery()
+            ->applyFilters([
+                'id' => '1,2,3',
+                'price' => [
+                    'lte' => 10,
+                    'greater_or_equal' => 5
+                ],
+                'name' => [
+                    'starts_with' => 'abc',
+                    'contains' => 'fgh',
+                    'ends_with' => 'xyz',
+                ]
+            ]);
+        $statement = <<<SQL
+SELECT
+    products.*
+FROM
+    tbl_products as products 
+WHERE 
+((id IN (:__1__, :__2__, :__3__) 
+AND price <= :__4__ 
+AND price >= :__5__ 
+AND name LIKE :__6__ 
+AND name LIKE :__7__ 
+AND name LIKE :__8__))  
+AND deleted_on IS NULL    
+SQL;
+
+        $this->assertSameStatement($statement, $query->getStatement());
+        $this->assertEquals([
+            '__1__' => [1, 2],
+            '__2__' => [2, 2],
+            '__3__' => [3, 2],
+            '__4__' => [10, 1],
+            '__5__' => [5, 1],
+            '__6__' => ['abc%', 2],
+            '__7__' => ['%fgh%', 2],
+            '__8__' => ['%xyz', 2],
+        ], $query->getBindValues());
+    }
+
     public function test_joining_multiple_times_with_the_same_relation()
     {
         $query = $this->mapper->newQuery()

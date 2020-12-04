@@ -9,6 +9,7 @@ use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Arr;
+use Sirius\Orm\Query\Operators;
 use Sirius\Orm\Relation\Aggregate;
 use Sirius\Sql\Bindings;
 use Sirius\Sql\Select;
@@ -354,6 +355,25 @@ class Query extends Select
         }
 
         return parent::where($column, $value, $condition);
+    }
+
+    public function applyFilters(array $filters): self
+    {
+        $this->whereStartSet();
+        foreach ($filters as $column => $columnFilters) {
+            if (!is_array($columnFilters)) {
+                list($operator, $value) = Operators::getOperatorAndValue('=', $columnFilters);
+                $this->where($column, $value, $operator);
+                continue;
+            }
+            foreach ($columnFilters as $operator => $value) {
+                list($operator, $value) = Operators::getOperatorAndValue($operator, $value);
+                $this->where($column, $value, $operator);
+            }
+        }
+        $this->endSet();
+
+        return $this;
     }
 
     public function setGuards(array $guards)
