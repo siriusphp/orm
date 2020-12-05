@@ -23,7 +23,7 @@ class ClassMethod extends Base
 
     protected $comments = '';
 
-    public static function make(string $name = null)
+    public static function make(string $name)
     {
         return (new static)->setName($name);
     }

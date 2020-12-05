@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sirius\Orm\Relation;
 
+use InvalidArgumentException;
 use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\Orm;

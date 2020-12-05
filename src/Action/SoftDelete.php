@@ -7,9 +7,6 @@ use Sirius\Orm\Entity\StateEnum;
 
 class SoftDelete extends Delete
 {
-    /**
-     * @var int
-     */
     protected $now;
 
     protected function execute()
