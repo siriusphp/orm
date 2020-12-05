@@ -69,11 +69,13 @@ class ClassGenerator
         $file = new PhpFile();
         $file->setStrictTypes(true);
 
+        $namespace = /** @scrutinizer ignore-deprecated */ $class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '';
+
         return [
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
+                          . $namespace
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -90,11 +92,12 @@ class ClassGenerator
 
         $class->setExtends($mapper->getClassName() . 'Base');
 
+        /** @scrutinizer ignore-deprecated */ $namespace = $class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '';
         return [
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
+                          . $namespace
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -106,11 +109,12 @@ class ClassGenerator
         $file = new PhpFile();
         $file->setStrictTypes(true);
 
+        /** @scrutinizer ignore-deprecated */ $namespace = $class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '';
         return [
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
+                          . $namespace
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -128,11 +132,13 @@ class ClassGenerator
 
         $class->setExtends($queryClass . 'Base');
 
+        /** @scrutinizer ignore-deprecated */ $namespace = $class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '';
+
         return [
             'path'     => $mapper->getDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
+                          . $namespace
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -144,11 +150,13 @@ class ClassGenerator
         $file = new PhpFile();
         $file->setStrictTypes(true);
 
+        /** @scrutinizer ignore-deprecated */ $namespace = $class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '';
+
         return [
             'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
+                          . $namespace
                           . $this->classPrinter->printClass($class)
         ];
     }
@@ -166,11 +174,13 @@ class ClassGenerator
 
         $class->setExtends($entityClass . 'Base');
 
+        /** @scrutinizer ignore-deprecated */ $namespace = $class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '';
+
         return [
             'path'     => $mapper->getEntityDestination() . $class->getName() . '.php',
             'contents' => $this->classPrinter->printFile($file)
                           . PHP_EOL
-                          . ($class->getNamespace() ? $this->classPrinter->printNamespace($class->getNamespace()) : '')
+                          . $namespace
                           . $this->classPrinter->printClass($class)
         ];
     }

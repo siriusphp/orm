@@ -57,8 +57,8 @@ class OneToManyObserver extends Base implements ToManyInterface
         $type          = $foreignMapper->getEntityNamespace()
                          . '\\' . $foreignMapper->getEntityClass();
 
-        $class->getNamespace()->addUse(Collection::class);
-        $class->getNamespace()->addUse($type, null, $type);
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse(Collection::class);
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse($type, null, $type);
 
         if ($mapper->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
             $class->addComment(sprintf('@property %s[]|Collection $%s', $type, $name));

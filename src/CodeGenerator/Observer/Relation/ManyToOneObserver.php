@@ -54,7 +54,7 @@ class ManyToOneObserver extends Base implements ToOneInterface
         $type          = $foreignMapper->getEntityNamespace()
                          . '\\' . $foreignMapper->getEntityClass();
 
-        $class->getNamespace()->addUse($type, null, $type);
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse($type, null, $type);
 
         $cast = $class->addMethod(Str::methodName($name . ' Attribute', 'cast'));
         $cast->setVisibility(ClassType::VISIBILITY_PROTECTED);

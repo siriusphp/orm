@@ -43,7 +43,7 @@ class ComputedPropertyObserver extends Base
         $type = $this->property->getType();
 
         if (is_string($type) && (class_exists($type) || strpos($type, '\\') !== false)) {
-            $class->getNamespace()->addUse($type, null, $alias);
+            /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse($type, null, $alias);
         } else {
             $alias = $type;
         }

@@ -50,9 +50,9 @@ class SoftDeleteObserver extends Base
 
     public function observeBaseMapperClass(ClassType $class): ClassType
     {
-        $class->getNamespace()->addUse(\Sirius\Orm\Action\SoftDelete::class, 'SoftDeleteAction');
-        $class->getNamespace()->addUse(\Sirius\Orm\Action\Delete::class, 'DeleteAction');
-        $class->getNamespace()->addUse(\Sirius\Orm\Action\Update::class, 'UpdateAction');
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse(\Sirius\Orm\Action\SoftDelete::class, 'SoftDeleteAction');
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse(\Sirius\Orm\Action\Delete::class, 'DeleteAction');
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse(\Sirius\Orm\Action\Update::class, 'UpdateAction');
         $class->addProperty('deletedAtColumn', $this->behaviour->getDeletedAtColumn())
               ->setVisibility('protected');
 
@@ -130,7 +130,7 @@ try {
         $init = $class->getMethod('init');
         $init->addBody('$this->withoutTrashed();' . PHP_EOL);
 
-        $class->getNamespace()->addUse(SoftDeleteTrait::class, null, $traitAlias);
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse(SoftDeleteTrait::class, null, $traitAlias);
 
         $class->addTrait($traitAlias);
 

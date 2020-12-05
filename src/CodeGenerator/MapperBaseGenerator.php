@@ -164,14 +164,17 @@ class MapperBaseGenerator
     {
         $method = $this->class->addMethod('newSubselectQuery')
                               ->setReturnType($this->mapper->getQueryClass());
-        $this->class->getNamespace()->addUse(Connection::class, null, $connectionAlias);
+        /** @scrutinizer ignore-deprecated */ $this->class->getNamespace()->addUse(Connection::class, null, $connectionAlias);
         $method->addParameter('connection')
                ->setType($connectionAlias);
-        $this->class->getNamespace()->addUse(Bindings::class, null, $bindingsAlias);
+
+        /** @scrutinizer ignore-deprecated */ $this->class->getNamespace()->addUse(Bindings::class, null, $bindingsAlias);
         $method->addParameter('bindings')
                ->setType($bindingsAlias);
+
         $method->addParameter('indent')
                ->setType('string');
+
         $method->addBody(sprintf('$query = new %s($this->getReadConnection(), $this, $bindings, $indent);', $this->mapper->getQueryClass()));
         $method->addBody('return $this->behaviours->apply($this, __FUNCTION__, $query);');
     }

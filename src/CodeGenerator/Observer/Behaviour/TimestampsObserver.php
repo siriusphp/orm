@@ -55,7 +55,7 @@ class TimestampsObserver extends Base
             $class->addMethod('init')->setVisibility('public')
                   ->setBody('parent::init();' . PHP_EOL);
         }
-        $class->getNamespace()->addUse(\Sirius\Orm\Behaviour\Timestamps::class);
+        /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse(\Sirius\Orm\Behaviour\Timestamps::class);
         $method = $class->getMethod('init');
         $method->addBody(PHP_EOL . '$this->behaviours->add(new Timestamps($this->createdAtColumn, $this->updatedAtColumn));');
 

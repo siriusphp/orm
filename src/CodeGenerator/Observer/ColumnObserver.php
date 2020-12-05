@@ -59,7 +59,7 @@ class ColumnObserver extends Base
         $type = $this->getAttributeTypeForEntityClass();
 
         if (class_exists($type)) {
-            $class->getNamespace()->addUse($type);
+            /** @scrutinizer ignore-deprecated */ $class->getNamespace()->addUse($type);
             $type = basename($type);
         }
 
