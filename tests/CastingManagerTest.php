@@ -89,7 +89,7 @@ class CastingManagerTest extends BaseTestCase
 
     public function test_cast_product_entity()
     {
-        $result = $this->cm->cast('entity_from_products', [
+        $result = $this->cm->cast('entity_products', [
             'id'    => 1,
             'value' => 10,
         ]);

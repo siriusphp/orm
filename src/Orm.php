@@ -7,9 +7,8 @@ use InvalidArgumentException;
 use Sirius\Orm\Contract\MapperLocatorInterface;
 use Sirius\Orm\Entity\CollectionCaster;
 use Sirius\Orm\Entity\EntityCaster;
-use Sirius\Orm\Helpers\Str;
 use Sirius\Orm\Relation\Relation;
-use Sirius\Orm\Relation\RelationConfig;
+use Sirius\Orm\Relation\RelationBuilder;
 
 class Orm
 {
@@ -37,21 +36,20 @@ class Orm
      * @var MapperLocatorInterface|null
      */
     protected $mapperLocator;
-
     /**
-     * Orm constructor.
-     *
-     * @param ConnectionLocator $connectionLocator
-     * @param CastingManager|null $castingManager
-     * @param MapperLocatorInterface|null $mapperLocator
+     * @var RelationBuilder
      */
+    protected $relationBuilder;
+
     public function __construct(
         ConnectionLocator $connectionLocator,
+        RelationBuilder $relationBuilder = null,
         CastingManager $castingManager = null,
         MapperLocatorInterface $mapperLocator = null
     ) {
         $this->connectionLocator = $connectionLocator;
-        $this->castingManager    = $castingManager ?: new CastingManager();
+        $this->relationBuilder   = $relationBuilder ?? new RelationBuilder();
+        $this->castingManager    = $castingManager ?? new CastingManager();
         $this->mapperLocator     = $mapperLocator;
     }
 
@@ -59,11 +57,9 @@ class Orm
      * Register a mapper with a name
      *
      * @param string $name
-     * @param Mapper|MapperConfig|callable $mapper
-     *
-     * @return $this
+     * @param Mapper|callable|string $mapper
      */
-    public function register(string $name, $mapper): self
+    public function register(string $name, $mapper)
     {
         if ($mapper instanceof Mapper) {
             $this->mappers[$name] = $mapper;
@@ -75,8 +71,6 @@ class Orm
         }
 
         $this->addCastingMethodsForMapper($name);
-
-        return $this;
     }
 
     /**
@@ -112,9 +106,6 @@ class Orm
         return $this->mappers[$name];
     }
 
-    /**
-     * @return CastingManager
-     */
     public function getCastingManager(): CastingManager
     {
         return $this->castingManager;
@@ -125,40 +116,11 @@ class Orm
         return $this->connectionLocator;
     }
 
-    /**
-     * Create a relation instance for a mapper based on t
-     *
-     * @param Mapper $mapper
-     * @param string $name Name of the relation inside the mapper
-     * @param array $options Array of options for the relation
-     *
-     * @return Relation
-     */
     public function createRelation(Mapper $mapper, string $name, array $options): Relation
     {
-        $foreignMapper = $options[RelationConfig::FOREIGN_MAPPER];
-        if ($this->has($foreignMapper)) {
-            if (! $foreignMapper instanceof Mapper) {
-                $foreignMapper = $this->get($foreignMapper);
-            }
-        }
-        $type          = $options[RelationConfig::TYPE];
-        $relationClass = 'Sirius\\Orm\\Relation\\' . Str::className($type);
-
-        if (! class_exists($relationClass)) {
-            throw new InvalidArgumentException("{$relationClass} does not exist");
-        }
-
-        return new $relationClass($name, $mapper, $foreignMapper, $options);
+        return $this->relationBuilder->build($this, $mapper, $name, $options);
     }
 
-    /**
-     * Build a mapper from a config or a factory function
-     *
-     * @param MapperConfig|callable $mapperConfigOrFactory
-     *
-     * @return Mapper
-     */
     protected function buildMapper($mapperConfigOrFactory): Mapper
     {
         $mapper = null;
@@ -185,7 +147,7 @@ class Orm
 
     protected function addCastingMethodsForMapper(string $name)
     {
-        $this->castingManager->register('entity_from_' . $name, new EntityCaster($this, $name));
+        $this->castingManager->register('entity_' . $name, new EntityCaster($this, $name));
         $this->castingManager->register('collection_of_' . $name, new CollectionCaster($this, $name));
     }
 }
