@@ -188,7 +188,6 @@ abstract class BaseAction implements ActionInterface
                 $executed[] = $action;
             }
         } catch (\Exception $e) {
-            $this->undo($executed);
             throw new FailedActionException(
                 sprintf("%s failed for mapper %s", get_class($this), $this->mapper->getConfig()->getTableAlias(true)),
                 (int)$e->getCode(),
