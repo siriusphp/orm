@@ -7,10 +7,13 @@ namespace Sirius\Orm\Tests\Generated\Mapper;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Collection\PaginatedCollection;
 use Sirius\Orm\Query;
+use Sirius\Orm\Query\SoftDeleteTrait;
 use Sirius\Orm\Tests\Generated\Entity\Product;
 
 abstract class ProductQueryBase extends Query
 {
+    use SoftDeleteTrait;
+
     protected $createdAtColumn = 'created_on';
     protected $updatedAtColumn = 'updated_on';
     protected $deletedAtColumn = 'deleted_on';
@@ -60,19 +63,6 @@ abstract class ProductQueryBase extends Query
     protected function init()
     {
         parent::init();
-        $this->guards[] = $this->deletedAtColumn . ' IS NULL';
-    }
-
-    public function withTrashed()
-    {
-        $guards = [];
-        foreach ($this->guards as $k => $v) {
-            if ($v != $this->deletedAtColumn . ' IS NULL') {
-                $guards[$k] = $v;
-            }
-        }
-        $this->guards = $guards;
-
-        return $this;
+        $this->withoutTrashed();
     }
 }

@@ -7,6 +7,7 @@ use Nette\PhpGenerator\ClassType;
 use Sirius\Orm\Blueprint\Behaviour\SoftDelete;
 use Sirius\Orm\Blueprint\Behaviour\Timestamps;
 use Sirius\Orm\CodeGenerator\Observer\Base;
+use Sirius\Orm\Query\SoftDeleteTrait;
 
 class SoftDeleteObserver extends Base
 {
@@ -127,22 +128,11 @@ try {
                   ->setBody('parent::init();' . PHP_EOL);
         }
         $init = $class->getMethod('init');
-        $init->addBody('$this->guards[] = $this->deletedAtColumn . \' IS NULL\';' . PHP_EOL);
+        $init->addBody('$this->withoutTrashed();' . PHP_EOL);
 
-        // add withTrashed()
-        $class->addMethod('withTrashed')
-              ->setVisibility(ClassType::VISIBILITY_PUBLIC)
-              ->setBody('
-$guards = [];
-foreach ($this->guards as $k => $v) {
-    if ($v != $this->deletedAtColumn . \' IS NULL\') {
-        $guards[$k] = $v;
-    }
-}
-$this->guards = $guards;
+        $class->getNamespace()->addUse(SoftDeleteTrait::class, null, $traitAlias);
 
-return $this;
-            ');
+        $class->addTrait($traitAlias);
 
         return $class;
     }
