@@ -203,8 +203,6 @@ SQL;
 
     public function test_deep_insert()
     {
-        $this->populateDb();
-
         $category = $this->categoryMapper->newEntity([
             'name'     => 'New category',
             'children' => new Collection([], $this->categoryMapper->getHydrator()),
