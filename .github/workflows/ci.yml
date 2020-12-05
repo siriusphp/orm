@@ -40,7 +40,7 @@ jobs:
 #         mysql root password: 'rootpass' # Required if "mysql user" is empty, default is empty. The root superuser password
     - name: Setup DB services
       run: |
-        cd docker
+        cd tests
         docker-compose up -d
         cd ..
 
@@ -81,7 +81,7 @@ jobs:
         MYSQL_CONNECTION: 'mysql:host=127.0.0.1;port=13306dbname=siriusorm'
         MYSQL_USER: 'root'
         MYSQL_PASS: 'sirius'
-        POSTGRES_CONNECTION: 'pgsql:host=siriusorm_postgres;port=15423;dbname=siriusorm'
+        POSTGRES_CONNECTION: 'pgsql:host=127.0.0.1;port=15423;dbname=siriusorm'
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit
