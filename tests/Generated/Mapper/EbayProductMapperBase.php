@@ -7,12 +7,14 @@ namespace Sirius\Orm\Tests\Generated\Mapper;
 use Sirius\Orm\Action\Delete as DeleteAction;
 use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\Update as UpdateAction;
+use Sirius\Orm\Connection;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\Generated\Entity\EbayProduct;
+use Sirius\Sql\Bindings;
 
 /**
  * @method EbayProductQuery where($column, $value, $condition)
@@ -57,6 +59,12 @@ abstract class EbayProductMapperBase extends Mapper
     public function newQuery(): EbayProductQuery
     {
         $query = new EbayProductQuery($this->getReadConnection(), $this);
+        return $this->behaviours->apply($this, __FUNCTION__, $query);
+    }
+
+    public function newSubselectQuery(Connection $connection, Bindings $bindings, string $indent): EbayProductQuery
+    {
+        $query = new EbayProductQuery($this->getReadConnection(), $this, $bindings, $indent);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

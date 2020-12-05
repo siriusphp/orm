@@ -11,11 +11,13 @@ use Sirius\Orm\Action\Insert;
 use Sirius\Orm\Action\Update;
 use Sirius\Orm\Blueprint\Mapper;
 use Sirius\Orm\Blueprint\Relation;
+use Sirius\Orm\Connection;
 use Sirius\Orm\Entity\ClassMethodsHydrator;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\MapperConfig;
+use Sirius\Sql\Bindings;
 
 class MapperBaseGenerator
 {
@@ -68,6 +70,7 @@ class MapperBaseGenerator
         $this->addInitRelationsMethod();
         $this->addFindMethod();
         $this->addNewQueryMethod();
+        $this->addNewSubselectQueryMethod();
         $this->addSaveMethod();
         $this->addDeleteMethod();
 
@@ -154,6 +157,22 @@ class MapperBaseGenerator
         $method = $this->class->addMethod('newQuery')
                               ->setReturnType($this->mapper->getQueryClass());
         $method->addBody(sprintf('$query = new %s($this->getReadConnection(), $this);', $this->mapper->getQueryClass()));
+        $method->addBody('return $this->behaviours->apply($this, __FUNCTION__, $query);');
+    }
+
+    protected function addNewSubselectQueryMethod()
+    {
+        $method = $this->class->addMethod('newSubselectQuery')
+                              ->setReturnType($this->mapper->getQueryClass());
+        $this->class->getNamespace()->addUse(Connection::class, null, $connectionAlias);
+        $method->addParameter('connection')
+               ->setType($connectionAlias);
+        $this->class->getNamespace()->addUse(Bindings::class, null, $bindingsAlias);
+        $method->addParameter('bindings')
+               ->setType($bindingsAlias);
+        $method->addParameter('indent')
+               ->setType('string');
+        $method->addBody(sprintf('$query = new %s($this->getReadConnection(), $this, $bindings, $indent);', $this->mapper->getQueryClass()));
         $method->addBody('return $this->behaviours->apply($this, __FUNCTION__, $query);');
     }
 

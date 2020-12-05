@@ -154,7 +154,7 @@ class Query extends Select
 
     public function subSelectForJoinWith(Mapper $mapper): Query
     {
-        return new Query($this->connection, $mapper, $this->bindings, $this->indent . '    ');
+        return $mapper->newSubselectQuery($this->connection, $this->bindings, $this->indent . '    ');
     }
 
     public function find($pk, array $load = [])

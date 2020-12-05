@@ -80,6 +80,7 @@ FROM
         products.*
     FROM
         tbl_products as products
+    WHERE deleted_on IS NULL    
     ) AS products ON categories.id = products.category_id 
 SQL;
 

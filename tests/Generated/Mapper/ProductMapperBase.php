@@ -9,12 +9,14 @@ use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\SoftDelete as SoftDeleteAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Behaviour\Timestamps;
+use Sirius\Orm\Connection;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\Generated\Entity\Product;
+use Sirius\Sql\Bindings;
 
 /**
  * @method ProductQuery where($column, $value, $condition)
@@ -118,6 +120,12 @@ abstract class ProductMapperBase extends Mapper
     public function newQuery(): ProductQuery
     {
         $query = new ProductQuery($this->getReadConnection(), $this);
+        return $this->behaviours->apply($this, __FUNCTION__, $query);
+    }
+
+    public function newSubselectQuery(Connection $connection, Bindings $bindings, string $indent): ProductQuery
+    {
+        $query = new ProductQuery($this->getReadConnection(), $this, $bindings, $indent);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

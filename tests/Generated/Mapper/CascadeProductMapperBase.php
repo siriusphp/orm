@@ -9,12 +9,14 @@ use Sirius\Orm\Action\Insert as InsertAction;
 use Sirius\Orm\Action\SoftDelete as SoftDeleteAction;
 use Sirius\Orm\Action\Update as UpdateAction;
 use Sirius\Orm\Behaviour\Timestamps;
+use Sirius\Orm\Connection;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Exception\FailedActionException;
 use Sirius\Orm\Mapper;
 use Sirius\Orm\MapperConfig;
 use Sirius\Orm\Tests\Generated\Entity\CascadeProduct;
+use Sirius\Sql\Bindings;
 
 /**
  * @method CascadeProductQuery where($column, $value, $condition)
@@ -83,6 +85,12 @@ abstract class CascadeProductMapperBase extends Mapper
     public function newQuery(): CascadeProductQuery
     {
         $query = new CascadeProductQuery($this->getReadConnection(), $this);
+        return $this->behaviours->apply($this, __FUNCTION__, $query);
+    }
+
+    public function newSubselectQuery(Connection $connection, Bindings $bindings, string $indent): CascadeProductQuery
+    {
+        $query = new CascadeProductQuery($this->getReadConnection(), $this, $bindings, $indent);
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
 

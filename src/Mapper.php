@@ -10,6 +10,7 @@ use Sirius\Orm\Contract\HydratorInterface;
 use Sirius\Orm\Entity\GenericHydrator;
 use Sirius\Orm\Entity\Patcher;
 use Sirius\Orm\Relation\Relation;
+use Sirius\Sql\Bindings;
 
 /**
  * @method Query where($column, $value, $condition)
@@ -117,11 +118,6 @@ class Mapper
         return $mapper;
     }
 
-    public function addQueryScope($scope, callable $callback)
-    {
-        $this->mapperConfig->addQueryScope($scope, $callback);
-    }
-
     public function newEntity(array $data): EntityInterface
     {
         $entity = $this->getHydrator()
@@ -188,12 +184,16 @@ class Mapper
         return array_keys($this->relations);
     }
 
-    /**
-     * @return Query
-     */
-    public function newQuery()
+    public function newQuery(): Query
     {
         $query = new Query($this->getReadConnection(), $this);
+
+        return $this->behaviours->apply($this, __FUNCTION__, $query);
+    }
+
+    public function newSubselectQuery(Connection $connection, Bindings $bindings, string $indent)
+    {
+        $query = new Query($connection, $this, $bindings, $indent);
 
         return $this->behaviours->apply($this, __FUNCTION__, $query);
     }
