@@ -25,12 +25,12 @@ class ManyToManyObserver extends OneToManyObserver implements ToManyInterface
 
     protected function observeLinkedBaseEntity(ClassType $class)
     {
-        $throughColumns = $this->relation->getThroughColumns();
-        if (empty($throughColumns)) {
+        $pivotColumns = $this->relation->getPivotColumns();
+        if (empty($pivotColumns)) {
             return $class;
         }
 
-        foreach ($throughColumns as $column) {
+        foreach ($pivotColumns as $column) {
             $comment = 'unsed only for relations with ' . $this->relation->getMapper()->getName();
             if ($this->relation->getMapper()->getEntityStyle() === Mapper::ENTITY_STYLE_PROPERTIES) {
                 $class->addComment(sprintf('@property mixed $%s - %s', $column, $comment));
@@ -55,7 +55,7 @@ class ManyToManyObserver extends OneToManyObserver implements ToManyInterface
     {
         $config[MapperConfig::PIVOT_ATTRIBUTES] = array_merge(
             $config[MapperConfig::PIVOT_ATTRIBUTES] ?? [],
-            array_values($this->relation->getThroughColumns() ?? [])
+            array_values($this->relation->getPivotColumns() ?? [])
         );
 
         return $config;

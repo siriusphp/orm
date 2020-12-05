@@ -76,11 +76,11 @@ $orm->register('products', MapperConfig::fromArray([
         'tags' => [
             RelationConfig::TYPE                   => RelationConfig::TYPE_MANY_TO_MANY,
             RelationConfig::FOREIGN_MAPPER         => 'tags',
-            RelationConfig::THROUGH_TABLE          => 'tbl_products_to_tags',
-            RelationConfig::THROUGH_TABLE_ALIAS    => 'products_tags',
+            RelationConfig::PIVOT_TABLE          => 'tbl_products_to_tags',
+            RelationConfig::PIVOT_TABLE_ALIAS    => 'products_tags',
             RelationConfig::NATIVE_KEY             => 'product_id',
             RelationConfig::FOREIGN_KEY            => 'tag_id',
-            RelationConfig::THROUGH_COLUMNS        => ['position', 'created_at'],
+            RelationConfig::PIVOT_COLUMNS        => ['position', 'created_at'],
             RelationConfig::THROUGH_COLUMNS_PREFIX => 'link_',
             RelationConfig::QUERY_CALLBACK         => function($query) {
                 $query->orderBy('position DESC');

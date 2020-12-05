@@ -7,7 +7,6 @@ use Sirius\Orm\Action\DeletePivotRows;
 use Sirius\Orm\Collection\Collection;
 use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Contract\Relation\ToManyInterface;
-use Sirius\Orm\Entity\StateEnum;
 use Sirius\Orm\Entity\Tracker;
 use Sirius\Orm\Helpers\Inflector;
 use Sirius\Orm\Helpers\QueryHelper;
@@ -31,22 +30,22 @@ class ManyToMany extends Relation implements ToManyInterface
             $this->options[RelationConfig::NATIVE_KEY] = $nativeKey;
         }
 
-        if (! isset($this->options[RelationConfig::THROUGH_TABLE])) {
+        if (! isset($this->options[RelationConfig::PIVOT_TABLE])) {
             $tables = [$this->foreignMapper->getConfig()->getTable(), $this->nativeMapper->getConfig()->getTable()];
             sort($tables);
-            $this->options[RelationConfig::THROUGH_TABLE] = implode('_', $tables);
+            $this->options[RelationConfig::PIVOT_TABLE] = implode('_', $tables);
         }
 
-        if (! isset($this->options[RelationConfig::THROUGH_NATIVE_COLUMN])) {
+        if (! isset($this->options[RelationConfig::PIVOT_NATIVE_COLUMN])) {
             $prefix = Inflector::singularize($this->nativeMapper->getConfig()->getTableAlias(true));
 
-            $this->options[RelationConfig::THROUGH_NATIVE_COLUMN] = $this->getKeyColumn($prefix, $nativeKey);
+            $this->options[RelationConfig::PIVOT_NATIVE_COLUMN] = $this->getKeyColumn($prefix, $nativeKey);
         }
 
-        if (! isset($this->options[RelationConfig::THROUGH_FOREIGN_COLUMN])) {
+        if (! isset($this->options[RelationConfig::PIVOT_FOREIGN_COLUMN])) {
             $prefix = Inflector::singularize($this->foreignMapper->getConfig()->getTableAlias(true));
 
-            $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN] = $this->getKeyColumn($prefix, $foreignKey);
+            $this->options[RelationConfig::PIVOT_FOREIGN_COLUMN] = $this->getKeyColumn($prefix, $foreignKey);
         }
     }
 
@@ -61,52 +60,52 @@ class ManyToMany extends Relation implements ToManyInterface
 
         $query = $this->foreignMapper->newQuery();
 
-        $query = $this->joinWithThroughTable($query)
-                      ->where($this->options[RelationConfig::THROUGH_NATIVE_COLUMN], $nativePks);
+        $query = $this->joinWithPivotTable($query)
+                      ->where($this->options[RelationConfig::PIVOT_NATIVE_COLUMN], $nativePks);
 
         $query = $this->applyQueryCallback($query);
 
         $query = $this->applyForeignGuards($query);
 
-        $query = $this->applyThroughGuards($query);
+        $query = $this->applyPivotGuards($query);
 
         $query = $this->addPivotColumns($query);
 
         return $query;
     }
 
-    protected function joinWithThroughTable($query)
+    protected function joinWithPivotTable($query)
     {
-        $through          = $this->getOption(RelationConfig::THROUGH_TABLE);
-        $throughAlias     = $this->getOption(RelationConfig::THROUGH_TABLE_ALIAS);
-        $throughReference = QueryHelper::reference($through, $throughAlias);
-        $throughName      = $throughAlias ?? $through;
+        $pivotTable      = $this->getOption(RelationConfig::PIVOT_TABLE);
+        $pivotTableAlias = $this->getOption(RelationConfig::PIVOT_TABLE_ALIAS);
+        $pivotReference  = QueryHelper::reference($pivotTable, $pivotTableAlias);
+        $pivotName       = $pivotTableAlias ?? $pivotTable;
 
-        $throughCols      = $this->options[RelationConfig::THROUGH_FOREIGN_COLUMN];
+        $pivotColumns     = $this->options[RelationConfig::PIVOT_FOREIGN_COLUMN];
         $foreignTableName = $this->foreignMapper->getConfig()->getTableAlias(true);
         $foreignKeys      = $this->options[RelationConfig::FOREIGN_KEY];
 
-        $joinCondition = QueryHelper::joinCondition($foreignTableName, $foreignKeys, $throughName, $throughCols);
+        $joinCondition = QueryHelper::joinCondition($foreignTableName, $foreignKeys, $pivotName, $pivotColumns);
 
-        return $query->join('INNER', $throughReference, $joinCondition);
+        return $query->join('INNER', $pivotReference, $joinCondition);
     }
 
     private function addPivotColumns($query)
     {
-        $throughColumns = $this->getOption(RelationConfig::THROUGH_COLUMNS);
+        $pivotColumns = $this->getOption(RelationConfig::PIVOT_COLUMNS);
 
-        $through      = $this->getOption(RelationConfig::THROUGH_TABLE);
-        $throughAlias = $this->getOption(RelationConfig::THROUGH_TABLE_ALIAS);
-        $throughName  = $throughAlias ?? $through;
+        $pivotTable      = $this->getOption(RelationConfig::PIVOT_TABLE);
+        $pivotTableAlias = $this->getOption(RelationConfig::PIVOT_TABLE_ALIAS);
+        $pivotName       = $pivotTableAlias ?? $pivotTable;
 
-        if (! empty($throughColumns)) {
-            foreach ($throughColumns as $col => $alias) {
-                $query->columns("{$throughName}.{$col} AS {$alias}");
+        if (! empty($pivotColumns)) {
+            foreach ($pivotColumns as $col => $alias) {
+                $query->columns("{$pivotName}.{$col} AS {$alias}");
             }
         }
 
-        foreach ((array)$this->options[RelationConfig::THROUGH_NATIVE_COLUMN] as $col) {
-            $query->columns("{$throughName}.{$col}");
+        foreach ((array)$this->options[RelationConfig::PIVOT_NATIVE_COLUMN] as $col) {
+            $query->columns("{$pivotName}.{$col}");
         }
 
         return $query;
@@ -120,7 +119,7 @@ class ManyToMany extends Relation implements ToManyInterface
         #$subselect->resetGuards();
         #$subselect->setGuards($this->foreignMapper->getConfig()->getGuards());
 
-        $subselect = $this->joinWithThroughTable($subselect);
+        $subselect = $this->joinWithPivotTable($subselect);
 
         $subselect = $this->addPivotColumns($subselect);
 
@@ -137,7 +136,7 @@ class ManyToMany extends Relation implements ToManyInterface
             $this->nativeMapper->getConfig()->getTableAlias(true),
             $this->getOption(RelationConfig::NATIVE_KEY),
             $this->name,
-            $this->getOption(RelationConfig::THROUGH_NATIVE_COLUMN)
+            $this->getOption(RelationConfig::PIVOT_NATIVE_COLUMN)
         );
     }
 
@@ -145,7 +144,7 @@ class ManyToMany extends Relation implements ToManyInterface
     {
         $pairs      = [];
         $nativeKey  = (array)$this->options[RelationConfig::NATIVE_KEY];
-        $foreignKey = (array)$this->options[RelationConfig::THROUGH_NATIVE_COLUMN];
+        $foreignKey = (array)$this->options[RelationConfig::PIVOT_NATIVE_COLUMN];
         foreach ($nativeKey as $k => $v) {
             $pairs[$v] = $foreignKey[$k];
         }
@@ -180,7 +179,7 @@ class ManyToMany extends Relation implements ToManyInterface
 
     protected function addActionOnDelete(BaseAction $action)
     {
-        $nativeEntity       = $action->getEntity();
+        $nativeEntity = $action->getEntity();
 
         // retrieve them again from the DB since the related collection might not have everything
         // for example due to a relation query callback
@@ -207,7 +206,7 @@ class ManyToMany extends Relation implements ToManyInterface
 
         /** @var Collection $foreignEntities */
         $foreignEntities = $this->nativeEntityHydrator->get($action->getEntity(), $this->name);
-        if (! $foreignEntities || !$foreignEntities instanceof Collection || $foreignEntities->isEmpty()) {
+        if (! $foreignEntities || ! $foreignEntities instanceof Collection || $foreignEntities->isEmpty()) {
             return;
         }
 
@@ -237,9 +236,9 @@ class ManyToMany extends Relation implements ToManyInterface
         }
     }
 
-    private function applyThroughGuards(Query $query)
+    private function applyPivotGuards(Query $query)
     {
-        $guards = $this->getOption(RelationConfig::THROUGH_GUARDS);
+        $guards = $this->getOption(RelationConfig::PIVOT_GUARDS);
         if ($guards) {
             $query->setGuards($guards);
         }

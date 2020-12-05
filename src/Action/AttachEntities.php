@@ -72,22 +72,22 @@ class AttachEntities implements ActionInterface
             return;
         }
 
-        $conn         = $this->relation->getNativeMapper()->getWriteConnection();
-        $throughTable = (string)$this->relation->getOption(RelationConfig::THROUGH_TABLE);
+        $conn       = $this->relation->getNativeMapper()->getWriteConnection();
+        $pivotTable = (string)$this->relation->getOption(RelationConfig::PIVOT_TABLE);
 
-        $throughNativeColumns  = (array)$this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
-        $throughForeignColumns = (array)$this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
-        $nativeKey             = (array)$this->getNativeEntityHydrator()->getPk($this->nativeEntity);
-        $foreignKey            = (array)$this->getForeignEntityHydrator()->getPk($this->foreignEntity);
+        $pivotNativeColumns  = (array)$this->relation->getOption(RelationConfig::PIVOT_NATIVE_COLUMN);
+        $pivotForeignColumns = (array)$this->relation->getOption(RelationConfig::PIVOT_FOREIGN_COLUMN);
+        $nativeKey           = (array)$this->getNativeEntityHydrator()->getPk($this->nativeEntity);
+        $foreignKey          = (array)$this->getForeignEntityHydrator()->getPk($this->foreignEntity);
 
         // first delete existing pivot row
         $delete = new \Sirius\Sql\Delete($conn);
-        $delete->from($throughTable);
-        foreach ($throughNativeColumns as $k => $col) {
+        $delete->from($pivotTable);
+        foreach ($pivotNativeColumns as $k => $col) {
             $delete->where($col, $nativeKey[$k]);
-            $delete->where($throughForeignColumns[$k], $foreignKey[$k]);
+            $delete->where($pivotForeignColumns[$k], $foreignKey[$k]);
         }
-        foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
+        foreach ((array)$this->relation->getOption(RelationConfig::PIVOT_GUARDS) as $col => $value) {
             if (! is_int($col)) {
                 $delete->where($col, $value);
             } else {
@@ -97,24 +97,24 @@ class AttachEntities implements ActionInterface
         $delete->perform();
 
         $insertColumns = [];
-        foreach ($throughNativeColumns as $k => $col) {
-            $insertColumns[$col]                       = $nativeKey[$k];
-            $insertColumns[$throughForeignColumns[$k]] = $foreignKey[$k];
+        foreach ($pivotNativeColumns as $k => $col) {
+            $insertColumns[$col]                     = $nativeKey[$k];
+            $insertColumns[$pivotForeignColumns[$k]] = $foreignKey[$k];
         }
 
-        foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_COLUMNS) as $col => $alias) {
+        foreach ((array)$this->relation->getOption(RelationConfig::PIVOT_COLUMNS) as $col => $alias) {
             $insertColumns[$col] = $this->getForeignEntityHydrator()
                                         ->get($this->foreignEntity, $alias);
         }
 
-        foreach ((array)$this->relation->getOption(RelationConfig::THROUGH_GUARDS) as $col => $value) {
+        foreach ((array)$this->relation->getOption(RelationConfig::PIVOT_GUARDS) as $col => $value) {
             if (! is_int($col)) {
                 $insertColumns[$col] = $value;
             }
         }
 
         $insert = new \Sirius\Sql\Insert($conn);
-        $insert->into($throughTable)
+        $insert->into($pivotTable)
                ->columns($insertColumns)
                ->perform();
     }

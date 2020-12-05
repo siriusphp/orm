@@ -59,11 +59,11 @@ $orm->addMapper(
                                            ->setForeignKey('content_id')
                                            ->setForeignGuards(['content_type' => 'products'])) // @testing: one to many | relation guards
           ->addRelation('tags', ManyToMany::make('tags')// @testing: many to many
-                                          ->setThroughTable('tbl_links_to_tags')
-                                          ->setThroughTableAlias('products_to_tags')
-                                          ->setThroughNativeColumn('tagable_id')
-                                          ->setThroughGuards(['tagable_type' => 'products'])
-                                          ->setThroughColumns(['position' => 'position_in_product'])
+                                          ->setPivotTable('tbl_links_to_tags')
+                                          ->setPivotTableAlias('products_to_tags')
+                                          ->setPivotNativeColumn('tagable_id')
+                                          ->setPivotGuards(['tagable_type' => 'products'])
+                                          ->setPivotColumns(['position' => 'position_in_product'])
                                           ->setQueryCallback(function (Query $query) {
                                               $query->orderBy('position ASC');
 

@@ -62,10 +62,10 @@ SQL;
     public function test_query_callback()
     {
         $relation = new ManyToMany('tags', $this->productsMapper, $this->tagsMapper, [
-            RelationConfig::THROUGH_TABLE         => 'products_tags',
-            RelationConfig::THROUGH_NATIVE_COLUMN => 'product_id',
-            RelationConfig::THROUGH_COLUMNS       => ['position' => 'pivot_position'],
-            RelationConfig::QUERY_CALLBACK        => function (Query $query) {
+            RelationConfig::PIVOT_TABLE         => 'products_tags',
+            RelationConfig::PIVOT_NATIVE_COLUMN => 'product_id',
+            RelationConfig::PIVOT_COLUMNS       => ['position' => 'pivot_position'],
+            RelationConfig::QUERY_CALLBACK      => function (Query $query) {
                 return $query->where('status', 'active');
             }
         ]);
@@ -97,9 +97,9 @@ SQL;
     public function test_query_guards()
     {
         $relation = new ManyToMany('category', $this->productsMapper, $this->tagsMapper, [
-            RelationConfig::THROUGH_TABLE         => 'products_tags',
-            RelationConfig::THROUGH_NATIVE_COLUMN => 'product_id',
-            RelationConfig::FOREIGN_GUARDS        => ['status' => 'active', 'deleted_at IS NULL']
+            RelationConfig::PIVOT_TABLE         => 'products_tags',
+            RelationConfig::PIVOT_NATIVE_COLUMN => 'product_id',
+            RelationConfig::FOREIGN_GUARDS      => ['status' => 'active', 'deleted_at IS NULL']
         ]);
 
         $tracker = new Tracker([

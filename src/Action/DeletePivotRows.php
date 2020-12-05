@@ -48,10 +48,10 @@ class DeletePivotRows extends BaseAction
         }
 
         $delete = new \Sirius\Sql\Delete($this->mapper->getWriteConnection());
-        $delete->from((string)$this->relation->getOption(RelationConfig::THROUGH_TABLE));
+        $delete->from((string)$this->relation->getOption(RelationConfig::PIVOT_TABLE));
         $delete->whereAll($conditions, false);
 
-        $guards = $this->relation->getOption(RelationConfig::THROUGH_GUARDS);
+        $guards = $this->relation->getOption(RelationConfig::PIVOT_GUARDS);
         if ($guards) {
             foreach ($guards as $column => $value) {
                 if (is_int($column)) {
@@ -75,20 +75,20 @@ class DeletePivotRows extends BaseAction
         $conditions = [];
 
         $nativeEntityPk    = (array)$this->nativeMapper->getConfig()->getPrimaryKey();
-        $nativeThroughCols = (array)$this->relation->getOption(RelationConfig::THROUGH_NATIVE_COLUMN);
+        $pivotThroughCols = (array)$this->relation->getOption(RelationConfig::PIVOT_NATIVE_COLUMN);
         foreach ($nativeEntityPk as $idx => $col) {
             $val = $this->nativeEntityHydrator->get($this->nativeEntity, $col);
             if ($val) {
-                $conditions[$nativeThroughCols[$idx]] = $val;
+                $conditions[$pivotThroughCols[$idx]] = $val;
             }
         }
 
         $entityPk    = (array)$this->mapper->getConfig()->getPrimaryKey();
-        $throughCols = (array)$this->relation->getOption(RelationConfig::THROUGH_FOREIGN_COLUMN);
+        $pivotColumns = (array)$this->relation->getOption(RelationConfig::PIVOT_FOREIGN_COLUMN);
         foreach ($entityPk as $idx => $col) {
             $val = $this->entityHydrator->get($this->entity, $col);
             if ($val) {
-                $conditions[$throughCols[$idx]] = $val;
+                $conditions[$pivotColumns[$idx]] = $val;
             }
         }
 

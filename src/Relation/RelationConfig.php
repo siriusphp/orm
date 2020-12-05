@@ -17,18 +17,12 @@ final class RelationConfig
     const AGGREGATES = 'aggregates';
 
     // through options
-    const THROUGH_TABLE = 'through_table';
-    const THROUGH_TABLE_ALIAS = 'through_table_alias';
-    const THROUGH_GUARDS = 'through_guards';
-    const THROUGH_COLUMNS = 'through_columns'; // column/attribute pairs from the THROUGH_TABLE
-    const THROUGH_NATIVE_COLUMN = 'through_native_column';
-    const THROUGH_FOREIGN_COLUMN = 'through_foreign_column';
-
-    // setters and getters
-    const NATIVE_SETTER = 'native_setter';
-    const NATIVE_GETTER = 'native_getter';
-    const FOREIGN_SETTER = 'foreign_setter';
-    const FOREIGN_GETTER = 'foreign_getter';
+    const PIVOT_TABLE = 'pivot_table';
+    const PIVOT_TABLE_ALIAS = 'pivot_table_alias';
+    const PIVOT_GUARDS = 'pivot_guards';
+    const PIVOT_COLUMNS = 'pivot_columns'; // column/attribute pairs from the PIVOT_TABLE
+    const PIVOT_NATIVE_COLUMN = 'pivot_native_column';
+    const PIVOT_FOREIGN_COLUMN = 'pivot_foreign_column';
 
     // loading option values
     const LOAD_LAZY = 'lazy';

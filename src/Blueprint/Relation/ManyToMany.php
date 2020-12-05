@@ -14,17 +14,17 @@ class ManyToMany extends Relation
 
     protected $foreignKey = 'id';
 
-    protected $throughTable;
+    protected $pivotTable;
 
-    protected $throughTableAlias;
+    protected $pivotTableAlias;
 
-    protected $throughGuards = [];
+    protected $pivotGuards = [];
 
-    protected $throughColumns = [];
+    protected $pivotColumns = [];
 
-    protected $throughNativeColumn = '';
+    protected $pivotNativeColumn = '';
 
-    protected $throughForeignColumn = '';
+    protected $pivotForeignColumn = '';
 
     protected $aggregates = [];
 
@@ -62,7 +62,7 @@ class ManyToMany extends Relation
             return;
         }
 
-        if (! $this->throughTable) {
+        if (! $this->pivotTable) {
             $tablePrefix = $this->mapper->getTableAlias() ?
                 str_replace($this->mapper->getTable(), '', $this->mapper->getTableAlias())
                 : '';
@@ -70,19 +70,19 @@ class ManyToMany extends Relation
             $tables = [$this->mapper->getTableAlias() ?: $this->mapper->getTable(), $this->foreignMapper];
             sort($tables);
 
-            $this->throughTable = $tablePrefix . implode('_', $tables);
+            $this->pivotTable = $tablePrefix . implode('_', $tables);
 
             if ($tablePrefix) {
-                $this->throughTableAlias = implode('_', $tables);
+                $this->pivotTableAlias = implode('_', $tables);
             }
         }
 
-        if (! $this->throughNativeColumn) {
-            $this->throughNativeColumn = Inflector::singularize($this->mapper->getName()) . '_id';
+        if (! $this->pivotNativeColumn) {
+            $this->pivotNativeColumn = Inflector::singularize($this->mapper->getName()) . '_id';
         }
 
-        if (! $this->throughForeignColumn) {
-            $this->throughForeignColumn = Inflector::singularize($this->foreignMapper) . '_id';
+        if (! $this->pivotForeignColumn) {
+            $this->pivotForeignColumn = Inflector::singularize($this->foreignMapper) . '_id';
         }
     }
 
@@ -101,19 +101,19 @@ class ManyToMany extends Relation
     /**
      * @return mixed
      */
-    public function getThroughTable()
+    public function getPivotTable()
     {
-        return $this->throughTable;
+        return $this->pivotTable;
     }
 
     /**
-     * @param mixed $throughTable
+     * @param mixed $pivotTable
      *
      * @return ManyToMany
      */
-    public function setThroughTable(string $throughTable)
+    public function setPivotTable(string $pivotTable)
     {
-        $this->throughTable = $throughTable;
+        $this->pivotTable = $pivotTable;
 
         return $this;
     }
@@ -121,19 +121,19 @@ class ManyToMany extends Relation
     /**
      * @return mixed
      */
-    public function getThroughTableAlias()
+    public function getPivotTableAlias()
     {
-        return $this->throughTableAlias;
+        return $this->pivotTableAlias;
     }
 
     /**
-     * @param mixed $throughTableAlias
+     * @param mixed $pivotTableAlias
      *
      * @return ManyToMany
      */
-    public function setThroughTableAlias($throughTableAlias)
+    public function setPivotTableAlias($pivotTableAlias)
     {
-        $this->throughTableAlias = $throughTableAlias;
+        $this->pivotTableAlias = $pivotTableAlias;
 
         return $this;
     }
@@ -141,19 +141,19 @@ class ManyToMany extends Relation
     /**
      * @return array
      */
-    public function getThroughGuards(): array
+    public function getPivotGuards(): array
     {
-        return $this->throughGuards;
+        return $this->pivotGuards;
     }
 
     /**
-     * @param array $throughGuards
+     * @param array $pivotGuards
      *
      * @return ManyToMany
      */
-    public function setThroughGuards(array $throughGuards): ManyToMany
+    public function setPivotGuards(array $pivotGuards): ManyToMany
     {
-        $this->throughGuards = $throughGuards;
+        $this->pivotGuards = $pivotGuards;
 
         return $this;
     }
@@ -161,21 +161,21 @@ class ManyToMany extends Relation
     /**
      * @return array
      */
-    public function getThroughColumns(): array
+    public function getPivotColumns(): array
     {
-        return $this->throughColumns;
+        return $this->pivotColumns;
     }
 
     /**
      * Pairs of column name (from table) and attribute name (in the linked model)
      *
-     * @param array $throughColumns
+     * @param array $pivotColumns
      *
      * @return ManyToMany
      */
-    public function setThroughColumns(array $throughColumns): ManyToMany
+    public function setPivotColumns(array $pivotColumns): ManyToMany
     {
-        $this->throughColumns = $throughColumns;
+        $this->pivotColumns = $pivotColumns;
 
         $this->maybeSetAdditionalProperties();
 
@@ -185,19 +185,19 @@ class ManyToMany extends Relation
     /**
      * @return string
      */
-    public function getThroughNativeColumn(): string
+    public function getPivotNativeColumn(): string
     {
-        return $this->throughNativeColumn;
+        return $this->pivotNativeColumn;
     }
 
     /**
-     * @param string $throughNativeColumn
+     * @param string $pivotNativeColumn
      *
      * @return ManyToMany
      */
-    public function setThroughNativeColumn(string $throughNativeColumn): ManyToMany
+    public function setPivotNativeColumn(string $pivotNativeColumn): ManyToMany
     {
-        $this->throughNativeColumn = $throughNativeColumn;
+        $this->pivotNativeColumn = $pivotNativeColumn;
 
         return $this;
     }
@@ -205,19 +205,19 @@ class ManyToMany extends Relation
     /**
      * @return string
      */
-    public function getThroughForeignColumn(): string
+    public function getPivotForeignColumn(): string
     {
-        return $this->throughForeignColumn;
+        return $this->pivotForeignColumn;
     }
 
     /**
-     * @param string $throughForeignColumn
+     * @param string $pivotForeignColumn
      *
      * @return ManyToMany
      */
-    public function setThroughForeignColumn(string $throughForeignColumn): ManyToMany
+    public function setPivotForeignColumn(string $pivotForeignColumn): ManyToMany
     {
-        $this->throughForeignColumn = $throughForeignColumn;
+        $this->pivotForeignColumn = $pivotForeignColumn;
 
         return $this;
     }

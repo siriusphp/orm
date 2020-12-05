@@ -71,7 +71,7 @@ class MapperConfig
     protected $columnAttributeMap = [];
 
     /**
-     * Attributes that might come from THROUGH_COLUMNS
+     * Attributes that might come from PIVOT_COLUMNS
      * in many-to-many relations
      * @var array
      */
