@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sirius\Orm\Tests;
 
 use Doctrine\DBAL\Platforms\MySQL80Platform;
+use Doctrine\DBAL\Platforms\PostgreSQL92Platform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Schema\Schema;
 use PHPUnit\Framework\TestCase;
@@ -66,6 +67,10 @@ class BaseTestCase extends TestCase
         switch ($this->dbEngine) {
             case 'mysql':
                 $platform = new MySQL80Platform();
+                break;
+            case 'postgres':
+                $platform = new PostgreSQL92Platform();
+                break;
         }
         /** @var Schema $schema */
         $schema = include(__DIR__ . "/resources/schema.php");
