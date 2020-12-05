@@ -168,7 +168,7 @@ class Mapper
 
     public function getRelation(string $name): Relation
     {
-        if (! $this->hasRelation($name)) {
+        if ( ! $this->hasRelation($name)) {
             throw new \InvalidArgumentException("Relation named {$name} is not registered for this mapper");
         }
 
@@ -206,5 +206,20 @@ class Mapper
     public function getWriteConnection(): Connection
     {
         return $this->connectionLocator->getWrite();
+    }
+
+    protected function runActionInTransaction(Action\BaseAction $action)
+    {
+        $this->connectionLocator->lockToWrite(true);
+        $this->getWriteConnection()->beginTransaction();
+        try {
+            $action->run();
+            $this->getWriteConnection()->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->getWriteConnection()->rollBack();
+            throw $e;
+        }
     }
 }

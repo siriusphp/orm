@@ -73,17 +73,7 @@ return $this->behaviours->apply($this, __FUNCTION__, $action);
         $method->setBody('
 $action = new DeleteAction($this, $entity, [\'relations\' => $withRelations]);
 
-$this->connectionLocator->lockToWrite(true);
-$this->getWriteConnection()->beginTransaction();
-try {
-    $action->run();
-    $this->getWriteConnection()->commit();
-
-    return true;
-} catch (\Exception $e) {
-    $this->getWriteConnection()->rollBack();
-    throw $e;
-}
+return $this->runActionInTransaction($action);
         ');
 
         $method = $class->addMethod('restore')->setReturnType('bool');
@@ -100,17 +90,7 @@ if ( ! $entity) {
 $this->getHydrator()->set($entity, $this->deletedAtColumn, null);
 $action = new UpdateAction($this, $entity);
 
-$this->connectionLocator->lockToWrite(true);
-$this->getWriteConnection()->beginTransaction();
-try {
-    $action->run();
-    $this->getWriteConnection()->commit();
-
-    return true;
-} catch (\Exception $e) {
-    $this->getWriteConnection()->rollBack();
-    throw $e;
-}
+return $this->runActionInTransaction($action);
         ');
 
         return $class;

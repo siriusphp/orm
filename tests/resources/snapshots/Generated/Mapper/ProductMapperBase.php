@@ -133,19 +133,7 @@ abstract class ProductMapperBase extends Mapper
     {
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
 
-        $this->connectionLocator->lockToWrite(true);
-        $this->getWriteConnection()->beginTransaction();
-        try {
-            $action->run();
-            $this->getWriteConnection()->commit();
-            $this->connectionLocator->lockToWrite(false);
-
-            return true;
-        } catch (FailedActionException $e) {
-            $this->getWriteConnection()->rollBack();
-            $this->connectionLocator->lockToWrite(false);
-            throw $e;
-        }
+        return $this->runActionInTransaction($action);
     }
 
     public function newSaveAction(Product $entity, $options): UpdateAction
@@ -163,17 +151,7 @@ abstract class ProductMapperBase extends Mapper
     {
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
 
-        $this->connectionLocator->lockToWrite(true);
-        $this->getWriteConnection()->beginTransaction();
-        try {
-            $action->run();
-            $this->getWriteConnection()->commit();
-
-            return true;
-        } catch (\Exception $e) {
-            $this->getWriteConnection()->rollBack();
-            throw $e;
-        }
+        return $this->runActionInTransaction($action);
     }
 
     public function newDeleteAction(Product $entity, $options)
@@ -188,17 +166,7 @@ abstract class ProductMapperBase extends Mapper
     {
         $action = new DeleteAction($this, $entity, ['relations' => $withRelations]);
 
-        $this->connectionLocator->lockToWrite(true);
-        $this->getWriteConnection()->beginTransaction();
-        try {
-            $action->run();
-            $this->getWriteConnection()->commit();
-
-            return true;
-        } catch (\Exception $e) {
-            $this->getWriteConnection()->rollBack();
-            throw $e;
-        }
+        return $this->runActionInTransaction($action);
     }
 
     public function restore($pk): bool
@@ -214,16 +182,6 @@ abstract class ProductMapperBase extends Mapper
         $this->getHydrator()->set($entity, $this->deletedAtColumn, null);
         $action = new UpdateAction($this, $entity);
 
-        $this->connectionLocator->lockToWrite(true);
-        $this->getWriteConnection()->beginTransaction();
-        try {
-            $action->run();
-            $this->getWriteConnection()->commit();
-
-            return true;
-        } catch (\Exception $e) {
-            $this->getWriteConnection()->rollBack();
-            throw $e;
-        }
+        return $this->runActionInTransaction($action);
     }
 }

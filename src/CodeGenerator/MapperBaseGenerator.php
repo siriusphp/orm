@@ -192,19 +192,7 @@ class MapperBaseGenerator
         $method->setBody('
 $action = $this->newSaveAction($entity, [\'relations\' => $withRelations]);
 
-$this->connectionLocator->lockToWrite(true);
-$this->getWriteConnection()->beginTransaction();
-try {
-    $action->run();
-    $this->getWriteConnection()->commit();
-    $this->connectionLocator->lockToWrite(false);
-
-    return true;
-} catch (FailedActionException $e) {
-    $this->getWriteConnection()->rollBack();
-    $this->connectionLocator->lockToWrite(false);
-    throw $e;
-}
+return $this->runActionInTransaction($action);
         ');
 
         $method = $this->class->addMethod('newSaveAction')->setReturnType('UpdateAction');
@@ -230,17 +218,7 @@ return $this->behaviours->apply($this, __FUNCTION__, $action);
         $method->setBody('
 $action = $this->newDeleteAction($entity, [\'relations\' => $withRelations]);
 
-$this->connectionLocator->lockToWrite(true);
-$this->getWriteConnection()->beginTransaction();
-try {
-    $action->run();
-    $this->getWriteConnection()->commit();
-
-    return true;
-} catch (\Exception $e) {
-    $this->getWriteConnection()->rollBack();
-    throw $e;
-}
+return $this->runActionInTransaction($action);
         ');
 
         $this->namespace->addUse(Delete::class, 'DeleteAction');

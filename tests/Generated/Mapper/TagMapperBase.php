@@ -66,19 +66,7 @@ abstract class TagMapperBase extends Mapper
     {
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
 
-        $this->connectionLocator->lockToWrite(true);
-        $this->getWriteConnection()->beginTransaction();
-        try {
-            $action->run();
-            $this->getWriteConnection()->commit();
-            $this->connectionLocator->lockToWrite(false);
-
-            return true;
-        } catch (FailedActionException $e) {
-            $this->getWriteConnection()->rollBack();
-            $this->connectionLocator->lockToWrite(false);
-            throw $e;
-        }
+        return $this->runActionInTransaction($action);
     }
 
     public function newSaveAction(Tag $entity, $options): UpdateAction
@@ -96,17 +84,7 @@ abstract class TagMapperBase extends Mapper
     {
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
 
-        $this->connectionLocator->lockToWrite(true);
-        $this->getWriteConnection()->beginTransaction();
-        try {
-            $action->run();
-            $this->getWriteConnection()->commit();
-
-            return true;
-        } catch (\Exception $e) {
-            $this->getWriteConnection()->rollBack();
-            throw $e;
-        }
+        return $this->runActionInTransaction($action);
     }
 
     public function newDeleteAction(Tag $entity, $options): DeleteAction
