@@ -184,7 +184,7 @@ class Mapper
         return array_keys($this->relations);
     }
 
-    public function newQuery(): Query
+    public function newQuery()
     {
         $query = new Query($this->getReadConnection(), $this);
 
