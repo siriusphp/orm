@@ -58,6 +58,6 @@ class OrmTest extends BaseTestCase
     {
         $mapper = new ProductMapper($this->orm);
         $this->orm->register('products', $mapper);
-        $this->assertEquals($mapper, $this->orm->get('products'));
+        $this->assertInstanceOf(ProductMapper::class, $this->orm->get('products'));
     }
 }

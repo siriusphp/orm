@@ -71,9 +71,12 @@ abstract class ProductLanguageMapperBase extends Mapper
 
     public function save(ProductLanguage $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'saving', $entity);
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'saved', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newSaveAction(ProductLanguage $entity, $options): UpdateAction
@@ -89,9 +92,12 @@ abstract class ProductLanguageMapperBase extends Mapper
 
     public function delete(ProductLanguage $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'deleting', $entity);
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'deleted', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newDeleteAction(ProductLanguage $entity, $options): DeleteAction
