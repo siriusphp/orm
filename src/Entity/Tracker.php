@@ -180,8 +180,17 @@ class Tracker
     {
         /** @var Relation $relation */
         $relation = $this->relations[$name];
-        /** @var Query $query */
+        /** @var Query|null $query */
         $query = $relation->getQuery($this);
+
+        /**
+         * query can be null if there are no entities to be retrieved
+         * this is when the native keys are `null` in which case
+         * there's no need for a query to be constructed and executed
+         */
+        if (!$query) {
+            return [];
+        }
 
         $queryCallback = $this->relationCallback[$name] ?? null;
         if ($queryCallback && is_callable($queryCallback)) {

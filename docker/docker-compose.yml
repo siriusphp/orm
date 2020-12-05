@@ -14,16 +14,16 @@ services:
     networks:
       - local
 
-  sqlserver:
-    image: microsoft/mssql-server-linux
-    container_name: siriusorm_mssql
-    ports:
-      - "11433:1433"
-    environment:
-      SA_PASSWORD: "SSpaSS__1"
-      ACCEPT_EULA: "Y"
-    networks:
-      - local
+#  sqlserver:
+#    image: microsoft/mssql-server-linux
+#    container_name: siriusorm_mssql
+#    ports:
+#      - "11433:1433"
+#    environment:
+#      SA_PASSWORD: "SSpaSS__1"
+#      ACCEPT_EULA: "Y"
+#    networks:
+#      - local
 
   mysql_latest:
     image: mysql:latest

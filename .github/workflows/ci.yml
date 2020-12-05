@@ -7,7 +7,7 @@ on:
     branches: [ dev_2x ]
 
 jobs:
-  build:
+  test:
     strategy:
       matrix:
         php: ['7.2']
@@ -18,17 +18,17 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    services:
-      siriusorm_mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_USER: sirius
-          MYSQL_PASSWORD: sirius
-          MYSQL_DATABASE: siriusorm
-          MYSQL_ROOT_PASSWORD: sirius
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+#    services:
+#      siriusorm_mysql:
+#        image: mysql:5.7
+#        env:
+#          MYSQL_USER: sirius
+#          MYSQL_PASSWORD: sirius
+#          MYSQL_DATABASE: siriusorm
+#          MYSQL_ROOT_PASSWORD: sirius
+#        ports:
+#          - 3306:3306
+#        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - uses: actions/checkout@v2
@@ -38,10 +38,15 @@ jobs:
 #         mysql version: '8.0' # Optional, default value is "latest". The version of the MySQL
 #         mysql database: 'siriusorm' # Optional, default value is "test". The specified database which will be create
 #         mysql root password: 'rootpass' # Required if "mysql user" is empty, default is empty. The root superuser password
+    - name: Setup DB services
+      run: |
+        cd docker
+        docker-compose up -d
+        cd ..
 
     - name: Verify MySQL connection
       run: |
-        while ! mysqladmin ping -h"127.0.0.1" -P3306 --silent; do
+        while ! mysqladmin ping -h"127.0.0.1" -P13306 --silent; do
           sleep 1
         done
 
@@ -49,9 +54,12 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
-        coverage: xdebug
+        coverage: pcov
+        tools: pecl
+        extensions: mbstring, pdo, pdo_pgsql
       env:
         fail-fast: true
+
     - name: Validate composer.json and composer.lock
       run: composer validate
 
@@ -70,9 +78,10 @@ jobs:
 
     - name: Run test suite
       env:
-        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;dbname=siriusorm'
+        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;port=13306dbname=siriusorm'
         MYSQL_USER: 'root'
         MYSQL_PASS: 'sirius'
+        POSTGRES_CONNECTION: 'pgsql:host=siriusorm_postgres;port=15423;dbname=siriusorm'
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit

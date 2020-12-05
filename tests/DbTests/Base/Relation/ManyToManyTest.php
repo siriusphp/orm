@@ -274,8 +274,8 @@ SQL;
         $product = $this->productsMapper->find(1);
         $this->productsMapper->delete($product);
 
-        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_type="products" and tagable_id=1');
-        $this->assertRowPresent('tbl_links_to_tags', 'tagable_type="categories" and tagable_id=1');
+        $this->assertRowDeleted('tbl_links_to_tags', 'tagable_type=\'products\' and tagable_id=1');
+        $this->assertRowPresent('tbl_links_to_tags', 'tagable_type=\'categories\' and tagable_id=1');
     }
 
     protected function populateDb(): void

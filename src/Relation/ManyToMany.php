@@ -55,8 +55,11 @@ class ManyToMany extends Relation implements ToManyInterface
         $nativeKey = $this->options[RelationConfig::NATIVE_KEY];
         $nativePks = $tracker->pluck($nativeKey, $this->nativeEntityHydrator);
 
-        $query = $this->foreignMapper
-            ->newQuery();
+        if (empty($nativePks)) {
+            return null;
+        }
+
+        $query = $this->foreignMapper->newQuery();
 
         $query = $this->joinWithThroughTable($query)
                       ->where($this->options[RelationConfig::THROUGH_NATIVE_COLUMN], $nativePks);
