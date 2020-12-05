@@ -71,9 +71,12 @@ abstract class LanguageMapperBase extends Mapper
 
     public function save(Language $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'saving', $entity);
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'saved', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newSaveAction(Language $entity, $options): UpdateAction
@@ -89,9 +92,12 @@ abstract class LanguageMapperBase extends Mapper
 
     public function delete(Language $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'deleting', $entity);
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'deleted', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newDeleteAction(Language $entity, $options): DeleteAction

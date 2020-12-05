@@ -71,6 +71,7 @@ return $this->behaviours->apply($this, __FUNCTION__, $action);
         $method->addParameter('entity')->setType($this->behaviour->getMapper()->getEntityClass());
         $method->addParameter('withRelations', false);
         $method->setBody('
+$entity = $this->behaviours->apply($this, \'deleting\', $entity);        
 $action = new DeleteAction($this, $entity, [\'relations\' => $withRelations]);
 
 return $this->runActionInTransaction($action);

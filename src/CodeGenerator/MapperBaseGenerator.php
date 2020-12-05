@@ -190,9 +190,12 @@ class MapperBaseGenerator
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
         $method->addParameter('withRelations', false);
         $method->setBody('
+$entity = $this->behaviours->apply($this, \'saving\', $entity);        
 $action = $this->newSaveAction($entity, [\'relations\' => $withRelations]);
+$result = $this->runActionInTransaction($action);
+$entity = $this->behaviours->apply($this, \'saved\', $entity);        
 
-return $this->runActionInTransaction($action);
+return $result;
         ');
 
         $method = $this->class->addMethod('newSaveAction')->setReturnType('UpdateAction');
@@ -216,9 +219,12 @@ return $this->behaviours->apply($this, __FUNCTION__, $action);
         $method->addParameter('entity')->setType($this->mapper->getEntityClass());
         $method->addParameter('withRelations', false);
         $method->setBody('
+$entity = $this->behaviours->apply($this, \'deleting\', $entity);        
 $action = $this->newDeleteAction($entity, [\'relations\' => $withRelations]);
+$result = $this->runActionInTransaction($action);
+$entity = $this->behaviours->apply($this, \'deleted\', $entity);        
 
-return $this->runActionInTransaction($action);
+return $result;
         ');
 
         $this->namespace->addUse(Delete::class, 'DeleteAction');

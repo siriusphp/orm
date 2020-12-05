@@ -7,6 +7,7 @@ use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\PostgreSQL92Platform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Schema\Schema;
+use League\Event\EventDispatcher;
 use PHPUnit\Framework\TestCase;
 use Sirius\Orm\Connection;
 use Sirius\Orm\ConnectionLocator;
@@ -39,6 +40,10 @@ class BaseTestCase extends TestCase
      * @var \Atlas\Pdo\ConnectionLocator|ConnectionLocator
      */
     protected $connectionLocator;
+    /**
+     * @var EventDispatcher
+     */
+    protected $eventDispatcher;
 
     public function setUp(): void
     {
@@ -55,7 +60,8 @@ class BaseTestCase extends TestCase
         $this->connection        = $connection;
         $connectionLocator       = ConnectionLocator::new($this->connection);
         $this->connectionLocator = $connectionLocator;
-        $this->orm               = new Orm($connectionLocator);
+        $this->eventDispatcher   = new EventDispatcher();
+        $this->orm               = new Orm($connectionLocator, null, null, $this->eventDispatcher);
         $this->createTables();
         $this->loadMappers();
         $connectionLocator->logQueries();

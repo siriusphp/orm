@@ -131,9 +131,12 @@ abstract class ProductMapperBase extends Mapper
 
     public function save(Product $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'saving', $entity);
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'saved', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newSaveAction(Product $entity, $options): UpdateAction
@@ -149,9 +152,12 @@ abstract class ProductMapperBase extends Mapper
 
     public function delete(Product $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'deleting', $entity);
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'deleted', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newDeleteAction(Product $entity, $options)
@@ -164,6 +170,7 @@ abstract class ProductMapperBase extends Mapper
 
     public function forceDelete(Product $entity, $withRelations = false)
     {
+        $entity = $this->behaviours->apply($this, 'deleting', $entity);
         $action = new DeleteAction($this, $entity, ['relations' => $withRelations]);
 
         return $this->runActionInTransaction($action);

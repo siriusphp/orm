@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sirius\Orm;
 
 use InvalidArgumentException;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Sirius\Orm\Behaviour\Events;
 use Sirius\Orm\Contract\MapperLocatorInterface;
 use Sirius\Orm\Entity\CollectionCaster;
 use Sirius\Orm\Entity\EntityCaster;
@@ -40,16 +42,22 @@ class Orm
      * @var RelationBuilder
      */
     protected $relationBuilder;
+    /**
+     * @var EventDispatcherInterface|null
+     */
+    protected $events;
 
     public function __construct(
         ConnectionLocator $connectionLocator,
         RelationBuilder $relationBuilder = null,
         CastingManager $castingManager = null,
+        EventDispatcherInterface $events = null,
         MapperLocatorInterface $mapperLocator = null
     ) {
         $this->connectionLocator = $connectionLocator;
         $this->relationBuilder   = $relationBuilder ?? new RelationBuilder();
         $this->castingManager    = $castingManager ?? new CastingManager();
+        $this->events            = $events;
         $this->mapperLocator     = $mapperLocator;
     }
 
@@ -95,7 +103,7 @@ class Orm
     public function get($name): Mapper
     {
         if (isset($this->lazyMappers[$name])) {
-            $this->mappers[$name] = $this->buildMapper($this->lazyMappers[$name]);
+            $this->mappers[$name] = $this->createMapper($name);
             unset($this->lazyMappers[$name]);
         }
 
@@ -121,13 +129,15 @@ class Orm
         return $this->relationBuilder->build($this, $mapper, $name, $options);
     }
 
-    protected function buildMapper($mapperConfigOrFactory): Mapper
+    protected function createMapper($name): Mapper
     {
+        $definition = $this->lazyMappers[$name];
+
         $mapper = null;
-        if (is_callable($mapperConfigOrFactory)) {
-            $mapper = $mapperConfigOrFactory($this);
+        if (is_callable($definition)) {
+            $mapper = $definition($this);
         } elseif ($this->mapperLocator) {
-            $mapper = $this->mapperLocator->get($mapperConfigOrFactory);
+            $mapper = $this->mapperLocator->get($definition);
         }
 
         if (! $mapper) {
@@ -140,6 +150,10 @@ class Orm
             throw new InvalidArgumentException(
                 'The mapper generated from the factory is not a valid `Mapper` instance.'
             );
+        }
+
+        if ($this->events) {
+            $mapper->use(new Events($this->events, $name));
         }
 
         return $mapper;

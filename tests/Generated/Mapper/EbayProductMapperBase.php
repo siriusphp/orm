@@ -70,9 +70,12 @@ abstract class EbayProductMapperBase extends Mapper
 
     public function save(EbayProduct $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'saving', $entity);
         $action = $this->newSaveAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'saved', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newSaveAction(EbayProduct $entity, $options): UpdateAction
@@ -88,9 +91,12 @@ abstract class EbayProductMapperBase extends Mapper
 
     public function delete(EbayProduct $entity, $withRelations = false): bool
     {
+        $entity = $this->behaviours->apply($this, 'deleting', $entity);
         $action = $this->newDeleteAction($entity, ['relations' => $withRelations]);
+        $result = $this->runActionInTransaction($action);
+        $entity = $this->behaviours->apply($this, 'deleted', $entity);
 
-        return $this->runActionInTransaction($action);
+        return $result;
     }
 
     public function newDeleteAction(EbayProduct $entity, $options): DeleteAction
