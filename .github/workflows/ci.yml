@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        php: ['7.2']
+        php: ['7.2', '7.3', '7.4']
 #        include:
 #            - php: '8.0'
 #              composer-flags: '--ignore-platform-req=php'
@@ -78,10 +78,10 @@ jobs:
 
     - name: Run test suite
       env:
-        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;port=13306dbname=siriusorm'
+        MYSQL_CONNECTION: 'mysql:host=127.0.0.1;port=13306;dbname=siriusorm'
         MYSQL_USER: 'root'
         MYSQL_PASS: 'sirius'
-        POSTGRES_CONNECTION: 'pgsql:host=127.0.0.1;port=15423;dbname=siriusorm'
+        POSTGRES_CONNECTION: 'pgsql:host=127.0.0.1;port=15432;dbname=siriusorm'
       run: |
         mkdir -p build/logs
         vendor/bin/phpunit
