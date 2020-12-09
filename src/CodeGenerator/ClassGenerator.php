@@ -48,6 +48,8 @@ class ClassGenerator
     public function writeFiles()
     {
         if (!$this->orm->isValid()) {
+            echo "There are errors with your mapper definitions", PHP_EOL;
+            echo "=============================================", PHP_EOL;
             echo implode(PHP_EOL, $this->orm->getErrors());
             throw new \Exception('Invalid ORM specifications');
         }

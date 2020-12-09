@@ -8,7 +8,7 @@ use Sirius\Orm\Contract\EntityInterface;
 use Sirius\Orm\Event\DeletedEntity;
 use Sirius\Orm\Event\DeletingEntity;
 use Sirius\Orm\Event\NewEntity;
-use Sirius\Orm\Event\NewMapperQuery;
+use Sirius\Orm\Event\NewQuery;
 use Sirius\Orm\Event\SavedEntity;
 use Sirius\Orm\Event\SavingEntity;
 use Sirius\Orm\Mapper;
@@ -34,15 +34,15 @@ class Events implements BehaviourInterface
         return 'events';
     }
 
-    public function onNewQuery(Mapper $mapper, Query $query)
+    public function onNewQuery(/** @scrutinizer ignore-unused */ Mapper $mapper, Query $query)
     {
-        $event = new NewMapperQuery($this->mapperName, $query);
+        $event = new NewQuery($this->mapperName, $query);
         $this->events->dispatch($event);
 
         return $event->getQuery();
     }
 
-    public function onNewEntity(Mapper $mapper, EntityInterface $entity)
+    public function onNewEntity(/** @scrutinizer ignore-unused */ Mapper $mapper, EntityInterface $entity)
     {
         $event = new NewEntity($this->mapperName, $entity);
         $this->events->dispatch($event);
@@ -50,7 +50,7 @@ class Events implements BehaviourInterface
         return $event->getEntity();
     }
 
-    public function onSaving(Mapper $mapper, EntityInterface $entity)
+    public function onSaving(/** @scrutinizer ignore-unused */ Mapper $mapper, EntityInterface $entity)
     {
         $event = new SavingEntity($this->mapperName, $entity);
         $this->events->dispatch($event);
@@ -58,7 +58,7 @@ class Events implements BehaviourInterface
         return $event->getEntity();
     }
 
-    public function onSaved(Mapper $mapper, EntityInterface $entity)
+    public function onSaved(/** @scrutinizer ignore-unused */ Mapper $mapper, EntityInterface $entity)
     {
         $event = new SavedEntity($this->mapperName, $entity);
         $this->events->dispatch($event);
@@ -66,7 +66,7 @@ class Events implements BehaviourInterface
         return $event->getEntity();
     }
 
-    public function onDeleting(Mapper $mapper, EntityInterface $entity)
+    public function onDeleting(/** @scrutinizer ignore-unused */ Mapper $mapper, EntityInterface $entity)
     {
         $event = new DeletingEntity($this->mapperName, $entity);
         $this->events->dispatch($event);
@@ -74,7 +74,7 @@ class Events implements BehaviourInterface
         return $event->getEntity();
     }
 
-    public function onDeleted(Mapper $mapper, EntityInterface $entity)
+    public function onDeleted(/** @scrutinizer ignore-unused */ Mapper $mapper, EntityInterface $entity)
     {
         $event = new DeletedEntity($this->mapperName, $entity);
         $this->events->dispatch($event);

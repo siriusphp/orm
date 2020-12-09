@@ -11,28 +11,24 @@ Examples:
 - multiple products belong to a category 
 - multiple pages belong to one parent.
 
-There are no special options for this type of relation, besides those explained in the [relations page](relations.html).
-
-Most of the times (like in the examples above) you don't want to CASCADE delete so this defaults to FALSE.
-
-## Definining a many-to-one relation
+Below is a minimal example for defining a many-to-one relation
 
 ```php
-use Sirius\Orm\Relation\RelationConfig;
+use Sirius\Orm\Blueprint\Relation\ManyToOne;
 
-$orm->register('products', MapperConfig::make(
-    // other mapper config goes here
-    'relations' => [
-        'category' => [
-            RelationConfig::TYPE           => 'many_to_one',
-            RelationConfig::FOREIGN_MAPPER => 'categories',
-            RelationConfig::NATIVE_KEY     => 'category_id',            
-            RelationConfig::FOREIGN_KEY    => 'id',            
-            RelationConfig::QUERY_CALLBACK => function($query) {
-                $query->orderBy('display_priority DESC');
-                return $query;
-             }
-        ]       
-    ]
-));
+$imagesDefinition->addRelation(
+    'product', // name of the relation
+    ManyToOne::make('product') // name of the foreign mapper
+);
 ``` 
+
+### Methods available on the ManyToOne blueprint class
+
+Method | Required | Purpose
+:----- | :----| :----
+setForeignMapper()| No | Set the name of the foreign mapper
+setNativeKey()| No | Set the column in the native mapper. Determined based on the native mapper's name (eg: product => product_id)
+setForeignKey()| No | Set the column in the foreign mapper. Defaults to the primary key of the foreign mapper
+setLoadStrategy()| No | Set's the loading strategy for the relation: lazy, eager (always load the related entities) or none (load only if expressly requested). <br>**Default: lazy**
+setForeignGuards()| No | Sets query/entity guards. Read more [here](the_guards.md)
+setQueryCallback()| No | A function to be applied to the query that retrieves the relations. This should be used mostly for sorting as anything more might give unexpeted results.

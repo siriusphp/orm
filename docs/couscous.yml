@@ -15,6 +15,7 @@ exclude:
 baseUrl: https://www.sirius.ro/php/sirius/orm
 paypal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SGXDKNJCXFPJU
 gacode: UA-535999-18
+githubDocsUrl: https://github.com/siriusphp/orm/tree/master/docs/
 
 projectName: Sirius\Orm
 title: Sirius\Orm
@@ -38,69 +39,93 @@ menu:
                 getting_started:
                     text: Introduction
                     relativeUrl:
-                mappers:
-                    text: Mappers
-                    relativeUrl: mappers.html
-                insert:
-                    text: Querying entities
-                    relativeUrl: queries.html
-                update:
-                    text: Working with entities
-                    relativeUrl: entities.html
-                delete:
-                    text: Behaviours
-                    relativeUrl: behaviours.html
-                other:
-                    text: Direct queries
-                    relativeUrl: direct_queries.html
-                query_scopes:
-                    text: Query scopes
-                    relativeUrl: the_query_scopes.html
-                limits:
+                configuration:
+                    text: ORM Configuration
+                    relativeUrl: configuration.html
+                usage:
+                    text: ORM Usage
+                    relativeUrl: usage.html
+                code_generation:
+                    text: Code generation
+                    relativeUrl: code_generation.html
+                limitations:
                     text: Limitations
                     relativeUrl: limits.html
+        mappers:
+            name: Mappers
+            items:
+                overview:
+                    text: Overview
+                    relativeUrl: mappers.html
+                definition:
+                    text: Definition
+                    relativeUrl: mapper_definition.html
+                usage:
+                    text: Usage
+                    relativeUrl: mapper_usage.html
+                behaviours:
+                    text: Behaviours
+                    relativeUrl: mapper_behaviours.html
+                events:
+                    text: Events
+                    relativeUrl: mapper_events.html
+        queries:
+            name: Queries
+            items:
+                overview:
+                    text: Searching entities
+                    relativeUrl: queries.html
+                eager_loading:
+                    text: Eager loading
+                    relativeUrl: query_eager_loading.html
+                joining:
+                    text: Joining
+                    relativeUrl: query_join.html
+                batching:
+                    text: Batching
+                    relativeUrl: query_batches.html
+                usage:
+                    text: Direct queries
+                    relativeUrl: queries_direct.html
+        entities:
+            name: Entities
+            items:
+                overview:
+                    text: Overview
+                    relativeUrl: entities.html
+                definition:
+                    text: Definition
+                    relativeUrl: entity_definition.html
+                usage:
+                    text: Usage
+                    relativeUrl: entity_usage.html
+                patching:
+                    text: Patching
+                    relativeUrl: entity_patching.html
+                hydrators:
+                    text: Hydrators
+                    relativeUrl: entity_hydrators.html
         relations:
             name: Relations
             items:
                 getting_started:
                     text: Basics
                     relativeUrl: relations.html
-                one_to_one:
-                    text: One-to-one
-                    relativeUrl: relation_one_to_one.html
                 one_to_many:
                     text: One-to-many
                     relativeUrl: relation_one_to_many.html
+                one_to_one:
+                    text: One-to-one
+                    relativeUrl: relation_one_to_one.html
                 many_to_one:
                     text: Many-to-one
                     relativeUrl: relation_many_to_one.html
                 many_to_many:
                     text: Many-to-many
                     relativeUrl: relation_many_to_many.html
-                eav:
-                    text: EAV
-                    relativeUrl: relation_eav.html
                 aggregatges:
                     text: Aggregates
                     relativeUrl: relation_aggregate.html
-        cookbook:
-            name: Cookbook
-            items:
-                custom_entities:
-                    text: Custom entities
-                    relativeUrl: cookbook_custom_entities.html
-                table-inheritance:
-                    text: Table inheritance
-                    relativeUrl: cookbook_table_inheritance.html
-                polymorphic_associations:
-                    text: Polymorphic associations
-                    relativeUrl: cookbook_polymorphic_associations.html
-                validation:
-                    text: Entity validation
-                    relativeUrl: cookbook_validation.html
-                testing:
-                    text: Testing
-                    relativeUrl: cookbook_testing.html
         advanced:
             name: Advanced
             items:
@@ -110,9 +135,21 @@ menu:
                 actions:
                     text: The actions
                     relativeUrl: the_actions.html
+                lazy_values:
+                    text: The lazy values
+                    relativeUrl: the_lazy_values.html
                 tracker:
                     text: The tracker
                     relativeUrl: the_tracker.html
                 casting:
                     text: The casting manager
                     relativeUrl: the_casting_manager.html
+        cookbook:
+            name: Cookbook
+            items:
+                table-inheritance:
+                    text: Table inheritance
+                    relativeUrl: cookbook_table_inheritance.html
+                uuid:
+                    text: UUIDs as primary keys
+                    relativeUrl: cookbook_uuid_primary_key.html

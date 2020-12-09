@@ -188,14 +188,6 @@ $orm->addMapper(
                                              ->addAggregate('highest_price', [RelationConfig::AGG_FUNCTION => 'max(products.price)']))
 );
 
-if (!$orm->isValid()) {
-    echo "There are errors with your mapper definitions", PHP_EOL;
-    echo "=============================================", PHP_EOL;
-    echo implode(PHP_EOL, $orm->getErrors());
-
-    return -1;
-}
-
 $generator = new ClassGenerator($orm);
 $generator->writeFiles();
 

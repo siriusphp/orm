@@ -1,74 +1,42 @@
 ---
-title: Working with entities | Sirius ORM
+title: Entities | Sirius ORM
 ---
 
-# Working with entities
+# Entities
 
-## Creating new entities
+We have tried to make the entities as lean as possible and and flexibile enough to match your programming style. 
 
-You can ask the mapper to generate new entities for you using the hydrator. 
-This will free you from having to build them yourself as it will also construct the proper relations
+Depending on your preferred style of programming you can use one of the 2 types of entities:
+- properties-based entities
+- methods-based entities
 
-```php
-$product = $orm->get('products')
-    ->newEntity([
-        'name' => 'iPhone XXS',
-        'sku'  => 'ixxs',
-        'price'=> 1000.50,
-        'category' => [
-            'name' => 'Smart phones',
-        ],
-        // and on and on...
-    ]);
-```
+For both style you will have great code-editor support. For the properties-based entities we use class comments.
 
-The above code will construct a Category entity and associate it with the Product entity and so on and so forth.
+#### Properties-based entities
 
-## Manipulating the entities
-
-Once you have an entity from the mapper (from `newEntity` or from a querry) you can manipulate it as described by its interface. In the case of the `GenericEntity` class you can perform things like
+These type of entites are those where you do things like
 
 ```php
-$product = $orm->find('products', 1);
-$product->category->name = 'New category name'; // this works with lazy loading
-$product->images->get(0)->path = 'new_image.jpg'; // this too
+$entity->attribute;
+
+$entity->another_attribute = $someValue;
 ```
 
-One-to-many and Many-to-many relations return Collections, which extend the Doctrine's [ArrayCollection](https://www.doctrine-project.org/projects/doctrine-collections/en/1.6/index.html) so you can do things like
+#### Methods-based entities
+
+These type of entites are those where you use getters/setters to manipulate them
 
 ```php
-if (!$product->images->isEmpty()) {
-    $product->images->first();
-}
+$entity->getAttribute();
 
-$paths = $product->images->map(function($image) {
-    return $image->path;
-});
+$entity->setAnotherAttribute($someValue);
 ```
 
-## Persisting the entities
+As you will see in the next section, you can choose what style of entity you want. You can even mix and match them, if you want.
 
-```php
-$orm->get('products')->save($product);
-```
+> Theoretically you can use your own base entities if they implement the `Sirius\Orm\Contract\EntityInterface`interface but the code generation feature does not currently support it.
 
-It's that simple! The actions required for persisting an entity are wrapped in a transaction and the ORM will search for all the changes in the "entity tree" and perform the necessary persisting action. You can learn more about the
- persistence actions [here](the_actions.md)
- 
-If you don't want for the ORM to look up the "entity tree" and you want to persist only the "root entity" you can do this
+Entities are database-agnostic and they do not know anything about the underlying structure. For this reason the mapper use hydrators to convert data from DB to entities and back. 
+For each entity style there's a matching hydrator class that is created when the mapper is initialized.
 
-```php
-$orm->get('products')->save($product, false); // it will only persist the product row
-```
-
-If you want to persist only specific parts of the "entity tree" you do this:
-
-```php
-$orm->get('products')->save($product, ['category', 'category.parent', 'images']);
-```
-
-## Deleting entities
-
-```php
-$orm->get('products')->delete($product);
-```
+Next: [Entity definition](entity_definition.md)

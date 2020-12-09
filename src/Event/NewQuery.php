@@ -6,7 +6,7 @@ namespace Sirius\Orm\Event;
 use League\Event\HasEventName;
 use Sirius\Orm\Query;
 
-class NewMapperQuery implements HasEventName
+class NewQuery implements HasEventName
 {
 
     /**

@@ -14,9 +14,9 @@ If you have circular references and you access the relation a new SQL will be tr
 
 ```php
 $product = $orm->find('products', 1);
-$product->get('name'); // returns 'old name'
-$product->set('name', 'new name');
-$productFromCategory = $product->get('category')->get('products')[0];
+$product->getName(); // returns 'old name'
+$product->setName('new name');
+$productFromCategory = $product->getCategory()->getProducts()->get(0);
 $productFromCategory->get('name'); // returns 'old name' NOT 'new name'
 ```
 
@@ -24,9 +24,9 @@ I believe this is a reasonable trade-off in the context of the request-response 
 
 ## 2. No database schema utility
 
-At the moment the _Sirius ORM_ doesn't have a schema generation utility to help with creating migrations 
+At the moment the **Sirius\ORM** doesn't have a schema generation utility to help with creating migrations 
 
 ## 3. Single database
 
-At the moment the _Sirius ORM_ doesn't know how to handle relations over multiple databases. The SELECT queries that contain JOINs have to be on the same database.
+At the moment the **Sirius\ORM** doesn't know how to handle relations over multiple databases. The SELECT queries that contain JOINs have to be on the same database.
 

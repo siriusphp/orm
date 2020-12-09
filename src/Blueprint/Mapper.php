@@ -297,6 +297,7 @@ class Mapper extends Base
 
     public function addAutoIncrementColumn($name = 'id'): Mapper
     {
+        $this->setPrimaryKey($name);
         return $this->addColumn(
             Column::integer($name, true)
                   ->setAutoIncrement(true)

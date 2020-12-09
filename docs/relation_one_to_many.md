@@ -10,43 +10,43 @@ Examples:
 - one product has many images, 
 - one category has many products.
 
-Besides the configuration options explained in the [relations page](relations.html) on "one to many" relation you can have
-
-> ##### `aggregates` / `RelationConfig::AGGREGATES`
-
-> - here you have a list of aggregated values that can be eager/lazy loaded to an entity (count, average, sums)
-> - check the [relation aggregates](relation_aggregate.md) page for more details
-
-Most of the times (like in the examples above) you don't want to CASCADE delete so this defaults to FALSE. 
-One use-case where you want to enable this behaviours is on "one order has many order lines" where you don't need the order lines once the
- order is deleted.
- But then again, you should let the DB do this.
- 
-## Defining a one-to-many relation
-
-In this case the `media` table holds other type of files, not just images
+Bellow is the minimal code needed when definining a one-to-many relation.
 
 ```php
-use Sirius\Orm\Relation\RelationConfig;
+use Sirius\Orm\Blueprint\Relation\OneToMany;
 
-$orm->register('products', MapperConfig::make(
-    // other mapper config goes here
-    'relations' => [
-        'images' => [
-            RelationConfig::TYPE           => 'many_to_one',
-            RelationConfig::FOREIGN_MAPPER => 'media',
-            RelationConfig::NATIVE_KEY     => 'id', 
-            RelationConfig::FOREIGN_KEY    => 'product_id',
-            // the "media" mapper holds more than images 
-            RelationConfig::FOREIGN_GUARDS => [
-                'media_type' => 'image'
-            ],
-            // order the images by a specific field
-            RelationConfig::QUERY_CALLBACK => function($query) {
-                $query->orderBy('display_priority DESC');
-                return $query;
-             }
-        ]       
-    ]
-));
-```  
+$productsDefinition->addRelation(
+    'images', // name of the relation
+    OneToMany::make('images') // name of the foreign mapper
+);
+```
+
+The relation will make some assumptions so that the relation configuration array looks like this:
+
+```php
+class ProductMapperBase extends Mapper {
+    protected function initRelations() {
+        $this->addRelation('languages', [
+            'type' => 'one_to_many',
+            'native_key' => 'id',
+            'foreign_mapper' => 'product_languages',
+            'foreign_key' => 'content_id',
+            'load_strategy' => 'lazy',
+        ]);
+    }
+}
+```
+
+### Methods available on the OneToMany blueprint class
+
+Method | Required | Purpose
+:----- | :----| :----
+setForeignMapper()| No | Set the name of the foreign mapper
+setNativeKey()| No | Set the column in the native mapper. Defaults to the primary key of the native mapper
+setForeignKey()| No | Set the column in the foreign mapper. Determined based on the native mapper's name (eg: products => product_id)
+setLoadStrategy()| No | Set's the loading strategy for the relation: lazy, eager (always load the related entities) or none (load only if expressly requested). <br>**Default: lazy**
+setForeignGuards()| No | Sets query/entity guards. Read more [here](the_guards.md)
+setQueryCallback()| No | A function to be applied to the query that retrieves the relations. This should be used mostly for sorting as anything more might give unexpeted results.
+setCascade()| No | Sets whether to delete the  related entities when the main entity is deleted (true/false). <br>**Default: false** 
+
+
